@@ -29,13 +29,13 @@ def init():
     con.execute("""
     --sql
     /**
-    * refid - reference id - generated from the diff+prefid+rrefid+kind
-    * prefid - parent reference id - which row was this diffed off of?
+    * crefid - child reference id - which row updated off of this?
+    * prefid - parent reference id - which row was this updated from?
     * pathname - where to put the file or url lookup or whatever
     * content - the actual article
     */
     CREATE TABLE IF NOT EXISTS edit_log (
-      refid NOT NULL PRIMARY KEY,
+      crefid NOT NULL PRIMARY KEY,
       prefid NOT NULL,
       pathname NOT NULL,
       content NOT NULL
@@ -45,7 +45,10 @@ def init():
 
     con.execute("""
     --sql
-    PRAGMA recursive_triggers = OFF
+    CREATE TRIGGER preventDuplicateRefIds BEFORE UPDATE ON articles WHEN new.refid == old.refid
+    BEGIN
+      SELECT RAISE(ABORT, 'refid must be changed');
+    END
     --endsql
     """)
 
@@ -53,34 +56,7 @@ def init():
     --sql
     CREATE TRIGGER updateEditLogAfterUpdate AFTER UPDATE ON articles
     BEGIN
-      INSERT INTO edit_log VALUES(new.refid, old.refid, new.pathname, new.content);
-    END
-    --endsql
-    """)
-
-    con.execute("""
-    --sql
-    CREATE TRIGGER preventEditLogInsert BEFORE INSERT ON edit_log
-    BEGIN
-      SELECT RAISE(ABORT, 'Edit Log is Read Only.');
-    END
-    --endsql
-    """)
-
-    con.execute("""
-    --sql
-    CREATE TRIGGER preventEditLogUpdate BEFORE UPDATE ON edit_log
-    BEGIN
-      SELECT RAISE(ABORT, 'Edit Log is Read Only.');
-    END
-    --endsql
-    """)
-
-    con.execute("""
-    --sql
-    CREATE TRIGGER preventEditLogDelete BEFORE DELETE ON edit_log
-    BEGIN
-      SELECT RAISE(ABORT, 'Edit Log is Read Only.');
+      INSERT INTO edit_log VALUES(new.refid, old.refid, old.pathname, old.content);
     END
     --endsql
     """)
