@@ -1,0 +1,3 @@
+[submodule "deps/sqlite_zstd_vfs"]
+	path = deps/sqlite_zstd_vfs
+	url = git@github.com:mlin/sqlite_zstd_vfs.git

@@ -1,12 +1,33 @@
-import sqlite3
-from sys import exit
+from glob import iglob
+import os
+from DbActions import DbActions
+
+
+def _removeOrphans():
+    pass
+
+
+def _updateReflog():
+    pass
+
+
+def _addNewFile(pathname):
+    file = open(pathname).read()
+    pass
 
 
 def publish():
-    try:
-        con = sqlite3.connect("fil:./sigil/sigil.db?mode=rw", uri=True)
-    except sqlite3.OperationalError:
-        print("sigil database note found, please run `sigil init`")
-        exit(0)
 
-    cur = con.cursor()
+    files = iglob('**', recursive=True)
+
+    db = DbActions()
+
+    for file in files:
+        if not os.path.isfile(file):
+            continue
+
+        _stat = os.stat(file)
+        _inodeExists = db.doesInodeExist(_stat.st_ino)
+        if not _inodeExists:
+            _addNewFile(file)
+            continue
