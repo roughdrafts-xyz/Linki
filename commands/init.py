@@ -54,6 +54,16 @@ def init():
 
     con.execute("""
     --sql
+    CREATE TRIGGER preventNoOpUpdates BEFORE UPDATE ON articles 
+    WHEN (new.pathname == old.pathname AND new.content == old.content)
+    BEGIN
+      SELECT RAISE(ABORT, 'refid must be changed');
+    END
+    --endsql
+    """)
+
+    con.execute("""
+    --sql
     CREATE TRIGGER updateEditLogAfterUpdate AFTER UPDATE ON articles
     BEGIN
       INSERT INTO edit_log VALUES(new.refid, old.refid, old.pathname, old.content);

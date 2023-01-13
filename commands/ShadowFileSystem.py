@@ -12,9 +12,15 @@ class ShadowFileSystem():
       refid NOT NULL PRIMARY KEY,
       inode NOT NULL UNIQUE,
       ctimeMs NOT NULL,
-      pathname NOT NULL,
-      content NOT NULL
     ) WITHOUT ROWID
     --endsql
     """
-    pass
+
+    def doesInodeExist(self, ino):
+        _inoExistsCursor = self.db.execute("""
+        --sql
+        SELECT COUNT(inode) FROM shadow_filesystem WHERE inode=? LIMIT 1
+        --endsql
+        """, (ino))
+        _inodeCount = _inoExistsCursor.fetchone()[0]
+        return _inodeCount > 0

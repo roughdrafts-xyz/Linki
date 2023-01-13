@@ -11,23 +11,21 @@ class DbActions:
         db.enable_load_extension(True)
         db.load_extension(str(zstd_path))
         db = sqlite3.connect(
-            "file:./sigil/sigil.db?mode=ro&vfs=zstd", uri=True)
+            "file:./.sigil/sigil.db?vfs=zstd", uri=True)
     except sqlite3.OperationalError:
         print("sigil database note found, please run `sigil init`")
         exit(0)
 
-    def doesInodeExist(self, ino):
-        _inoExistsCursor = self.db.execute("""
-        --sql
-        SELECT COUNT(inode) FROM head WHERE inode=? LIMIT 1
-        --endsql
-        """, parameters=(ino))
-        _inodeCount = _inoExistsCursor.fetchone()[0]
-        return _inodeCount > 0
-
-    def addRefLogRow(self, refid, prefid, diff):
+    def addNewArticle(self, refid, pathname, content):
         self.db.execute("""
         --sql
-        INSERT INTO reflog VALUES(:refid, :prefid, :diff)
+        INSERT INTO articles VALUES(:refid, :pathname, :content)
         --endsql
-        """, parameters=(refid, prefid, diff))
+        """, (refid, pathname, content))
+
+    def updateExistingArticle(self, refid, pathname, content):
+        self.db.execute("""
+        --sql
+        UPDATE articles SET (refid, pathname, content) = (:crefid, :pathname, :content) WHERE refid = :prefid
+        --endsql
+        """, {'prefid': refid, 'pathname': pathname, 'crefid': 'crefid', 'content': content})

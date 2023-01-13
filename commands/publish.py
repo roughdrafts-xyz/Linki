@@ -1,6 +1,6 @@
 from glob import iglob
 import os
-from DbActions import DbActions
+from .DbActions import DbActions
 
 
 def _removeOrphans():
@@ -11,23 +11,19 @@ def _updateReflog():
     pass
 
 
-def _addNewFile(pathname):
-    file = open(pathname).read()
-    pass
-
-
 def publish():
-
-    files = iglob('**', recursive=True)
-
     db = DbActions()
 
+    def _updateExistingFile(pathname):
+        file = open(pathname).read()
+        db.updateExistingArticle('refid', pathname, file)
+
+    def _addNewFile(pathname):
+        file = open(pathname).read()
+        db.addNewArticle('refid', pathname, file)
+
+    files = iglob('**', recursive=True)
     for file in files:
         if not os.path.isfile(file):
             continue
-
-        _stat = os.stat(file)
-        _inodeExists = db.doesInodeExist(_stat.st_ino)
-        if not _inodeExists:
-            _addNewFile(file)
-            continue
+        _updateExistingFile(file)
