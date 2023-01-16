@@ -1,6 +1,9 @@
-from ShadowFileSystem import ShadowFileSystem
+from .ShadowFileSystem import ShadowFileSystem
+from .DbActions import DbActions
 
 
 def checkout():
-    db = ShadowFileSystem()
-    pass
+    sfs = ShadowFileSystem()
+    db = DbActions()
+    articles = db.getArticles()
+    sfs.loadFiles(articles)

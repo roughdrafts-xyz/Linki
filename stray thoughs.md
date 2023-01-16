@@ -1,0 +1,2 @@
+- Should probably have a cache folder that holds compiled versions of files, or offer REDIS integration for that or something - Just in case someone accesses a version of a file a lot without putting it in the wiki.
+- Need to implement the [delta thing](https://detools.readthedocs.io/en/latest/)
