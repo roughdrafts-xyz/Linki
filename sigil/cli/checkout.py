@@ -1,5 +1,5 @@
-from .ShadowFileSystem import ShadowFileSystem
-from ..repo.Repo import Repo
+from sigil.cli.ShadowFileSystem import ShadowFileSystem
+from sigil.repo.Repo import Repo
 
 
 def checkout():

@@ -1,13 +1,13 @@
 import sys
-from commands.init import init
-from commands.publish import publish
+from cli.init import init
+from cli.publish import publish
 
 try:
     command = sys.argv[1]
 
-    if(command == 'init'):
+    if (command == 'init'):
         init()
-    elif(command == 'publish'):
+    elif (command == 'publish'):
         publish()
     else:
         raise IndexError

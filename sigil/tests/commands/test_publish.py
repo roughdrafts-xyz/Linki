@@ -2,7 +2,7 @@
 import unittest
 import os
 from sigil.tests.helpers import getPopulatedDirectory
-from sigil.commands.publish import publish
+from sigil.cli.publish import publish
 from sigil.repo.Repo import Repo
 
 
@@ -23,14 +23,27 @@ class TestPublishCommand(unittest.TestCase):
         db_refs = [article["refid"] for article in articles]
         self.assertEqual(fs_refs, db_refs)
 
-    def test_does_publish_multiple_times(self):
-        publish()
+    def test_does_not_publish_existing_articles(self):
         publish()
         publish()
         articles = self.db.getArticles()
         fs_refs = os.listdir('.sigil/refs/')
         db_refs = [article["refid"] for article in articles]
         self.assertEqual(fs_refs, db_refs)
+
+    def test_does_publish_new_articles_after_edit(self):
+        publish()
+        file = open('hello_world', 'w')
+        file.write('Goodnight Moon')
+        file.close()
+        publish()
+        articles = self.db.getArticles()
+        fs_refs = os.listdir('.sigil/refs/')
+        db_refs = [article["refid"] for article in articles]
+        self.assertNotEqual(fs_refs, db_refs)
+        for db_ref in db_refs:
+            with self.subTest(deb_ref=db_ref):
+                self.assertIn(db_ref, fs_refs)
 
 
 if __name__ == '__main__':

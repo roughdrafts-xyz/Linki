@@ -1,5 +1,5 @@
 import os
-from sigil.commands.init import init
+from sigil.cli.init import init
 from tempfile import TemporaryDirectory
 
 
