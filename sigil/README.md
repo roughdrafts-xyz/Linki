@@ -10,7 +10,7 @@ help <command>
 : Display detailed help for <command>.
 
 init
-: Create an empty Sigil repository in the current directory.
+: Create a new Sigil repository in the current directory.
 
 publish
 : Write every updated file to the repository.
@@ -28,7 +28,7 @@ status
 : Show updated files that will be written to the repository.
 
 history <file>
-: Show the edit history of the indicated file.
+: Show the edit history of the <file>.
 
 view <refid>
 : Prints the article associated with the <refid> to stdout.

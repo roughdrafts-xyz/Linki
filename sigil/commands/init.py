@@ -22,7 +22,7 @@ def init():
     */
     CREATE TABLE IF NOT EXISTS articles (
       refid NOT NULL PRIMARY KEY,
-      pathname NOT NULL,
+      pathname NOT NULL
     ) WITHOUT ROWID
     --endsql
     """)
@@ -36,7 +36,7 @@ def init():
     */
     CREATE TABLE IF NOT EXISTS refid_info (
       refid NOT NULL PRIMARY KEY,
-      pathname NOT NULL,
+      pathname NOT NULL
     ) WITHOUT ROWID
     --endsql
     """)
@@ -52,8 +52,9 @@ def init():
     * this is not unique because multiple edits can come from the same refid
     */
     CREATE TABLE IF NOT EXISTS edit_log (
-      crefid NOT NULL PRIMARY KEY,
-      prefid NOT NULL PRIMARY KEY
+      crefid NOT NULL,
+      prefid NOT NULL,
+      PRIMARY KEY(crefid, prefid)
     ) WITHOUT ROWID
     --endsql
     """)
@@ -76,6 +77,7 @@ def init():
     --sql
       INSERT INTO refid_info VALUES(new.refid, new.pathname) ON CONFLICT DO NOTHING;
     END
+    --endsql
     """)
 
     print('.sigil directory initiated')
