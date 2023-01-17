@@ -3,14 +3,14 @@ import unittest
 import os
 from sigil.tests.helpers import getPopulatedDirectory
 from sigil.commands.publish import publish
-from sigil.commands.DbActions import DbActions
+from sigil.repo.Repo import Repo
 
 
 class TestPublishCommand(unittest.TestCase):
     def setUp(self):
         self.dir = getPopulatedDirectory()
         os.chdir(self.dir.name)
-        self.db = DbActions()
+        self.db = Repo()
         self.db.connect()
 
     def tearDown(self):
@@ -19,10 +19,9 @@ class TestPublishCommand(unittest.TestCase):
     def test_does_publish(self):
         publish()
         articles = self.db.getArticles().fetchall()
-        refs = os.listdir('.sigil/refs/')
-        for article in articles:
-            with self.subTest(article=article):
-                self.assertIn(article["refid"], refs)
+        fs_refs = os.listdir('.sigil/refs/')
+        db_refs = [article["refid"] for article in articles]
+        self.assertEqual(fs_refs, db_refs)
 
 
 if __name__ == '__main__':

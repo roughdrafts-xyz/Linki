@@ -1,6 +1,6 @@
 from glob import iglob
 import os
-from .DbActions import DbActions
+from sigil.repo.Repo import Repo
 
 
 def _removeOrphans():
@@ -12,7 +12,7 @@ def _updateReflog():
 
 
 def publish():
-    db = DbActions()
+    db = Repo()
     db.connect()
 
     def _updateExistingFile(pathname):

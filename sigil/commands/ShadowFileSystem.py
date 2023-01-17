@@ -4,7 +4,8 @@ import os
 
 class ShadowFileSystem:
 
-    db = sqlite3.connect('./sigil/shadow_fs.db')
+    def init(self):
+        self.db = sqlite3.connect('./sigil/shadow_fs.db')
 
     def loadFiles(self, files):
         # Files should include pathname and content

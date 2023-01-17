@@ -1,9 +1,9 @@
 from .ShadowFileSystem import ShadowFileSystem
-from .DbActions import DbActions
+from ..repo.Repo import Repo
 
 
 def checkout():
     sfs = ShadowFileSystem()
-    db = DbActions()
+    db = Repo()
     articles = db.getArticles()
     sfs.loadFiles(articles)

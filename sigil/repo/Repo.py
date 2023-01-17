@@ -1,9 +1,10 @@
 import sqlite3
 import shutil
 from sys import exit
+from sigil.repo._init import init
 
 
-class DbActions:
+class Repo:
     def connect(self):
         try:
             self.db = sqlite3.connect("file:./.sigil/sigil.db", uri=True)
@@ -36,3 +37,6 @@ class DbActions:
         """, {'prefid': refid, 'pathname': pathname, 'crefid': 'crefid'})
         self.db.commit()
         self._addArticleRef(refid, pathname)
+
+    def init(self):
+        init()
