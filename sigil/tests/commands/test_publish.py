@@ -23,6 +23,15 @@ class TestPublishCommand(unittest.TestCase):
         db_refs = [article["refid"] for article in articles]
         self.assertEqual(fs_refs, db_refs)
 
+    def test_does_publish_multiple_times(self):
+        publish()
+        publish()
+        publish()
+        articles = self.db.getArticles().fetchall()
+        fs_refs = os.listdir('.sigil/refs/')
+        db_refs = [article["refid"] for article in articles]
+        self.assertEqual(fs_refs, db_refs)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=True)

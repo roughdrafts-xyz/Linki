@@ -6,12 +6,8 @@ from sigil.repo._init import init
 
 class Repo:
     def connect(self):
-        try:
-            self.db = sqlite3.connect("file:./.sigil/sigil.db", uri=True)
-            self.db.row_factory = sqlite3.Row
-        except sqlite3.OperationalError:
-            print("sigil database note found, please run `sigil init`")
-            exit(0)
+        self.db = sqlite3.connect("file:./.sigil/sigil.db", uri=True)
+        self.db.row_factory = sqlite3.Row
 
     def getArticles(self):
         # you can iterate over a cursor
