@@ -16,15 +16,13 @@ def publish():
     db.connect()
 
     def _updateExistingFile(pathname):
-        file = open(pathname).read()
-        db.updateExistingArticle('refid', pathname, file)
+        db.updateExistingArticle('refid', pathname)
 
     def _addNewFile(pathname):
-        file = open(pathname).read()
-        db.addNewArticle('refid', pathname, file)
+        db.addNewArticle('refid', pathname)
 
     files = iglob('**', recursive=True)
     for file in files:
         if not os.path.isfile(file):
             continue
-        _updateExistingFile(file)
+        _addNewFile(file)

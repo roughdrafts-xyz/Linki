@@ -22,8 +22,8 @@ class TestPublishCommand(unittest.TestCase):
         refs = os.listdir('.sigil/refs/')
         for article in articles:
             with self.subTest(article=article):
-                self.assertIn(article.refid, refs)
+                self.assertIn(article["refid"], refs)
 
 
 if __name__ == '__main__':
-    unittest.main(buffer=False)
+    unittest.main(buffer=True)
