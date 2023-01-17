@@ -3,11 +3,12 @@ from sys import exit
 
 
 class DbActions:
-    try:
-        db = sqlite3.connect("file:./.sigil/sigil.db", uri=True)
-    except sqlite3.OperationalError:
-        print("sigil database note found, please run `sigil init`")
-        exit(0)
+    def connect(self):
+        try:
+            self.db = sqlite3.connect("file:./.sigil/sigil.db", uri=True)
+        except sqlite3.OperationalError:
+            print("sigil database note found, please run `sigil init`")
+            exit(0)
 
     def getArticles(self):
         # you can iterate over a cursor

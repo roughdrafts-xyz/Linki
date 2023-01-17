@@ -1,7 +1,7 @@
 import unittest
+import os
 from glob import glob
 from sigil.tests.helpers import getInitializedDirectory
-import os
 
 
 class TestInitCommand(unittest.TestCase):

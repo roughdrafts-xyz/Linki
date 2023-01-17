@@ -13,6 +13,7 @@ def _updateReflog():
 
 def publish():
     db = DbActions()
+    db.connect()
 
     def _updateExistingFile(pathname):
         file = open(pathname).read()
