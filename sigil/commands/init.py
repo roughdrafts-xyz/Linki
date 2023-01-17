@@ -1,7 +1,6 @@
 import sqlite3
 from os import mkdir
 from sys import exit
-import pathlib
 
 
 def init():

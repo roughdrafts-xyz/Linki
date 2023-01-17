@@ -14,8 +14,7 @@ class TestInitCommand(unittest.TestCase):
 
     def test_file_structure(self):
         files = glob(pathname='**', recursive=True, include_hidden=True)
-        self.assertIn('.sigil', files)
-        self.assertIn('.sigil/sigil.db', files)
+        self.assertEqual(files, ['.sigil', '.sigil/sigil.db'])
 
 
 if __name__ == '__main__':
