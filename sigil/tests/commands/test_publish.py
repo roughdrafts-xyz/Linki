@@ -18,7 +18,7 @@ class TestPublishCommand(unittest.TestCase):
 
     def test_does_publish(self):
         publish()
-        articles = self.db.getArticles().fetchall()
+        articles = self.db.getArticles()
         fs_refs = os.listdir('.sigil/refs/')
         db_refs = [article["refid"] for article in articles]
         self.assertEqual(fs_refs, db_refs)
@@ -27,7 +27,7 @@ class TestPublishCommand(unittest.TestCase):
         publish()
         publish()
         publish()
-        articles = self.db.getArticles().fetchall()
+        articles = self.db.getArticles()
         fs_refs = os.listdir('.sigil/refs/')
         db_refs = [article["refid"] for article in articles]
         self.assertEqual(fs_refs, db_refs)
