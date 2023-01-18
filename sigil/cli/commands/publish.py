@@ -22,7 +22,7 @@ def publish():
 
     def _updateExistingFile(pathname):
         prefid = sfs.getRefid(pathname)
-        crefid = db.updateExistingArticle(crefid, pathname)
+        crefid = db.updateExistingArticle(prefid, pathname)
         sfs.updateExistingFile(crefid, prefid, pathname)
 
     def _addNewFile(pathname):

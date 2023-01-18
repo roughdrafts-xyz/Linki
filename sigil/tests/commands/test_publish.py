@@ -21,6 +21,8 @@ class TestPublishCommand(unittest.TestCase):
         articles = self.db.getArticles()
         fs_refs = os.listdir('.sigil/refs/')
         db_refs = [article["refid"] for article in articles]
+        fs_refs.sort()
+        db_refs.sort()
         self.assertEqual(fs_refs, db_refs)
 
     def test_does_not_publish_existing_articles(self):
@@ -29,17 +31,21 @@ class TestPublishCommand(unittest.TestCase):
         articles = self.db.getArticles()
         fs_refs = os.listdir('.sigil/refs/')
         db_refs = [article["refid"] for article in articles]
+        fs_refs.sort()
+        db_refs.sort()
         self.assertEqual(fs_refs, db_refs)
 
     def test_does_publish_new_articles_after_edit(self):
         publish()
-        file = open('hello_world', 'w')
+        file = open('hello_world.md', 'w')
         file.write('Goodnight Moon')
         file.close()
         publish()
         articles = self.db.getArticles()
         fs_refs = os.listdir('.sigil/refs/')
         db_refs = [article["refid"] for article in articles]
+        fs_refs.sort()
+        db_refs.sort()
         self.assertNotEqual(fs_refs, db_refs)
         for db_ref in db_refs:
             with self.subTest(deb_ref=db_ref):

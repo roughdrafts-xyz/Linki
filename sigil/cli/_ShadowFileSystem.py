@@ -48,7 +48,7 @@ class _ShadowFileSystem:
         fstat = os.stat(file)
         self.db.execute("""
         --sql
-        UPDATE shadow_fs (refid, ino, mtime_ns, pathname) SET VALUES(:crefid, :ino, :mtime_ns, :pathname) WHERE refid=:prefid
+        UPDATE shadow_fstat SET (refid, ino, mtime_ns, pathname) = (:crefid, :ino, :mtime_ns, :pathname) WHERE refid=:prefid
         --endsql
         """, [crefid, fstat.st_ino, fstat.st_mtime_ns, file, prefid])
 
@@ -74,7 +74,7 @@ class _ShadowFileSystem:
         --sql
         SELECT refid FROM shadow_fstat WHERE ino=? LIMIT 1
         --endsql
-        """)
+        """, [fstat.st_ino])
         return _refidCursor.fetchone()[0]
 
     def hasInodeUpdated(self, file):

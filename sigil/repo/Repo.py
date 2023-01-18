@@ -55,14 +55,16 @@ class Repo:
         self._addArticleRef(refid, pathname)
         return refid
 
-    def updateExistingArticle(self, refid, pathname):
+    def updateExistingArticle(self, prefid, pathname):
+        crefid = self._generateNewRefid(prefid, pathname)
         self.db.execute("""
         --sql
         UPDATE articles SET (refid, pathname) = (:crefid, :pathname) WHERE refid = :prefid
         --endsql
-        """, {'prefid': refid, 'pathname': pathname, 'crefid': 'crefid'})
+        """, {'prefid': prefid, 'pathname': pathname, 'crefid': crefid})
         self.db.commit()
-        self._addArticleRef(refid, pathname)
+        self._addArticleRef(crefid, pathname)
+        return crefid
 
     def init(self):
         init()
