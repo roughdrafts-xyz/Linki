@@ -1,13 +1,13 @@
-from glob import iglob
 import os
-from sigil.repo.Repo import Repo
-from sigil.cli.ShadowFileSystem import ShadowFileSystem
 import sqlite3
+from glob import iglob
+from sigil.repo.Repo import Repo
+from sigil.cli._ShadowFileSystem import _ShadowFileSystem
 
 
 def publish():
     db = Repo()
-    sfs = ShadowFileSystem()
+    sfs = _ShadowFileSystem()
     try:
         db.connect()
     except sqlite3.OperationalError:
@@ -21,10 +21,13 @@ def publish():
         exit(0)
 
     def _updateExistingFile(pathname):
-        db.updateExistingArticle('refid', pathname)
+        prefid = sfs.getRefid(pathname)
+        crefid = db.updateExistingArticle(crefid, pathname)
+        sfs.updateExistingFile(crefid, prefid, pathname)
 
     def _addNewFile(pathname):
-        db.addNewArticle('refid', pathname)
+        refid = db.addNewArticle(pathname)
+        sfs.addNewFile(refid, pathname)
 
     files = iglob('**', recursive=True)
     for file in files:

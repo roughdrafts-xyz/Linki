@@ -1,8 +1,9 @@
 import sqlite3
 import os
+import shutil
 
 
-class ShadowFileSystem:
+class _ShadowFileSystem:
 
     def connect(self):
         self.db = sqlite3.connect('./.sigil/shadow_fs.db')
@@ -31,32 +32,57 @@ class ShadowFileSystem:
         ) WITHOUT ROWID
         --endsql
         """)
+        self.db.commit()
+
+    def _addNewFile(self, refid, file):
+        fstat = os.stat(file)
+        self.db.execute("INSERT INTO shadow_fstat VALUES(?,?,?,?)",
+                        [refid, fstat.st_ino, fstat.st_mtime_ns, file])
+        pass
+
+    def addNewFile(self, refid, file):
+        self._addNewFile(refid, file)
+        self.db.commit()
+
+    def updateExistingFile(self, crefid, prefid, file):
+        fstat = os.stat(file)
+        self.db.execute("""
+        --sql
+        UPDATE shadow_fs (refid, ino, mtime_ns, pathname) SET VALUES(:crefid, :ino, :mtime_ns, :pathname) WHERE refid=:prefid
+        --endsql
+        """, [crefid, fstat.st_ino, fstat.st_mtime_ns, file, prefid])
 
     def checkoutArticles(self, articles):
         for article in articles:
-            refid_file = open('./sigil/refs/'+article.refid).read()
-            open(article.pathname).write(refid_file)
-            nfstat = os.stat(article.pathname)
-            self.db.execute("INSERT INTO shadow_fstat VALUES(?,?,?,?)",
-                            (article.refid, nfstat.st_ino, nfstat.st_mtime_ns, article.pathname))
+            shutil.copyfile('./.sigil/refs/'+article.refid, article.pathname)
+            self._addNewFile(article.refid, article.pathname)
         self.db.commit()
 
     def isNewFile(self, file):
         fstat = os.stat(file)
         _inoExistsCursor = self.db.execute("""
         --sql
-        SELECT COUNT(inode) FROM shadow_fstat WHERE ino=? LIMIT 1
+        SELECT COUNT(ino) FROM shadow_fstat WHERE ino=? LIMIT 1
         --endsql
-        """, (fstat.st_ino))
+        """, [fstat.st_ino])
         _inodeCount = _inoExistsCursor.fetchone()[0]
         return _inodeCount < 1
+
+    def getRefid(self, file):
+        fstat = os.stat(file)
+        _refidCursor = self.db.execute("""
+        --sql
+        SELECT refid FROM shadow_fstat WHERE ino=? LIMIT 1
+        --endsql
+        """)
+        return _refidCursor.fetchone()[0]
 
     def hasInodeUpdated(self, file):
         fstat = os.stat(file)
         _inoExistsCursor = self.db.execute("""
         --sql
-        SELECT COUNT(inode) FROM shadow_fstat WHERE ino=? AND mtime_ns!=? LIMIT 1
+        SELECT COUNT(ino) FROM shadow_fstat WHERE ino=? AND mtime_ns!=? LIMIT 1
         --endsql
-        """, (fstat.st_ino, fstat.st_mtime_ns))
+        """, [fstat.st_ino, fstat.st_mtime_ns])
         _inodeCount = _inoExistsCursor.fetchone()[0]
         return _inodeCount > 0

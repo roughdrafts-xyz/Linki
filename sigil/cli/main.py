@@ -1,6 +1,6 @@
 import sys
-from cli.init import init
-from cli.publish import publish
+from sigil.cli.commands.init import init
+from sigil.cli.commands.publish import publish
 
 try:
     command = sys.argv[1]
