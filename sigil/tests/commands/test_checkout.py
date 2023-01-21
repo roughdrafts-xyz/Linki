@@ -15,7 +15,6 @@ class TestCheckoutCommand(unittest.TestCase):
     def test_does_checkout(self):
         fs_contents = os.listdir()
         self.assertIn('hello_world.md', fs_contents)
-        file = open('hello_world.md')
         with open('hello_world.md') as file:
             self.assertEqual(file.read(), 'Hello World!')
 
