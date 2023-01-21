@@ -1,7 +1,7 @@
 import unittest
 import os
 from sigil.tests.helpers import getCheckedOutDirectory
-from sigil.cli.commands.status import hasChanged
+from sigil.cli.commands.status import getStagedChanges
 
 
 class TestStatusCommand(unittest.TestCase):
@@ -12,21 +12,25 @@ class TestStatusCommand(unittest.TestCase):
     def tearDown(self):
         self.dir.cleanup()
 
-    def test_edited_repo_hasChanged(self):
-        _hasChanged = hasChanged()
-        self.assertTrue(_hasChanged)
+    def test_edited_repo_hasChangedFiles(self):
+        with open('hello_world.md', 'w') as file:
+            file.write('Hello Moon!')
+        changedFiles = getStagedChanges()
+        self.assertEqual(changedFiles, ['hello_world.md'])
 
-    def test_unedited_repo_hasNotChanged(self):
-        _hasChanged = hasChanged()
-        self.assertFalse(_hasChanged)
+    def test_unedited_repo_hasNoChangedFiles(self):
+        changedFiles = getStagedChanges()
+        self.assertEqual(changedFiles, [])
 
-    def test_edited_file_hasChanged(self):
-        _hasChanged = hasChanged('hello_world.md')
-        self.assertTrue(_hasChanged)
+    def test_edited_file_hasChangedFiles(self):
+        with open('hello_world.md', 'w') as file:
+            file.write('Hello Moon!')
+        changedFiles = getStagedChanges('hello_world.md')
+        self.assertEqual(changedFiles, ['hello_world.md'])
 
-    def test_unedited_file_hasNotChanged(self):
-        _hasChanged = hasChanged('hello_world.md')
-        self.assertFalse(_hasChanged)
+    def test_unedited_file_hasNoChangedFiles(self):
+        changedFiles = getStagedChanges('hello_world.md')
+        self.assertEqual(changedFiles, [])
 
 
 if __name__ == '__main__':

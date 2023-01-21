@@ -8,10 +8,6 @@ class _ShadowFileSystem:
     def connect(self):
         self.db = sqlite3.connect('./.sigil/shadow_fs.db')
 
-    def loadFiles(self, files):
-        for file in files:
-            shutil.copyfile('./.sigil/refs/'+file['refid'], file['pathname'])
-
     def init(self):
         self.connect()
         # Files should include pathname and content
@@ -42,7 +38,6 @@ class _ShadowFileSystem:
         fstat = os.stat(file)
         self.db.execute("INSERT INTO shadow_fstat VALUES(?,?,?,?)",
                         [refid, fstat.st_ino, fstat.st_mtime_ns, file])
-        pass
 
     def addNewFile(self, refid, file):
         self._addNewFile(refid, file)
@@ -57,9 +52,11 @@ class _ShadowFileSystem:
         """, [crefid, fstat.st_ino, fstat.st_mtime_ns, file, prefid])
 
     def checkoutArticles(self, articles):
+        self.init()
         for article in articles:
-            shutil.copyfile('./.sigil/refs/'+article.refid, article.pathname)
-            self._addNewFile(article.refid, article.pathname)
+            shutil.copyfile('./.sigil/refs/' +
+                            article['refid'], article['pathname'])
+            self._addNewFile(article['refid'], article['pathname'])
         self.db.commit()
 
     def isNewFile(self, file):

@@ -7,4 +7,4 @@ def checkout():
     db = Repo()
     db.connect()
     articles = db.getArticles()
-    sfs.loadFiles(articles)
+    sfs.checkoutArticles(articles)
