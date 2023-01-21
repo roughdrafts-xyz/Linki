@@ -36,9 +36,8 @@ class TestPublishCommand(unittest.TestCase):
 
     def test_does_publish_new_articles_after_edit(self):
         publish()
-        file = open('hello_world.md', 'w')
-        file.write('Goodnight Moon')
-        file.close()
+        with open('hello_world.md', 'w') as file:
+            file.write('Goodnight Moon')
         publish()
         articles = self.db.getArticles()
         fs_refs = os.listdir('.sigil/refs/')

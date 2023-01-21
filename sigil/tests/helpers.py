@@ -13,9 +13,8 @@ def getInitializedDirectory():
 
 def getPopulatedDirectory():
     dir = getInitializedDirectory()
-    file = open('hello_world.md', 'x')
-    file.write('Hello World!')
-    file.close()
+    with open('hello_world.md', 'x') as file:
+        file.write('Hello World!')
     return dir
 
 
