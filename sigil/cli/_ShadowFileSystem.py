@@ -8,6 +8,10 @@ class _ShadowFileSystem:
     def connect(self):
         self.db = sqlite3.connect('./.sigil/shadow_fs.db')
 
+    def loadFiles(self, files):
+        for file in files:
+            shutil.copyfile('./.sigil/refs/'+file['refid'], file['pathname'])
+
     def init(self):
         self.connect()
         # Files should include pathname and content

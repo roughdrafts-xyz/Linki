@@ -1,4 +1,3 @@
-
 import unittest
 import os
 from sigil.tests.helpers import getPopulatedDirectory
@@ -50,9 +49,6 @@ class TestPublishCommand(unittest.TestCase):
         for db_ref in db_refs:
             with self.subTest(deb_ref=db_ref):
                 self.assertIn(db_ref, fs_refs)
-
-    def test_does_publish_recognize_new_files_that_are_actually_edits(self):
-        pass
 
 
 if __name__ == '__main__':
