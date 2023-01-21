@@ -1,6 +1,7 @@
 import os
 from sigil.cli.commands.init import init
 from sigil.cli.commands.publish import publish
+from sigil.cli.commands.checkout import checkout
 from tempfile import TemporaryDirectory
 
 
@@ -22,4 +23,10 @@ def getSeededDirectory():
     dir = getPopulatedDirectory()
     publish()
     os.remove('hello_world.md')
+    return dir
+
+
+def getCheckedOutDirectory():
+    dir = getSeededDirectory()
+    checkout()
     return dir

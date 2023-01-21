@@ -1,0 +1,2 @@
+def hasChanged(path='.'):
+    pass
