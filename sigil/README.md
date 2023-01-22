@@ -27,7 +27,7 @@ clone <uri>
 status
 : Show updated files that will be written to the repository.
 
-history <file> [output-path]
+history <file>
 : Show the edit history of the <file>.
 
 view <refid>
