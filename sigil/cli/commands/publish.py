@@ -2,12 +2,12 @@ import os
 import sqlite3
 from glob import iglob
 from sigil.repo.Repo import Repo
-from sigil.cli._ShadowFileSystem import _ShadowFileSystem
+from sigil.editingInterfaces.FileSystem import FileSystem
 
 
 def publish():
     db = Repo()
-    sfs = _ShadowFileSystem()
+    sfs = FileSystem()
     try:
         db.connect()
     except sqlite3.OperationalError:

@@ -1,10 +1,10 @@
 from sigil.repo.Repo import Repo
-from sigil.cli._ShadowFileSystem import _ShadowFileSystem
+from sigil.workingDir.FileSystem import FileSystem
 
 
 def init():
     repo = Repo()
-    sfs = _ShadowFileSystem()
+    sfs = FileSystem()
     try:
         repo.init()
     except FileExistsError:

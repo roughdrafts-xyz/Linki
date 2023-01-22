@@ -1,10 +1,10 @@
 import os
-from sigil.cli._ShadowFileSystem import _ShadowFileSystem
+from sigil.workingDir.FileSystem import FileSystem
 from glob import iglob
 
 
 def getStagedChanges(path='.'):
-    sfs = _ShadowFileSystem()
+    sfs = FileSystem()
     sfs.connect()
 
     updatedFiles = []

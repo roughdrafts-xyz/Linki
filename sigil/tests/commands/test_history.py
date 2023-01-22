@@ -1,12 +1,13 @@
+
 import unittest
 import os
 from sigil.tests.helpers import getCheckedOutDirectory
-from sigil.cli.commands.view import view
+from sigil.cli.commands.history import getHistory
 from sigil.editingInterfaces.FileSystem import FileSystem
 from sigil.cli.commands.publish import publish
 
 
-class TestViewCommand(unittest.TestCase):
+class TestHistoryCommand(unittest.TestCase):
     def setUp(self):
         self.dir = getCheckedOutDirectory()
         self.sfs = FileSystem()
@@ -16,12 +17,10 @@ class TestViewCommand(unittest.TestCase):
     def tearDown(self):
         self.dir.cleanup()
 
-    def test_should_display_bytes(self):
-        refid = self.sfs.getRefid('hello_world.md')
-        with open('hello_world.md', 'rb') as file:
-            original_bytes = file.read()
+    def test_should_display_history(self):
         with open('hello_world.md', 'w') as file:
             file.write('Goodnight Moon')
         publish()
-        ref_bytes = view(refid)
-        self.assertEqual(original_bytes, ref_bytes)
+        refid = self.sfs.getRefid('hello_world.md')
+        history = getHistory(refid)
+        self.assertEqual(history, [])

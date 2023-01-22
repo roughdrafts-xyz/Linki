@@ -3,7 +3,7 @@ import os
 import shutil
 
 
-class _ShadowFileSystem:
+class FileSystem:
 
     def connect(self):
         self.db = sqlite3.connect('./.sigil/shadow_fs.db')
