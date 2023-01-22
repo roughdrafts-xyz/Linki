@@ -1,2 +1,7 @@
+from sigil.repo.Repo import Repo
+
+
 def view(refid):
-    pass
+    repo = Repo()
+    repo.connect()
+    return repo.viewRefid(refid)

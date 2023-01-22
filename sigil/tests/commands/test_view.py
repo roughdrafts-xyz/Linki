@@ -11,6 +11,7 @@ class TestViewCommand(unittest.TestCase):
         self.dir = getCheckedOutDirectory()
         self.sfs = _ShadowFileSystem()
         os.chdir(self.dir.name)
+        self.sfs.connect()
 
     def tearDown(self):
         self.dir.cleanup()

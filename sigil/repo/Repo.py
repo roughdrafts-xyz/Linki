@@ -14,6 +14,10 @@ class Repo:
         # you can iterate over a cursor
         return self.db.execute('SELECT * FROM articles')
 
+    def viewRefid(self, refid):
+        with open('.sigil/refs/'+refid, 'rb') as file:
+            return file.read()
+
     def _addArticleRef(self, refid, pathname):
         shutil.copyfile(pathname, './.sigil/refs/'+refid)
 
