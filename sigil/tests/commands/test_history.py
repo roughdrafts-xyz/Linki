@@ -2,7 +2,7 @@
 import unittest
 import os
 from sigil.tests.helpers import getCheckedOutDirectory
-from sigil.cli.commands.history import getHistory
+from sigil.cli.commands.history import getFormattedHistory
 from sigil.editingInterfaces.FileSystem import FileSystem
 from sigil.cli.commands.publish import publish
 
@@ -22,5 +22,5 @@ class TestHistoryCommand(unittest.TestCase):
             file.write('Goodnight Moon')
         publish()
         refid = self.sfs.getRefid('hello_world.md')
-        history = getHistory(refid)
-        self.assertEqual(history, [])
+        history = getFormattedHistory(refid)
+        self.assertEqual(list(history), [])

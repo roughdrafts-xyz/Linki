@@ -14,6 +14,10 @@ class Repo:
         # you can iterate over a cursor
         return self.db.execute('SELECT * FROM articles')
 
+    def getHistory(self, refid):
+        # TODO this needs to grab all the parents of refid and then return that as a cursor to iterate over
+        return []
+
     def viewRefid(self, refid):
         with open('.sigil/refs/'+refid, 'rb') as file:
             return file.read()
