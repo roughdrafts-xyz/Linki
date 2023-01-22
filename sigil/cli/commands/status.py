@@ -1,5 +1,5 @@
 import os
-from sigil.workingDir.FileSystem import FileSystem
+from sigil.editingInterfaces.FileSystem import FileSystem
 from glob import iglob
 
 

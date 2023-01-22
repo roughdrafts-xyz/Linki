@@ -1,5 +1,5 @@
 from sigil.repo.Repo import Repo
-from sigil.workingDir.FileSystem import FileSystem
+from sigil.editingInterfaces.FileSystem import FileSystem
 
 
 def init():

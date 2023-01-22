@@ -1,4 +1,4 @@
-from sigil.workingDir.FileSystem import FileSystem
+from sigil.editingInterfaces.FileSystem import FileSystem
 from sigil.repo.Repo import Repo
 
 
