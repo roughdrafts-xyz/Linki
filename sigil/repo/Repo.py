@@ -19,13 +19,14 @@ class Repo:
         return self.db.execute('''
         --sql
         WITH RECURSIVE
-            related_edit(refid) AS (
-                VALUES(:refid)
+            related_edit(refid, idx) AS (
+                VALUES(:refid, 0)
                 UNION ALL
-                SELECT prefid FROM edit_log, related_edit
-                WHERE edit_log.crefid = related_edit.refid
+                SELECT edit_log.prefid, related_edit.idx+1 
+                FROM edit_log JOIN related_edit
+                ON edit_log.crefid = related_edit.refid
             )
-        SELECT * FROM related_edit
+        SELECT refid, idx FROM related_edit ORDER BY idx
         --endsql
         ''', [refid])
 
