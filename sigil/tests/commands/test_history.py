@@ -33,9 +33,14 @@ class TestHistoryCommand(unittest.TestCase):
         with open('red_car.md', 'x') as file:
             file.write('The Car is Red.')
         publish()
-        history = getFormattedHistory(refids[-1])
-        mockHistory = map(self._mockFormatHistoryRow, refids)
-        self.assertEqual(list(history), list(mockHistory))
+
+        history = list(getFormattedHistory(refids[-1]))
+        mockHistory = list(map(self._mockFormatHistoryRow, refids))
+
+        self.assertEqual(history, mockHistory)
+
+        car_refid = self.sfs.getRefid('red_car.md')
+        self.assertNotIn(car_refid, history)
 
 
 if __name__ == '__main__':
