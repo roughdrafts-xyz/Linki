@@ -1,7 +1,7 @@
 import os
-from sigil.cli.commands.init import init
-from sigil.cli.commands.publish import publish
-from sigil.cli.commands.checkout import checkout
+from sigil.commandInterfaces.cli.init import init
+from sigil.commandInterfaces.cli.publish import publish
+from sigil.commandInterfaces.cli.checkout import checkout
 from tempfile import TemporaryDirectory
 
 

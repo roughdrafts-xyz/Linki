@@ -1,7 +1,7 @@
 import unittest
 import os
 from sigil.tests.helpers import getPopulatedDirectory
-from sigil.cli.commands.publish import publish
+from sigil.commandInterfaces.cli.publish import publish
 from sigil.repo.Repo import Repo
 
 

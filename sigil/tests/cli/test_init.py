@@ -2,7 +2,7 @@ import unittest
 import os
 from glob import glob
 from sigil.tests.helpers import getInitializedDirectory
-from sigil.cli.commands.init import init
+from sigil.commandInterfaces.cli.init import init
 
 
 class TestInitCommand(unittest.TestCase):

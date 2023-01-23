@@ -2,9 +2,9 @@
 import unittest
 import os
 from sigil.tests.helpers import getCheckedOutDirectory
-from sigil.cli.commands.history import getFormattedHistory
+from sigil.commandInterfaces.cli.history import getFormattedHistory
 from sigil.editingInterfaces.FileSystem import FileSystem
-from sigil.cli.commands.publish import publish
+from sigil.commandInterfaces.cli.publish import publish
 
 
 class TestHistoryCommand(unittest.TestCase):
