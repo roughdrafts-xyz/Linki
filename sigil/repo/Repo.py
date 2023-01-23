@@ -16,7 +16,18 @@ class Repo:
 
     def getHistory(self, refid):
         # TODO this needs to grab all the parents of refid and then return that as a cursor to iterate over
-        return []
+        return self.db.execute('''
+        --sql
+        WITH RECURSIVE
+            related_edit(refid) AS (
+                VALUES(:refid)
+                UNION ALL
+                SELECT prefid FROM edit_log, related_edit
+                WHERE edit_log.crefid = related_edit.refid
+            )
+        SELECT * FROM related_edit
+        --endsql
+        ''', [refid])
 
     def viewRefid(self, refid):
         with open('.sigil/refs/'+refid, 'rb') as file:

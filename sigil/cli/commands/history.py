@@ -1,13 +1,13 @@
 from sigil.repo.Repo import Repo
 
 
-def formatRow(row):
+def _formatHistoryRow(row):
     # TODO do formatting
-    return row
+    return row["refid"]
 
 
 def getFormattedHistory(refid):
     repo = Repo()
     repo.connect()
     history = repo.getHistory(refid)
-    return map(formatRow, history)
+    return map(_formatHistoryRow, history)

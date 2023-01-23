@@ -17,16 +17,26 @@ class TestHistoryCommand(unittest.TestCase):
     def tearDown(self):
         self.dir.cleanup()
 
-    def test_should_display_history(self):
+    def _mockFormatHistoryRow(self, refid):
+        return refid
+
+    def test_should_display_history_exclusively(self):
+        refids = [self.sfs.getRefid('hello_world.md')]
         with open('hello_world.md', 'w') as file:
             file.write('Goodnight Moon')
         publish()
+        refids.append(self.sfs.getRefid('hello_world.md'))
         with open('hello_world.md', 'w') as file:
             file.write('Hello Moon')
         publish()
-        refid = self.sfs.getRefid('hello_world.md')
-        history = getFormattedHistory(refid)
-        self.assertEqual(list(history), [])
+        refids.append(self.sfs.getRefid('hello_world.md'))
+        with open('red_car.md', 'x') as file:
+            file.write('The Car is Red.')
+        publish()
+        history = list(getFormattedHistory(refids[-1]))
+        refids.reverse()
+        mockHistory = map(self._mockFormatHistoryRow, refids)
+        self.assertEqual(list(history), list(mockHistory))
 
 
 if __name__ == '__main__':

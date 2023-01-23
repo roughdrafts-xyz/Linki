@@ -23,5 +23,8 @@ class TestViewCommand(unittest.TestCase):
         with open('hello_world.md', 'w') as file:
             file.write('Goodnight Moon')
         publish()
+        with open('hello_world.md', 'w') as file:
+            file.write('Hello Moon')
+        publish()
         ref_bytes = view(refid)
         self.assertEqual(original_bytes, ref_bytes)
