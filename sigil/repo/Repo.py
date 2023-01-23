@@ -26,7 +26,7 @@ class Repo:
                 FROM edit_log JOIN related_edit
                 ON edit_log.crefid = related_edit.refid
             )
-        SELECT refid, idx FROM related_edit ORDER BY idx
+        SELECT refid FROM related_edit ORDER BY idx DESC
         --endsql
         ''', [refid])
 

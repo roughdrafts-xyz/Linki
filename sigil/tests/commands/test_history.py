@@ -33,8 +33,7 @@ class TestHistoryCommand(unittest.TestCase):
         with open('red_car.md', 'x') as file:
             file.write('The Car is Red.')
         publish()
-        history = list(getFormattedHistory(refids[-1]))
-        refids.reverse()
+        history = getFormattedHistory(refids[-1])
         mockHistory = map(self._mockFormatHistoryRow, refids)
         self.assertEqual(list(history), list(mockHistory))
 
