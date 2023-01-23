@@ -1,10 +1,10 @@
 
-import unittest
 import os
-from sigil.tests.helpers import getCheckedOutDirectory
+import unittest
 from sigil.commandInterfaces.cli.history import getFormattedHistory
-from sigil.editingInterfaces.FileSystem import FileSystem
 from sigil.commandInterfaces.cli.publish import publish
+from sigil.editingInterfaces.FileSystem import FileSystem
+from sigil.tests.helpers import getCheckedOutDirectory
 
 
 class TestHistoryCommand(unittest.TestCase):

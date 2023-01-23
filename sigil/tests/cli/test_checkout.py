@@ -1,7 +1,6 @@
+import os
 import unittest
 from sigil.tests.helpers import getCheckedOutDirectory
-from sigil.commandInterfaces.cli.checkout import checkout
-import os
 
 
 class TestCheckoutCommand(unittest.TestCase):

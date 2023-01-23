@@ -1,7 +1,7 @@
-import unittest
 import os
-from sigil.tests.helpers import getCheckedOutDirectory
+import unittest
 from sigil.commandInterfaces.cli.status import getStagedChanges
+from sigil.tests.helpers import getCheckedOutDirectory
 
 
 class TestStatusCommand(unittest.TestCase):

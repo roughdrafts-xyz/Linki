@@ -1,8 +1,8 @@
-import unittest
 import os
-from sigil.tests.helpers import getPopulatedDirectory
+import unittest
 from sigil.commandInterfaces.cli.publish import publish
 from sigil.repo.Repo import Repo
+from sigil.tests.helpers import getPopulatedDirectory
 
 
 class TestPublishCommand(unittest.TestCase):

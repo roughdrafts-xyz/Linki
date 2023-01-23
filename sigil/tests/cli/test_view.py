@@ -1,9 +1,9 @@
-import unittest
 import os
-from sigil.tests.helpers import getCheckedOutDirectory
+import unittest
+from sigil.commandInterfaces.cli.publish import publish
 from sigil.commandInterfaces.cli.view import view
 from sigil.editingInterfaces.FileSystem import FileSystem
-from sigil.commandInterfaces.cli.publish import publish
+from sigil.tests.helpers import getCheckedOutDirectory
 
 
 class TestViewCommand(unittest.TestCase):
