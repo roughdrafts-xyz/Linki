@@ -11,5 +11,6 @@ def init():
         print('.sigil directory already exists.')
         exit(0)
 
+    sfs.connect()
     sfs.init()
     print('.sigil directory initiated')

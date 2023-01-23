@@ -9,7 +9,6 @@ class FileSystem:
         self.db = sqlite3.connect('./.sigil/shadow_fs.db')
 
     def init(self):
-        self.connect()
         # Files should include pathname and content
         self.db.execute("""
         --sql
@@ -43,13 +42,17 @@ class FileSystem:
         self._addNewFile(refid, file)
         self.db.commit()
 
-    def updateExistingFile(self, crefid, prefid, file):
+    def _updateExistingFile(self, crefid, prefid, file):
         fstat = os.stat(file)
         self.db.execute("""
         --sql
         UPDATE shadow_fstat SET (refid, ino, mtime_ns, pathname) = (:crefid, :ino, :mtime_ns, :pathname) WHERE refid=:prefid
         --endsql
         """, [crefid, fstat.st_ino, fstat.st_mtime_ns, file, prefid])
+
+    def updateExistingFile(self, crefid, prefid, file):
+        self._updateExistingFile(crefid, prefid, file)
+        self.db.commit()
 
     def checkoutArticles(self, articles):
         self.init()

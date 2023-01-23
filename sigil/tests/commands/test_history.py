@@ -21,6 +21,13 @@ class TestHistoryCommand(unittest.TestCase):
         with open('hello_world.md', 'w') as file:
             file.write('Goodnight Moon')
         publish()
+        with open('hello_world.md', 'w') as file:
+            file.write('Hello Moon')
+        publish()
         refid = self.sfs.getRefid('hello_world.md')
         history = getFormattedHistory(refid)
         self.assertEqual(list(history), [])
+
+
+if __name__ == '__main__':
+    unittest.main(buffer=True)
