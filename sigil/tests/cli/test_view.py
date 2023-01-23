@@ -28,3 +28,16 @@ class TestViewCommand(unittest.TestCase):
         publish()
         ref_bytes = view(refid)
         self.assertEqual(original_bytes, ref_bytes)
+
+    def test_should_display_center_edit(self):
+        with open('hello_world.md', 'w') as file:
+            file.write('Goodnight Moon')
+        publish()
+        refid = self.sfs.getRefid('hello_world.md')
+        with open('hello_world.md', 'rb') as file:
+            original_bytes = file.read()
+        with open('hello_world.md', 'w') as file:
+            file.write('Hello Moon')
+        publish()
+        ref_bytes = view(refid)
+        self.assertEqual(original_bytes, ref_bytes)
