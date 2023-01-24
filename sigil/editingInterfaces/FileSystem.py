@@ -8,25 +8,17 @@ from sigil.repo.Repo import Repo
 class FileSystem:
     def __init__(self):
         self.repo = Repo()
+        self.db = sqlite3.connect('file:.sigil/shadow_fs.db', uri=True)
 
-    def connect(self):
-        self.db = sqlite3.connect('.sigil/shadow_fs.db')
-        self.repo.connect()
-
-    def init(self):
-        self.repo.init()
-        db = sqlite3.connect('.sigil/shadow_fs.db')
-        self._refreshShadowFs(db)
-
-    def _refreshShadowFs(self, db):
+    def refreshShadowFs(self):
         # Files should include pathname and content
-        db.execute("""
+        self.db.execute("""
         --sql
         DROP TABLE IF EXISTS shadow_fstat
         --endsql
         """)
 
-        db.execute("""
+        self.db.execute("""
         --sql
         /**
         * refid - populated during hydration, reminder for whatever
@@ -41,7 +33,7 @@ class FileSystem:
         ) WITHOUT ROWID
         --endsql
         """)
-        db.commit()
+        self.db.commit()
 
     def _addNewFile(self, refid, file):
         fstat = os.stat(file)
@@ -68,13 +60,13 @@ class FileSystem:
         self.db.commit()
 
     def checkoutArticles(self):
-        self._refreshShadowFs(self.db)
+        self.refreshShadowFs()
         articles = self.repo.getArticles()
         for article in articles:
-            refLog = RefLog(article['refid'], self.repo.db)
-            refLog.applyHistory()
-            shutil.copyfile(refLog.file.name, article['pathname'])
-            self._addNewFile(article['refid'], article['pathname'])
+            with RefLog(self.repo.db, article['refid']) as refLog:
+                refLog.applyHistory()
+                shutil.copyfile(refLog.file.name, article['pathname'])
+                self._addNewFile(article['refid'], article['pathname'])
         self.db.commit()
 
     def isNewFile(self, file):

@@ -1,8 +1,6 @@
 import detools
 import sqlite3
 import hashlib
-from os import mkdir
-from sigil.repo._init import prepareRepoDb
 from sigil.repo.backports.file_digest import file_digest
 from sigil.repo.RefLog import RefLog
 from tempfile import TemporaryFile
@@ -10,7 +8,7 @@ from tempfile import TemporaryFile
 
 class Repo:
 
-    def connect(self):
+    def __init__(self):
         self.db = sqlite3.connect("file:.sigil/sigil.db", uri=True)
         self.db.row_factory = sqlite3.Row
 
@@ -23,25 +21,19 @@ class Repo:
             return file.read()
 
     def getHistory(self, refid):
-        refLog = RefLog(refid, self.db)
-        return refLog.getHistory()
+        with RefLog(self.db, refid) as refLog:
+            return refLog.getHistory()
 
     def _addNewArticleRef(self, refid, pathname):
-        emptyFile = TemporaryFile('rb')
-        fto = open(pathname, 'rb')
-        fpatch = open('.sigil/refs/'+refid, 'wb')
-        detools.create_patch(ffrom=emptyFile, fto=fto,
-                             fpatch=fpatch)
+        with TemporaryFile('r+b') as refLog, open(pathname, 'rb') as fto, open('.sigil/refs/'+refid, 'wb') as fpatch:
+            detools.create_patch(ffrom=refLog, fto=fto, fpatch=fpatch)
 
     def _addArticleRef(self, prefid, crefid, pathname):
-        ffrom = RefLog(prefid, self.db)
-        fto = open(pathname, 'rb')
-        fpatch = open('./.sigil/refs/'+crefid, 'wb')
+        with RefLog(self.db, prefid) as refLog, open(pathname, 'rb') as fto, open('./.sigil/refs/'+crefid, 'wb') as fpatch:
+            refLog.applyHistory()
 
-        ffrom.applyHistory()
-
-        detools.create_patch(ffrom=ffrom.file, fto=fto,
-                             fpatch=fpatch)
+            detools.create_patch(ffrom=refLog.file, fto=fto,
+                                 fpatch=fpatch)
 
     def _generateContentId(self, pathname):
         with open(pathname, 'rb') as file:
@@ -91,9 +83,3 @@ class Repo:
         self._addArticleRef(prefid, crefid, pathname)
         self.db.commit()
         return crefid
-
-    def init(self):
-        mkdir('.sigil')
-        mkdir('.sigil/refs')
-        con = sqlite3.connect(".sigil/sigil.db")
-        prepareRepoDb(con)

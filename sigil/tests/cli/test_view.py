@@ -41,3 +41,7 @@ class TestViewCommand(unittest.TestCase):
         publish()
         ref_bytes = view(refid)
         self.assertEqual(original_bytes, ref_bytes)
+
+
+if __name__ == '__main__':
+    unittest.main(buffer=True)

@@ -5,13 +5,13 @@ from sigil.editingInterfaces.FileSystem import FileSystem
 
 
 def publish():
-    sfs = FileSystem()
     try:
-        sfs.connect()
+        sfs = FileSystem()
     except sqlite3.OperationalError:
         print("sigil database not found, please run `sigil init`")
         exit(0)
 
+    sfs.refreshShadowFs()
     files = iglob('**', recursive=True)
     for file in files:
         if not os.path.isfile(file):

@@ -1,14 +1,17 @@
 import detools
+import contextlib
 from tempfile import TemporaryFile
 
 
-class RefLog():
-    def __init__(self, refid, db):
-        self.refid = refid
+class RefLog(contextlib.AbstractContextManager):
+    def __init__(self, db, refid):
         self.db = db
         self.file = TemporaryFile('r+b')
+        self.refid = refid
 
-    # This is a stub to make detools happy, it can be implemented more but there isn't a purpose for that yet.
+    def __exit__(self, *args):
+        self.file.close()
+
     def applyHistory(self):
         history = self.getHistory()
         for row in history:
@@ -20,7 +23,6 @@ class RefLog():
                 )
 
     def getHistory(self):
-        # TODO this needs to grab all the parents of refid and then return that as a cursor to iterate over
         return self.db.execute('''
         --sql
         WITH RECURSIVE
