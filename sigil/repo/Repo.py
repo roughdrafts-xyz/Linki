@@ -17,8 +17,9 @@ class Repo:
         return self.db.execute('SELECT * FROM articles')
 
     def viewRefid(self, refid):
-        with open('.sigil/refs/'+refid, 'rb') as file:
-            return file.read()
+        with RefLog(self.db, refid) as refLog:
+            refLog.applyHistory()
+            return refLog.file.read()
 
     def getHistory(self, refid):
         with RefLog(self.db, refid) as refLog:

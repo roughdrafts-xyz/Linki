@@ -12,15 +12,21 @@ class RefLog(contextlib.AbstractContextManager):
     def __exit__(self, exc_type, exc, tb):
         return None
 
+    def _modifyTempFile(self, refid):
+        with open('.sigil/refs/'+refid, 'rb') as _file:
+            detools.apply_patch(
+                ffrom=self.file,
+                fpatch=_file,
+                fto=self.file
+            )
+
     def applyHistory(self):
         history = self.getHistory()
+        next(history)
         for row in history:
-            with open('.sigil/refs/'+row['refid'], 'rb') as _file:
-                detools.apply_patch(
-                    ffrom=self.file,
-                    fpatch=_file,
-                    fto=self.file
-                )
+            print(dict(row))
+            self._modifyTempFile(row["refid"])
+        self._modifyTempFile(self.refid)
 
     def getHistory(self):
         return self.db.execute('''
@@ -33,6 +39,6 @@ class RefLog(contextlib.AbstractContextManager):
                 FROM edit_log JOIN related_edit
                 ON edit_log.crefid = related_edit.refid
             )
-        SELECT refid FROM related_edit WHERE refid!='0' ORDER BY idx DESC
+        SELECT refid, idx FROM related_edit ORDER BY idx DESC
         --endsql
         ''', [self.refid])
