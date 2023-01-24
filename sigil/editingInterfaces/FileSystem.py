@@ -49,7 +49,7 @@ class FileSystem:
                         [refid, fstat.st_ino, fstat.st_mtime_ns, file])
 
     def addNewFile(self, pathname):
-        refid = self.db.addNewArticle(pathname)
+        refid = self.repo.addNewArticle(pathname)
         self._addNewFile(refid, pathname)
         self.db.commit()
 
@@ -71,9 +71,9 @@ class FileSystem:
         self._refreshShadowFs(self.db)
         articles = self.repo.getArticles()
         for article in articles:
-            refLog = RefLog(article['refid'])
+            refLog = RefLog(article['refid'], self.repo.db)
             refLog.applyHistory()
-            shutil.copyfile(refLog.file, article['pathname'])
+            shutil.copyfile(refLog.file.name, article['pathname'])
             self._addNewFile(article['refid'], article['pathname'])
         self.db.commit()
 
