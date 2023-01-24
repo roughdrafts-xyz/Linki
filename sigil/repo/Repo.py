@@ -1,8 +1,8 @@
 import detools
 import sqlite3
 import hashlib
+from sigil.repo import RefLog
 from sigil.repo.backports.file_digest import file_digest
-from sigil.repo.RefLog import RefLog
 from tempfile import TemporaryFile
 
 
@@ -17,23 +17,19 @@ class Repo:
         return self.db.execute('SELECT * FROM articles')
 
     def viewRefid(self, refid):
-        with RefLog(self.db, refid) as refLog:
-            refLog.applyHistory()
-            return refLog.file.read()
+        with RefLog.getVersion(self.db, refid) as _version:
+            return _version.read()
 
     def getHistory(self, refid):
-        with RefLog(self.db, refid) as refLog:
-            return refLog.getHistory()
+        return RefLog.getHistory(self.db, refid)
 
     def _addNewArticleRef(self, refid, pathname):
         with TemporaryFile('r+b') as refLog, open(pathname, 'rb') as fto, open('.sigil/refs/'+refid, 'wb') as fpatch:
             detools.create_patch(ffrom=refLog, fto=fto, fpatch=fpatch)
 
     def _addArticleRef(self, prefid, crefid, pathname):
-        with RefLog(self.db, prefid) as refLog, open(pathname, 'rb') as fto, open('./.sigil/refs/'+crefid, 'wb') as fpatch:
-            refLog.applyHistory()
-
-            detools.create_patch(ffrom=refLog.file, fto=fto,
+        with RefLog.getVersion(self.db, prefid) as _version, open(pathname, 'rb') as fto, open('./.sigil/refs/'+crefid, 'wb') as fpatch:
+            detools.create_patch(ffrom=_version, fto=fto,
                                  fpatch=fpatch)
 
     def _generateContentId(self, pathname):

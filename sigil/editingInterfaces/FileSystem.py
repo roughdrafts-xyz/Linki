@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import shutil
-from sigil.repo.RefLog import RefLog
+from sigil.repo import RefLog
 from sigil.repo.Repo import Repo
 
 
@@ -63,9 +63,8 @@ class FileSystem:
         self.refreshShadowFs()
         articles = self.repo.getArticles()
         for article in articles:
-            with RefLog(self.repo.db, article['refid']) as refLog:
-                refLog.applyHistory()
-                shutil.copyfile(refLog.file.name, article['pathname'])
+            with RefLog.getVersion(self.repo.db, article['refid']) as _version, open(article['pathname'], 'w') as _article:
+                shutil.copyfileobj(_version, _article)
             self._addNewFile(article['refid'], article['pathname'])
             self.db.commit()
 
