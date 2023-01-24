@@ -63,7 +63,7 @@ class FileSystem:
 
     def updateExistingFile(self, pathname):
         prefid = self.getRefid(pathname)
-        crefid = self.db.updateExistingArticle(prefid, pathname)
+        crefid = self.repo.updateExistingArticle(prefid, pathname)
         self._updateExistingFile(crefid, prefid, pathname)
         self.db.commit()
 
