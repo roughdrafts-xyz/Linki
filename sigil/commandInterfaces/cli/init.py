@@ -1,16 +1,12 @@
-from sigil.repo.Repo import Repo
 from sigil.editingInterfaces.FileSystem import FileSystem
 
 
 def init():
-    repo = Repo()
-    sfs = FileSystem()
     try:
-        repo.init()
+        sfs = FileSystem()
+        sfs.init()
+        sfs.connect()
+        print('.sigil directory initiated')
     except FileExistsError:
         print('.sigil directory already exists.')
         exit(0)
-
-    sfs.connect()
-    sfs.init()
-    print('.sigil directory initiated')

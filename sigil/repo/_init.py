@@ -1,13 +1,6 @@
-import sqlite3
-from os import mkdir
-
-
-def init():
-    mkdir('./.sigil')
-    mkdir('./.sigil/refs')
+def prepareRepoDb(con):
     # sigil folder also has a folder of multiple zstd'd files that represent the various articles and their deltas and edit historys. The database merely tracks what refids care about each other. Every file is stored as a refid.
 
-    con = sqlite3.connect('./.sigil/sigil.db')
     con.execute("""
     --sql
     /**

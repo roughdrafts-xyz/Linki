@@ -1,22 +1,32 @@
 import sqlite3
 import os
 import shutil
+from sigil.repo.RefLog import RefLog
+from sigil.repo.Repo import Repo
 
 
 class FileSystem:
+    def __init__(self):
+        self.repo = Repo()
 
     def connect(self):
-        self.db = sqlite3.connect('./.sigil/shadow_fs.db')
+        self.db = sqlite3.connect('.sigil/shadow_fs.db')
+        self.repo.connect()
 
     def init(self):
+        self.repo.init()
+        db = sqlite3.connect('.sigil/shadow_fs.db')
+        self._refreshShadowFs(db)
+
+    def _refreshShadowFs(self, db):
         # Files should include pathname and content
-        self.db.execute("""
+        db.execute("""
         --sql
         DROP TABLE IF EXISTS shadow_fstat
         --endsql
         """)
 
-        self.db.execute("""
+        db.execute("""
         --sql
         /**
         * refid - populated during hydration, reminder for whatever
@@ -31,15 +41,16 @@ class FileSystem:
         ) WITHOUT ROWID
         --endsql
         """)
-        self.db.commit()
+        db.commit()
 
     def _addNewFile(self, refid, file):
         fstat = os.stat(file)
         self.db.execute("INSERT INTO shadow_fstat VALUES(?,?,?,?)",
                         [refid, fstat.st_ino, fstat.st_mtime_ns, file])
 
-    def addNewFile(self, refid, file):
-        self._addNewFile(refid, file)
+    def addNewFile(self, pathname):
+        refid = self.db.addNewArticle(pathname)
+        self._addNewFile(refid, pathname)
         self.db.commit()
 
     def _updateExistingFile(self, crefid, prefid, file):
@@ -50,15 +61,19 @@ class FileSystem:
         --endsql
         """, [crefid, fstat.st_ino, fstat.st_mtime_ns, file, prefid])
 
-    def updateExistingFile(self, crefid, prefid, file):
-        self._updateExistingFile(crefid, prefid, file)
+    def updateExistingFile(self, pathname):
+        prefid = self.getRefid(pathname)
+        crefid = self.db.updateExistingArticle(prefid, pathname)
+        self._updateExistingFile(crefid, prefid, pathname)
         self.db.commit()
 
-    def checkoutArticles(self, articles):
-        self.init()
+    def checkoutArticles(self):
+        self._refreshShadowFs(self.db)
+        articles = self.repo.getArticles()
         for article in articles:
-            shutil.copyfile('./.sigil/refs/' +
-                            article['refid'], article['pathname'])
+            refLog = RefLog(article['refid'])
+            refLog.applyHistory()
+            shutil.copyfile(refLog.file, article['pathname'])
             self._addNewFile(article['refid'], article['pathname'])
         self.db.commit()
 

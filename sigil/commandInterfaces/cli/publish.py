@@ -1,33 +1,16 @@
 import os
 import sqlite3
 from glob import iglob
-from sigil.repo.Repo import Repo
 from sigil.editingInterfaces.FileSystem import FileSystem
 
 
 def publish():
-    db = Repo()
     sfs = FileSystem()
-    try:
-        db.connect()
-    except sqlite3.OperationalError:
-        print("sigil database not found, please run `sigil init`")
-        exit(0)
-
     try:
         sfs.connect()
     except sqlite3.OperationalError:
-        print("Shadow Filesystem not found, please run `sigil init`")
+        print("sigil database not found, please run `sigil init`")
         exit(0)
-
-    def _updateExistingFile(pathname):
-        prefid = sfs.getRefid(pathname)
-        crefid = db.updateExistingArticle(prefid, pathname)
-        sfs.updateExistingFile(crefid, prefid, pathname)
-
-    def _addNewFile(pathname):
-        refid = db.addNewArticle(pathname)
-        sfs.addNewFile(refid, pathname)
 
     files = iglob('**', recursive=True)
     for file in files:
@@ -36,10 +19,10 @@ def publish():
 
         isNewFile = sfs.isNewFile(file)
         if (isNewFile):
-            _addNewFile(file)
+            sfs.addNewFile(file)
             continue
 
         inodeUpdated = sfs.hasInodeUpdated(file)
         if (inodeUpdated):
-            _updateExistingFile(file)
+            sfs.updateExistingFile(file)
             continue

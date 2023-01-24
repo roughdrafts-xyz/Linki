@@ -1,8 +1,8 @@
 import detools
 import sqlite3
-import shutil
 import hashlib
-from sigil.repo._init import init
+from os import mkdir
+from sigil.repo._init import prepareRepoDb
 from sigil.repo.backports.file_digest import file_digest
 from sigil.repo.RefLog import RefLog
 from tempfile import TemporaryFile
@@ -93,4 +93,7 @@ class Repo:
         return crefid
 
     def init(self):
-        init()
+        mkdir('.sigil')
+        mkdir('.sigil/refs')
+        con = sqlite3.connect(".sigil/sigil.db")
+        prepareRepoDb(con)
