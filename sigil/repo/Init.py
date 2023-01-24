@@ -16,8 +16,8 @@ def init_repo():
     * pathname - where to put the file or url lookup or whatever
     */
     CREATE TABLE IF NOT EXISTS articles (
-      refid NOT NULL PRIMARY KEY,
-      pathname NOT NULL
+      refid NOT NULL UNIQUE,
+      pathname NOT NULL PRIMARY KEY
     ) WITHOUT ROWID
     --endsql
     """)

@@ -11,7 +11,6 @@ def publish():
         print("sigil database not found, please run `sigil init`")
         exit(0)
 
-    sfs.refreshShadowFs()
     files = iglob('**', recursive=True)
     for file in files:
         if not os.path.isfile(file):

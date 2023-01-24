@@ -5,7 +5,6 @@ from glob import iglob
 
 def getStagedChanges(path='.'):
     sfs = FileSystem()
-    sfs.connect()
 
     updatedFiles = []
     if (os.path.isdir(path)):

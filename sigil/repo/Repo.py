@@ -45,14 +45,6 @@ class Repo:
         _hash.update(str.encode(pathname))
         return _hash.hexdigest()
 
-    def _generateInitialRefid(self, pathname):
-        _hash = hashlib.sha224()
-        contentid = self._generateContentId(pathname)
-        pathid = self._generatePathnameId(pathname)
-        _hash.update(str.encode(pathid))
-        _hash.update(str.encode(contentid))
-        return _hash.hexdigest()
-
     def _generateNewRefid(self, prefid, pathname):
         _hash = hashlib.sha224()
         contentid = self._generateContentId(pathname)
@@ -62,24 +54,31 @@ class Repo:
         _hash.update(str.encode(contentid))
         return _hash.hexdigest()
 
-    def addNewArticle(self, pathname):
-        refid = self._generateInitialRefid(pathname)
-        self.db.execute("""
-        --sql
-        INSERT INTO articles VALUES(:refid, :pathname)
-        --endsql
-        """, [refid, pathname])
-        self._addNewArticleRef(refid, pathname)
-        self.db.commit()
-        return refid
-
-    def updateExistingArticle(self, prefid, pathname):
-        crefid = self._generateNewRefid(prefid, pathname)
+    def _updateArticle(self, prefid, crefid, pathname):
         self.db.execute("""
         --sql
         UPDATE articles SET (refid, pathname) = (:crefid, :pathname) WHERE refid = :prefid
         --endsql
         """, {'prefid': prefid, 'pathname': pathname, 'crefid': crefid})
+
+    def addNewArticle(self, pathname):
+        refid = self._generateNewRefid('', pathname)
+        self.db.execute("""
+        --sql
+        INSERT INTO articles VALUES('0', :pathname);
+        """, [pathname])
+        self.db.execute("""
+        --sql
+        UPDATE articles SET (refid, pathname) = (:refid, :pathname) WHERE pathname = :pathname;
+        --endsql
+        """, {"refid": refid, "pathname": pathname})
+        self.db.commit()
+        self._addNewArticleRef(refid, pathname)
+        return refid
+
+    def updateExistingArticle(self, prefid, pathname):
+        crefid = self._generateNewRefid(prefid, pathname)
         self._addArticleRef(prefid, crefid, pathname)
+        self._updateArticle(prefid, crefid, pathname)
         self.db.commit()
         return crefid

@@ -8,6 +8,5 @@ def _formatHistoryRow(row):
 
 def getFormattedHistory(refid):
     repo = Repo()
-    repo.connect()
     history = repo.getHistory(refid)
     return map(_formatHistoryRow, history)

@@ -10,7 +10,6 @@ class TestPublishCommand(unittest.TestCase):
         self.dir = getPopulatedDirectory()
         os.chdir(self.dir.name)
         self.db = Repo()
-        self.db.connect()
 
     def tearDown(self):
         self.dir.cleanup()

@@ -9,8 +9,8 @@ class RefLog(contextlib.AbstractContextManager):
         self.file = TemporaryFile('r+b')
         self.refid = refid
 
-    def __exit__(self, *args):
-        self.file.close()
+    def __exit__(self, exc_type, exc, tb):
+        return None
 
     def applyHistory(self):
         history = self.getHistory()
@@ -33,6 +33,6 @@ class RefLog(contextlib.AbstractContextManager):
                 FROM edit_log JOIN related_edit
                 ON edit_log.crefid = related_edit.refid
             )
-        SELECT refid FROM related_edit ORDER BY idx DESC
+        SELECT refid FROM related_edit WHERE refid!='0' ORDER BY idx DESC
         --endsql
         ''', [self.refid])

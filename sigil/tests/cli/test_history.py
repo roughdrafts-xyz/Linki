@@ -12,7 +12,6 @@ class TestHistoryCommand(unittest.TestCase):
         self.dir = getCheckedOutDirectory()
         self.sfs = FileSystem()
         os.chdir(self.dir.name)
-        self.sfs.connect()
 
     def tearDown(self):
         self.dir.cleanup()

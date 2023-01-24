@@ -66,8 +66,8 @@ class FileSystem:
             with RefLog(self.repo.db, article['refid']) as refLog:
                 refLog.applyHistory()
                 shutil.copyfile(refLog.file.name, article['pathname'])
-                self._addNewFile(article['refid'], article['pathname'])
-        self.db.commit()
+            self._addNewFile(article['refid'], article['pathname'])
+            self.db.commit()
 
     def isNewFile(self, file):
         fstat = os.stat(file)
