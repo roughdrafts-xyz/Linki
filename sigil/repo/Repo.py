@@ -1,42 +1,47 @@
+import detools
 import sqlite3
 import shutil
 import hashlib
 from sigil.repo._init import init
-from sigil.repo.lib.file_digest import file_digest
+from sigil.repo.backports.file_digest import file_digest
+from sigil.repo.RefLog import RefLog
+from tempfile import TemporaryFile
 
 
 class Repo:
 
     def connect(self):
-        self.db = sqlite3.connect("file:./.sigil/sigil.db", uri=True)
+        self.db = sqlite3.connect("file:.sigil/sigil.db", uri=True)
         self.db.row_factory = sqlite3.Row
 
     def getArticles(self):
         # you can iterate over a cursor
         return self.db.execute('SELECT * FROM articles')
 
-    def getHistory(self, refid):
-        # TODO this needs to grab all the parents of refid and then return that as a cursor to iterate over
-        return self.db.execute('''
-        --sql
-        WITH RECURSIVE
-            related_edit(refid, idx) AS (
-                VALUES(:refid, 0)
-                UNION ALL
-                SELECT edit_log.prefid, related_edit.idx+1 
-                FROM edit_log JOIN related_edit
-                ON edit_log.crefid = related_edit.refid
-            )
-        SELECT refid FROM related_edit ORDER BY idx DESC
-        --endsql
-        ''', [refid])
-
     def viewRefid(self, refid):
         with open('.sigil/refs/'+refid, 'rb') as file:
             return file.read()
 
-    def _addArticleRef(self, refid, pathname):
-        shutil.copyfile(pathname, './.sigil/refs/'+refid)
+    def getHistory(self, refid):
+        refLog = RefLog(refid, self.db)
+        return refLog.getHistory()
+
+    def _addNewArticleRef(self, refid, pathname):
+        emptyFile = TemporaryFile('rb')
+        fto = open(pathname, 'rb')
+        fpatch = open('.sigil/refs/'+refid, 'wb')
+        detools.create_patch(ffrom=emptyFile, fto=fto,
+                             fpatch=fpatch)
+
+    def _addArticleRef(self, prefid, crefid, pathname):
+        ffrom = RefLog(prefid, self.db)
+        fto = open(pathname, 'rb')
+        fpatch = open('./.sigil/refs/'+crefid, 'wb')
+
+        ffrom.applyHistory()
+
+        detools.create_patch(ffrom=ffrom.file, fto=fto,
+                             fpatch=fpatch)
 
     def _generateContentId(self, pathname):
         with open(pathname, 'rb') as file:
@@ -72,8 +77,8 @@ class Repo:
         INSERT INTO articles VALUES(:refid, :pathname)
         --endsql
         """, [refid, pathname])
+        self._addNewArticleRef(refid, pathname)
         self.db.commit()
-        self._addArticleRef(refid, pathname)
         return refid
 
     def updateExistingArticle(self, prefid, pathname):
@@ -83,8 +88,8 @@ class Repo:
         UPDATE articles SET (refid, pathname) = (:crefid, :pathname) WHERE refid = :prefid
         --endsql
         """, {'prefid': prefid, 'pathname': pathname, 'crefid': crefid})
+        self._addArticleRef(prefid, crefid, pathname)
         self.db.commit()
-        self._addArticleRef(crefid, pathname)
         return crefid
 
     def init(self):
