@@ -14,8 +14,8 @@ class TestInitCommand(unittest.TestCase):
         self.dir.cleanup()
 
     def test_file_structure(self):
-        files = glob(pathname='**', recursive=True, include_hidden=True)
-        expected_files = ['.sigil', '.sigil/refs',
+        files = glob(pathname='.sigil/**', recursive=True)
+        expected_files = ['.sigil/', '.sigil/refs',
                           '.sigil/sigil.db', '.sigil/shadow_fs.db']
         self.assertEqual(files, expected_files)
 

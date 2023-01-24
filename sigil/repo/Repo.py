@@ -2,6 +2,7 @@ import sqlite3
 import shutil
 import hashlib
 from sigil.repo._init import init
+from sigil.repo.lib.file_digest import file_digest
 
 
 class Repo:
@@ -39,7 +40,7 @@ class Repo:
 
     def _generateContentId(self, pathname):
         with open(pathname, 'rb') as file:
-            digest = hashlib.file_digest(file, 'sha224')
+            digest = file_digest(file, hashlib.sha224)
         return digest.hexdigest()
 
     def _generatePathnameId(self, pathname):
