@@ -3,7 +3,7 @@ import sqlite3
 import hashlib
 from sigil.repo import RefLog
 from sigil.repo.backports.file_digest import file_digest
-from tempfile import TemporaryFile
+from tempfile import NamedTemporaryFile
 
 
 class Repo:
@@ -24,13 +24,20 @@ class Repo:
         return RefLog.getHistory(self.db, refid)
 
     def _addNewArticleRef(self, refid, pathname):
-        with TemporaryFile('r+b') as refLog, open(pathname, 'rb') as fto, open('.sigil/refs/'+refid, 'wb') as fpatch:
-            detools.create_patch(ffrom=refLog, fto=fto, fpatch=fpatch)
+        with NamedTemporaryFile() as ffrom, open(pathname, 'rb') as fto, open('.sigil/refs/'+refid, 'wb') as fpatch:
+            detools.create_patch(ffrom=ffrom, fto=fto,
+                                 fpatch=fpatch,
+                                 use_mmap=False,
+                                 patch_type='hdiffpatch',
+                                 algorithm='hdiffpatch')
 
     def _addArticleRef(self, prefid, crefid, pathname):
-        with RefLog.getVersion(self.db, prefid) as _version, open(pathname, 'rb') as fto, open('./.sigil/refs/'+crefid, 'wb') as fpatch:
-            detools.create_patch(ffrom=_version, fto=fto,
-                                 fpatch=fpatch)
+        with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, open('./.sigil/refs/'+crefid, 'wb') as fpatch:
+            detools.create_patch(ffrom=ffrom, fto=fto,
+                                 fpatch=fpatch,
+                                 use_mmap=False,
+                                 patch_type='hdiffpatch',
+                                 algorithm='hdiffpatch')
 
     def _generateContentId(self, pathname):
         with open(pathname, 'rb') as file:
@@ -54,8 +61,7 @@ class Repo:
     def _updateArticle(self, prefid, crefid, pathname):
         self.db.execute("""
         --sql
-        UPDATE articles SET (refid, pathname) = (:crefid, :pathname) WHERE refid = :prefid
-        --endsql
+        UPDATE articles SET (refid, pathname) = (:crefid, :pathname) WHERE refid = :prefid;
         """, {'prefid': prefid, 'pathname': pathname, 'crefid': crefid})
 
     def addNewArticle(self, pathname):
@@ -67,7 +73,6 @@ class Repo:
         self.db.execute("""
         --sql
         UPDATE articles SET (refid, pathname) = (:refid, :pathname) WHERE pathname = :pathname;
-        --endsql
         """, {"refid": refid, "pathname": pathname})
         self.db.commit()
         self._addNewArticleRef(refid, pathname)

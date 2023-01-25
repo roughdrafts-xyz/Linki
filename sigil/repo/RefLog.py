@@ -1,24 +1,25 @@
 import detools
-from tempfile import TemporaryFile
+import os
+from io import BytesIO
 
 
-def _modifyFile(refid, file):
-    with open('.sigil/refs/'+refid, 'rb') as _file:
+def _modifyFile(prev, refid):
+    with open('.sigil/refs/'+refid, 'rb') as _fpatch, BytesIO(prev) as _ffrom, BytesIO(prev) as _fto:
         detools.apply_patch(
-            ffrom=file,
-            fpatch=_file,
-            fto=file
+            ffrom=_ffrom,
+            fpatch=_fpatch,
+            fto=_fto
         )
+        return _fto.getvalue()
 
 
 def getVersion(db, refid):
     history = getHistory(db, refid)
-    file = TemporaryFile('r+b')
+    file = b''
     next(history)
     for row in history:
-        print(dict(row))
-        _modifyFile(row["refid"], file)
-    return file
+        file = _modifyFile(file, row["refid"])
+    return BytesIO(file)
 
 
 def getHistory(db, refid):
