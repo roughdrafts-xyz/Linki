@@ -23,25 +23,22 @@ class Repo:
     def getHistory(self, refid):
         return RefLog.getHistory(self.db, refid)
 
+    def _createPatch(self, ffrom, fto, fpatch):
+        detools.create_patch(ffrom=ffrom, fto=fto,
+                             fpatch=fpatch,
+                             compression='zstd',
+                             use_mmap=False,
+                             match_score=0,
+                             patch_type='hdiffpatch',
+                             algorithm='hdiffpatch')
+
     def _addNewArticleRef(self, refid, pathname):
         with io.BytesIO(b'') as ffrom, open(pathname, 'rb') as fto, open('.sigil/refs/'+refid, 'wb') as fpatch:
-            detools.create_patch(ffrom=ffrom, fto=fto,
-                                 fpatch=fpatch,
-                                 compression='zstd',
-                                 use_mmap=False,
-                                 match_score=0,
-                                 patch_type='hdiffpatch',
-                                 algorithm='hdiffpatch')
+            self._createPatch(ffrom, fto, fpatch)
 
     def _addArticleRef(self, prefid, crefid, pathname):
         with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, open('./.sigil/refs/'+crefid, 'wb') as fpatch:
-            detools.create_patch(ffrom=ffrom, fto=fto,
-                                 fpatch=fpatch,
-                                 compression='zstd',
-                                 use_mmap=False,
-                                 match_score=0,
-                                 patch_type='hdiffpatch',
-                                 algorithm='hdiffpatch')
+            self._createPatch(ffrom, fto, fpatch)
 
     def _generateContentId(self, pathname):
         with open(pathname, 'rb') as file:
