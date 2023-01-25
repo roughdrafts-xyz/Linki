@@ -27,8 +27,7 @@ class Repo:
         with io.BytesIO(b'') as ffrom, open(pathname, 'rb') as fto, open('.sigil/refs/'+refid, 'wb') as fpatch:
             detools.create_patch(ffrom=ffrom, fto=fto,
                                  fpatch=fpatch,
-                                 # compression='zstd',
-                                 compression='none',
+                                 compression='zstd',
                                  use_mmap=False,
                                  match_score=0,
                                  patch_type='hdiffpatch',
@@ -38,8 +37,7 @@ class Repo:
         with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, open('./.sigil/refs/'+crefid, 'wb') as fpatch:
             detools.create_patch(ffrom=ffrom, fto=fto,
                                  fpatch=fpatch,
-                                 # compression='zstd',
-                                 compression='none',
+                                 compression='zstd',
                                  use_mmap=False,
                                  match_score=0,
                                  patch_type='hdiffpatch',
