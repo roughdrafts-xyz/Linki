@@ -56,6 +56,11 @@ def init_repo():
 
     con.execute("""
     --sql
+    CREATE INDEX edit_log_back ON edit_log(crefid, prefid);
+    """)
+
+    con.execute("""
+    --sql
     CREATE TRIGGER preventDuplicateRefIds BEFORE UPDATE ON articles WHEN new.refid == old.refid
     BEGIN
       SELECT RAISE(ABORT, 'refid must be changed');

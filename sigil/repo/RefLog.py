@@ -4,7 +4,7 @@ from io import BytesIO
 
 
 def _modifyFile(prev, refid):
-    with open('.sigil/refs/'+refid, 'rb') as _fpatch, BytesIO(prev) as _ffrom, BytesIO(prev) as _fto:
+    with open('.sigil/refs/'+refid, 'rb') as _fpatch, BytesIO(prev) as _ffrom, BytesIO() as _fto:
         detools.apply_patch(
             ffrom=_ffrom,
             fpatch=_fpatch,
@@ -16,14 +16,13 @@ def _modifyFile(prev, refid):
 def getVersion(db, refid):
     history = getHistory(db, refid)
     file = b''
-    next(history)
     for row in history:
         file = _modifyFile(file, row["refid"])
     return BytesIO(file)
 
 
 def getHistory(db, refid):
-    return db.execute('''
+    history = db.execute('''
     --sql
     WITH RECURSIVE
         related_edit(refid, idx) AS (
@@ -36,3 +35,5 @@ def getHistory(db, refid):
     SELECT refid, idx FROM related_edit ORDER BY idx DESC
     --endsql
     ''', [refid])
+    next(history)  # Skips
+    return history

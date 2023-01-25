@@ -1,9 +1,9 @@
 import detools
 import sqlite3
 import hashlib
+import io
 from sigil.repo import RefLog
 from sigil.repo.backports.file_digest import file_digest
-from tempfile import NamedTemporaryFile
 
 
 class Repo:
@@ -24,10 +24,13 @@ class Repo:
         return RefLog.getHistory(self.db, refid)
 
     def _addNewArticleRef(self, refid, pathname):
-        with NamedTemporaryFile() as ffrom, open(pathname, 'rb') as fto, open('.sigil/refs/'+refid, 'wb') as fpatch:
+        with io.BytesIO(b'') as ffrom, open(pathname, 'rb') as fto, open('.sigil/refs/'+refid, 'wb') as fpatch:
             detools.create_patch(ffrom=ffrom, fto=fto,
                                  fpatch=fpatch,
+                                 # compression='zstd',
+                                 compression='none',
                                  use_mmap=False,
+                                 match_score=0,
                                  patch_type='hdiffpatch',
                                  algorithm='hdiffpatch')
 
@@ -35,7 +38,10 @@ class Repo:
         with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, open('./.sigil/refs/'+crefid, 'wb') as fpatch:
             detools.create_patch(ffrom=ffrom, fto=fto,
                                  fpatch=fpatch,
+                                 # compression='zstd',
+                                 compression='none',
                                  use_mmap=False,
+                                 match_score=0,
                                  patch_type='hdiffpatch',
                                  algorithm='hdiffpatch')
 
