@@ -54,9 +54,12 @@ class Repo:
         _hash = hashlib.sha224()
         contentid = self._generateContentId(pathname)
         pathid = self._generatePathnameId(pathname)
-        _hash.update(str.encode(prefid))
-        _hash.update(str.encode(pathid))
-        _hash.update(str.encode(contentid))
+        refid = b''.join([
+            bytes.fromhex(prefid),
+            bytes.fromhex(pathid),
+            bytes.fromhex(contentid)
+        ])
+        _hash.update(refid)
         return _hash.hexdigest()
 
     def _updateArticle(self, prefid, crefid, pathname):
