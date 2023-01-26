@@ -3,6 +3,7 @@ from io import BytesIO
 from functools import lru_cache
 
 
+@lru_cache
 def _modifyFile(prev, refid):
     with open('.sigil/refs/'+refid, 'rb') as _fpatch, BytesIO(prev) as _ffrom, BytesIO() as _fto:
         detools.apply_patch(
@@ -13,7 +14,6 @@ def _modifyFile(prev, refid):
         return _fto.getvalue()
 
 
-@lru_cache
 def getVersion(db, refid):
     history = getHistory(db, refid)
     file = b''
