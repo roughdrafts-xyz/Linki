@@ -3,7 +3,7 @@ from sigil.repo.Init import init_repo
 from sigil.editingInterfaces.FileSystem import FileSystem
 
 
-def init():
+def init(quiet=False):
     try:
         init_repo()
         sqlite3.connect('.sigil/shadow_fs.db')
@@ -11,7 +11,9 @@ def init():
         sfs = FileSystem()
         sfs.refreshShadowFs()
 
-        print('.sigil directory initiated')
+        if not quiet:
+            print('.sigil directory initiated')
     except FileExistsError:
-        print('.sigil directory already exists.')
+        if not quiet:
+            print('.sigil directory already exists.')
         exit(0)

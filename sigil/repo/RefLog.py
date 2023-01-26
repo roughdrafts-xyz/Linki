@@ -14,6 +14,7 @@ def _modifyFile(prev, refid):
         return _fto.getvalue()
 
 
+@lru_cache
 def getVersion(db, refid):
     history = getHistory(db, refid)
     file = b''
@@ -22,6 +23,7 @@ def getVersion(db, refid):
     return BytesIO(file)
 
 
+@lru_cache
 def getHistory(db, refid):
     history = db.execute('''
     --sql
