@@ -1,5 +1,7 @@
-from os import listdir
+from os import listdir, remove
 from sigil.tests.helpers import getInitializedDirectory, populateRepo
+from sigil.commandInterfaces.cli.checkout import checkout
+from sigil.repo.RefLog import _modifyFile
 from time import time
 
 
@@ -18,5 +20,14 @@ if __name__ == '__main__':
         print(i, len(listdir('.sigil/refs')), _time)
         totalPublishes += i
         i = i * 2
-    dir.cleanup()
     print(totalPublishes)
+    print('Cache info', _modifyFile.cache_info())
+    remove('hello_world.md')
+    _modifyFile.cache_clear()
+    start = time()
+    checkout()
+    end = time()
+    _time = end-start
+    print('Time to checkout', _time)
+
+    dir.cleanup()
