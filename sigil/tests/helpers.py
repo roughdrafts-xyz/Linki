@@ -32,13 +32,10 @@ def getCheckedOutDirectory():
     return dir
 
 
-def getVeryPopulatedRepo(n=100, dir=None):
-    if (dir == None):
-        dir = getInitializedDirectory()
+def populateRepo(n):
     start = len(listdir('.sigil/refs/'))
     end = start+n
     for i in range(start, end):
         with open('hello_world.md', 'w') as file:
             file.write(str(i))
         publish()
-    return dir
