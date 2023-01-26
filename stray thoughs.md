@@ -1,5 +1,4 @@
 - Should probably have a cache folder that holds compiled versions of files, or offer REDIS integration for that or something - Just in case someone accesses a version of a file a lot without putting it in the wiki.
-- Need to implement the [delta thing](https://detools.readthedocs.io/en/latest/)
 - Can probably use cherrypy for the web server. Looks like it'll cost about 2.5Mb?
 - marko or python-markdown might be good for the web server's markdown interpreter?
 

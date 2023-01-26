@@ -1,6 +1,6 @@
 import detools
-import os
 from io import BytesIO
+from functools import lru_cache
 
 
 def _modifyFile(prev, refid):
@@ -13,6 +13,7 @@ def _modifyFile(prev, refid):
         return _fto.getvalue()
 
 
+@lru_cache
 def getVersion(db, refid):
     history = getHistory(db, refid)
     file = b''
