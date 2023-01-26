@@ -21,7 +21,7 @@ if __name__ == '__main__':
         totalPublishes += i
         i = i * 2
     print(totalPublishes)
-    print('Cache info', _modifyFile.cache_info())
+    print(_modifyFile.cache_info())
     remove('hello_world.md')
     _modifyFile.cache_clear()
     start = time()
