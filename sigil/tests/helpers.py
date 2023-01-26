@@ -36,6 +36,6 @@ def populateRepo(n):
     start = len(listdir('.sigil/refs/'))
     end = start+n
     for i in range(start, end):
-        with open('hello_world.md', 'w') as file:
-            file.write(str(i))
+        with open('hello_world.md', 'wb') as file:
+            file.write(i.to_bytes(1, byteorder='big'))
         publish()
