@@ -38,3 +38,24 @@ def getHistory(db, refid):
     ''', [refid])
     next(history)  # Skips
     return history
+
+
+def getDetailedHistory(db, refid, pathname):
+    history = db.execute('''
+    --sql
+    WITH RECURSIVE
+        related_edit(refid, pathname, idx) AS (
+            VALUES(:refid, :pathname, 0)
+            UNION ALL
+            SELECT edit_log.prefid, refid_info.pathname, related_edit.idx+1
+            FROM edit_log 
+            JOIN related_edit 
+            ON edit_log.crefid = related_edit.refid
+            JOIN refid_info 
+            ON related_edit.refid = refid_info.refid
+        )
+    SELECT refid, pathname FROM related_edit ORDER BY idx DESC
+    --endsql
+    ''', [refid, pathname])
+    next(history)
+    return history

@@ -22,8 +22,12 @@ def checkout(quiet):
 def history(file):
     "Show the edit history of the FILE"
     # TODO Fill this in properly
-    print(file)
-    pass
+    from sigil.commandInterfaces.cli.history import getFormattedHistory
+    history = getFormattedHistory(file)
+    click.echo('Refid \tPath Name')
+    click.echo('------\t---------')
+    for histor in history:
+        click.echo(histor)
 
 
 @cli.command()
@@ -38,6 +42,13 @@ def init(quiet):
     except FileExistsError:
         if not quiet:
             click.echo('.sigil directory already exists.')
+
+
+@cli.command()
+def log():
+    "Show recent changes made to the repository"
+    # TODO Fill this in properly
+    pass
 
 
 @cli.command()
@@ -67,9 +78,9 @@ def status():
 @click.argument('refid', required=True)
 def view(refid):
     "Prints the article associated with the REFID to stdout."
-    print(refid)
-    # TODO Fill this in properly
-    pass
+    from sigil.commandInterfaces.cli.view import view
+    outp = view(refid)
+    click.echo(outp)
 
 
 if (__name__ == '__main__'):

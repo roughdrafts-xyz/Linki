@@ -17,7 +17,7 @@ class TestHistoryCommand(unittest.TestCase):
         self.dir.cleanup()
 
     def _mockFormatHistoryRow(self, refid):
-        return refid
+        return f'{refid[0:6]}\thello_world.md'
 
     def test_should_display_history_exclusively(self):
         refids = [self.sfs.getRefid('hello_world.md')]
@@ -33,7 +33,7 @@ class TestHistoryCommand(unittest.TestCase):
             file.write('The Car is Red.')
         publish()
 
-        history = list(getFormattedHistory(refids[-1]))
+        history = list(getFormattedHistory('hello_world.md'))
         mockHistory = list(map(self._mockFormatHistoryRow, refids))
 
         self.assertEqual(history, mockHistory)

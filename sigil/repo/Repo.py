@@ -23,6 +23,9 @@ class Repo:
     def getHistory(self, refid):
         return RefLog.getHistory(self.db, refid)
 
+    def getDetailedHistory(self, refid, pathname):
+        return RefLog.getDetailedHistory(self.db, refid, pathname)
+
     def _createPatch(self, ffrom, fto, fpatch):
         detools.create_patch(ffrom=ffrom, fto=fto,
                              fpatch=fpatch,

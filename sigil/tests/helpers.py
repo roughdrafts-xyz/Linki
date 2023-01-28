@@ -8,7 +8,7 @@ from tempfile import TemporaryDirectory
 def getInitializedDirectory():
     dir = TemporaryDirectory()
     chdir(dir.name)
-    init(quiet=True)
+    init()
     return dir
 
 

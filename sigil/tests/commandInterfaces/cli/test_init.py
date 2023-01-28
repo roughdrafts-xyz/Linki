@@ -20,7 +20,7 @@ class TestInitCommand(unittest.TestCase):
         self.assertEqual(files, expected_files)
 
     def test_should_not_init_twice(self):
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(FileExistsError):
             init()
 
 
