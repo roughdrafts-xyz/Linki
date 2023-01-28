@@ -3,7 +3,7 @@ from io import BytesIO
 from functools import lru_cache
 
 
-@lru_cache(maxsize=1024)  # Based on the last number provided by Profile
+@lru_cache(maxsize=1024)  # Based on the last number provided by Speed Test
 def _modifyFile(prev, refid):
     with open('.sigil/refs/'+refid, 'rb') as _fpatch, BytesIO(prev) as _ffrom, BytesIO() as _fto:
         detools.apply_patch(

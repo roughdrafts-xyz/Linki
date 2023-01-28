@@ -6,9 +6,6 @@ A Distributed Wiki using a repository structure and made to be familiar to devel
 
 ## basic commands
 
-help <command>
-: Display detailed help for <command>.
-
 init
 : Create a new Sigil repository in the current directory.
 

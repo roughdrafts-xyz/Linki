@@ -62,15 +62,19 @@ class FileSystem:
     def checkoutArticles(self):
         self.refreshShadowFs()
         articles = self.repo.getArticles()
+        checkedOut = 0
         for article in articles:
             try:
+                checkedOut += 1
                 with RefLog.getVersion(self.repo.db, article['refid']) as _version, open(article['pathname'], 'xb') as _article:
                     _article.write(_version.getvalue())
                 self._addNewFile(article['refid'], article['pathname'])
             except FileExistsError:
+                checkedOut -= 1
                 self._addNewFile(article['refid'], article['pathname'])
                 continue
         self.db.commit()
+        return checkedOut
 
     def isNewFile(self, file):
         fstat = os.stat(file)

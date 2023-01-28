@@ -5,6 +5,7 @@ from glob import iglob
 
 def getStagedChanges(path='.'):
     sfs = FileSystem()
+    # TODO this doesn't work with a newly initiated folder.
 
     updatedFiles = []
     if (os.path.isdir(path)):
