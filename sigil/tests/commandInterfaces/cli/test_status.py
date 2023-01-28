@@ -32,6 +32,12 @@ class TestStatusCommand(unittest.TestCase):
         changedFiles = getStagedChanges('hello_world.md')
         self.assertEqual(changedFiles, [])
 
+    def test_new_file(self):
+        with open('goodnight_moon.md', 'x') as file:
+            file.write('Goodnight Moon.')
+        changedFiles = getStagedChanges()
+        self.assertEqual(changedFiles, ['goodnight_moon.md'])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=True)

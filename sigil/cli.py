@@ -27,7 +27,6 @@ def checkout(quiet):
 @click.argument('file', required=True)
 def history(file):
     "Show the edit history of the FILE"
-    # TODO Fill this in properly
     from sigil.commandInterfaces.cli.history import getFormattedHistory
     history = getFormattedHistory(file)
     click.echo('Refid \tPath Name')

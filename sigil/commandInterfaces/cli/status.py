@@ -5,7 +5,6 @@ from glob import iglob
 
 def getStagedChanges(path='.'):
     sfs = FileSystem()
-    # TODO this doesn't work with a newly initiated folder.
 
     updatedFiles = []
     if (os.path.isdir(path)):
@@ -16,6 +15,11 @@ def getStagedChanges(path='.'):
 
             inodeUpdated = sfs.hasInodeUpdated(file)
             if (inodeUpdated):
+                updatedFiles.append(file)
+                continue
+
+            isNewFile = sfs.isNewFile(file)
+            if (isNewFile):
                 updatedFiles.append(file)
                 continue
     else:

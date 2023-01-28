@@ -2,7 +2,6 @@ from sigil.editingInterfaces.FileSystem import FileSystem
 
 
 def _formatHistoryRow(row):
-    # TODO do formatting
     refid = row["refid"]
     pathname = row["pathname"]
     return f'{refid[0:6]}\t{pathname}'
