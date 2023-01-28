@@ -1,15 +1,10 @@
 import os
-import sqlite3
 from glob import iglob
 from sigil.editingInterfaces.FileSystem import FileSystem
 
 
 def publish():
-    try:
-        sfs = FileSystem()
-    except sqlite3.OperationalError:
-        print("sigil database not found, please run `sigil init`")
-        exit(0)
+    sfs = FileSystem()
 
     files = iglob('**', recursive=True)
     count = [0, 0]

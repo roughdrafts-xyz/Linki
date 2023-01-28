@@ -1,10 +1,16 @@
 import click
+import os
 
 
 @click.group
 def cli():
     "A Distributed Wiki using a repository structure and made to be familiar to developers and authors. Supports any kind of file, but expects markdown."
-    pass
+    ctx = click.get_current_context()
+    if ctx.invoked_subcommand != 'init':
+        dbExists = os.access('.sigil/sigil.db', os.F_OK)
+        if (not dbExists):
+            raise click.ClickException(
+                'sigil database not found, please run `sigil init`')
 
 
 @cli.command()
