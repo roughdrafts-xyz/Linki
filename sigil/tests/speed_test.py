@@ -11,13 +11,14 @@ if __name__ == '__main__':
     totalPublishes = 1
     dir = getInitializedDirectory()
     populateRepo(totalPublishes)
-    print('publishes', 'refs', 'time')
+    print('pubs\trefs\ttime')
     while (_time < 1.0):
         start = time()
         populateRepo(i)
         end = time()
         _time = end-start
-        print(i, len(listdir('.sigil/refs')), _time)
+        print(
+            '\t'.join([f'{i}', f'{len(listdir(".sigil/refs"))}', f'{_time}']))
         totalPublishes += i
         i = i * 2
     print(totalPublishes)

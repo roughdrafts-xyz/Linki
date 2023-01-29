@@ -1,0 +1,15 @@
+Usage: sigil [OPTIONS] COMMAND [ARGS]...
+
+  A Distributed Wiki using a repository structure and made to be familiar to
+  developers and authors. Supports any kind of file, but expects markdown.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  checkout  Populate the working directory with the repository's wiki.
+  history   Show the edit history of the FILE
+  init      Create a new Sigil repository in the current directory.
+  publish   Write every updated file to the repository.
+  status    Show updated files that will be written to the repository.
+  view      Prints the article associated with the REFID to stdout.

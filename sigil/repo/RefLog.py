@@ -33,7 +33,7 @@ def getHistory(db, refid):
             FROM edit_log JOIN related_edit
             ON edit_log.crefid = related_edit.refid
         )
-    SELECT refid, idx FROM related_edit ORDER BY idx DESC
+    SELECT refid FROM related_edit ORDER BY idx DESC
     --endsql
     ''', [refid])
     next(history)  # Skips

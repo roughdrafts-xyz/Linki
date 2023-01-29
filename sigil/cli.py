@@ -50,13 +50,6 @@ def init(quiet):
 
 
 @cli.command()
-def log():
-    "Show recent changes made to the repository"
-    # TODO Fill this in properly
-    pass
-
-
-@cli.command()
 @click.option('--quiet', default=False, help='Suppress output messages.', is_flag=True)
 def publish(quiet):
     "Write every updated file to the repository."
