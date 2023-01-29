@@ -1,14 +1,25 @@
 - Should probably have a cache folder that holds compiled versions of files, or offer REDIS integration for that or something - Just in case someone accesses a version of a file a lot without putting it in the wiki.
 - Can probably use cherrypy for the web server. Looks like it'll cost about 2.5Mb?
+  - using webpy
 - marko or python-markdown might be good for the web server's markdown interpreter?
+  - using pypandoc
 
-# TODO Web Stuff
+# TODO Transfer Stuff
 
 copy <uri>
 : Copy an edit from another repository.
 
 clone <uri>
 : Copy an existing repository.
+
+remote publish <uri>
+: update any or all remote with your version of the wiki. (Copies over articles and deltas, sets remotes' articles)
+
+remote add <uri>
+: add a remote url to push to (cloning automatically does this)
+
+remote del <uri>
+: remote the indicated remote
 
 # Content Ref ID
 
@@ -20,7 +31,7 @@ If a user copies an edit, they take on part of the size of the edit or file. The
 
 # Comment system
 
-Need to detail this out for v1.2.
+Need to detail this out for v0.3.
 
 # Web interface
 
