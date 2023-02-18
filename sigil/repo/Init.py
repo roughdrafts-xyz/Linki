@@ -17,7 +17,8 @@ def init_repo():
     */
     CREATE TABLE IF NOT EXISTS articles (
       refid NOT NULL UNIQUE,
-      pathname NOT NULL PRIMARY KEY
+      pathname NOT NULL UNIQUE,
+      PRIMARY KEY(refid, pathname)
     ) WITHOUT ROWID
     --endsql
     """)

@@ -14,6 +14,7 @@ class TestInitCommand(unittest.TestCase):
         self.dir.cleanup()
 
     def test_file_structure(self):
+        # TODO Document the whole repo structure. 3 Weeks later and I've totally forgotten it.
         files = glob(pathname='.sigil/**', recursive=True)
         expected_files = ['.sigil/', '.sigil/refs',
                           '.sigil/sigil.db', '.sigil/shadow_fs.db']

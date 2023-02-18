@@ -1,10 +1,14 @@
 # TODO Transfer Stuff
 
-copy <uri>
-: Copy an edit from another repository.
-
 clone <uri>
 : Copy an existing repository.
+
+Starting the sprint with this, and focusing on http implementation first using webpy
+
+Test should make a repo, then have it serve and prepare for cloning, and then the new repo should have all the content of the original repo. Just checking that the expected folder structure is there should be fine. Also check for same file sizes. Unless assert has a way to check that files are the same.
+
+copy <uri>
+: Copy an edit from another repository.
 
 # Web interface
 
