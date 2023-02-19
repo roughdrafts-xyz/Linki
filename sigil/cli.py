@@ -2,15 +2,25 @@ import click
 import os
 
 
-@click.group
-def cli():
+class _Group(click.Group):
+    def invoke(self, ctx):
+        ctx.is_help = '--help' in ctx.args
+        return super(_Group, self).invoke(ctx)
+    pass
+
+
+@click.group(cls=_Group)
+@click.pass_context
+def cli(ctx):
     "A Distributed Wiki using a repository structure and made to be familiar to developers and authors. Supports any kind of file, but expects markdown."
-    ctx = click.get_current_context()
-    if ctx.invoked_subcommand != 'init':
-        dbExists = os.access('.sigil/sigil.db', os.F_OK)
-        if (not dbExists):
-            raise click.ClickException(
-                'sigil database not found, please run `sigil init`')
+    is_init = ctx.invoked_subcommand == 'init'
+    if (ctx.is_help or is_init):
+        return
+
+    dbExists = os.access('.sigil/sigil.db', os.F_OK)
+    if (not dbExists):
+        raise click.ClickException(
+            'sigil database not found, please run `sigil init`')
 
 
 @cli.command()
@@ -79,6 +89,12 @@ def view(refid):
     from sigil.commandInterfaces.cli.view import view
     outp = view(refid)
     click.echo(outp)
+
+
+@cli.command()
+@click.argument('src', required=True)
+def clone(src):
+    pass
 
 
 if (__name__ == '__main__'):
