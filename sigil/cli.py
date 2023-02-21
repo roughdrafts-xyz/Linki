@@ -14,7 +14,8 @@ class _Group(click.Group):
 def cli(ctx):
     "A Distributed Wiki using a repository structure and made to be familiar to developers and authors. Supports any kind of file, but expects markdown."
     is_init = ctx.invoked_subcommand == 'init'
-    if (ctx.is_help or is_init):
+    is_clone = ctx.invoked_subcommand == 'clone'
+    if (ctx.is_help or is_init or is_clone):
         return
 
     dbExists = os.access('.sigil/sigil.db', os.F_OK)
@@ -92,8 +93,14 @@ def view(refid):
 
 
 @cli.command()
-@click.argument('src', required=True)
-def clone(src):
+@click.argument('source', required=True)
+@click.argument('destination', required=False)
+@click.option('--bare', default=False, help="Destination will be the sigil folder instead of the working directory.", is_flag=True)
+def clone(source, destination, bare=False):
+    "Copy a repo into a new folder."
+    from sigil.remoteInterfaces.LocalCopy import LocalCopy
+    lCopy = LocalCopy(source)
+    lCopy.clone(dst=destination, bare=bare)
     pass
 
 
