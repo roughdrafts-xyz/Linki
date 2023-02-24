@@ -8,8 +8,12 @@ from sigil.repo.backports.file_digest import file_digest
 
 class Repo:
 
-    def __init__(self):
-        self.db = sqlite3.connect("file:.sigil/sigil.db", uri=True)
+    def __init__(self, bare=False):
+        if not bare:
+            self.db = sqlite3.connect("file:.sigil/sigil.db", uri=True)
+        else:
+            self.db = sqlite3.connect("file:./sigil.db", uri=True)
+
         self.db.row_factory = sqlite3.Row
         self.remotes = []
 
