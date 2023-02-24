@@ -6,7 +6,7 @@ from sigil.remoteInterfaces.LocalCopy import LocalCopy
 from tempfile import TemporaryDirectory
 
 
-class TestLocalCopy(unittest.TestCase):
+class TestLocalCopyClone(unittest.TestCase):
     def setUp(self):
         self.src = getCheckedOutDirectory()
         os.chdir(self.src.name)

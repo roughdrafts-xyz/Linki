@@ -32,6 +32,16 @@ def getCheckedOutDirectory():
     return dir
 
 
+def getClonedDirectory(src):
+    from sigil.remoteInterfaces.LocalCopy import LocalCopy
+    remote = LocalCopy(src)
+
+    dir = TemporaryDirectory()
+
+    remote.clone(dir.name)
+    return dir
+
+
 def populateRepo(n):
     start = len(listdir('.sigil/refs/'))
     end = start+n
