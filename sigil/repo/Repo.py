@@ -11,6 +11,21 @@ class Repo:
     def __init__(self):
         self.db = sqlite3.connect("file:.sigil/sigil.db", uri=True)
         self.db.row_factory = sqlite3.Row
+        self.remotes = []
+
+    def getRemotes(self):
+        return self.remotes
+
+    def addRemote(self, remote):
+        self.remotes = [remote]
+        return self.remotes
+
+    def delRemote(self, remote):
+        try:
+            self.remotes.remove(remote)
+        except ValueError:
+            pass
+        return self.remotes
 
     def getArticles(self):
         # you can iterate over a cursor
