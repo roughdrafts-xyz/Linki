@@ -80,3 +80,14 @@ def init_repo():
     END
     --endsql
     """)
+
+    con.execute("""
+    --sql
+    /**
+    */
+    CREATE TABLE IF NOT EXISTS remotes (
+      pathname PRIMARY KEY
+      -- TODO add type eventually, depending on whether or not automatically determining type based on pathname is easier.
+    ) WITHOUT ROWID
+    --endsql
+    """)
