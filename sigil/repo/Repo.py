@@ -15,21 +15,23 @@ class Repo:
             self.db = sqlite3.connect("file:./sigil.db", uri=True)
 
         self.db.row_factory = sqlite3.Row
-        self.remotes = []
 
     def getRemotes(self):
-        return self.remotes
+        return self.db.execute('SELECT * FROM remotes')
 
-    def addRemote(self, remote):
-        self.remotes = [remote]
-        return self.remotes
+    def addRemote(self, pathname):
+        self.db.execute("""
+        --sql
+        INSERT INTO remotes VALUES(:pathname);
+        """, [pathname])
+        self.db.commit()
 
-    def delRemote(self, remote):
-        try:
-            self.remotes.remove(remote)
-        except ValueError:
-            pass
-        return self.remotes
+    def delRemote(self, pathname):
+        self.db.execute("""
+        --sql
+        DELETE FROM remotes WHERE pathname=:pathname;
+        """, [pathname])
+        self.db.commit()
 
     def getArticles(self):
         # you can iterate over a cursor
