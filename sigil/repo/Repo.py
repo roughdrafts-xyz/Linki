@@ -10,12 +10,6 @@ from pathlib import Path
 class Repo:
 
     def __init__(self, pathname=None, bare=False):
-        if not bare:
-            self.db = sqlite3.connect("file:.sigil/sigil.db", uri=True)
-        else:
-            self.db = sqlite3.connect("file:./sigil.db", uri=True)
-
-        self.db.row_factory = sqlite3.Row
         if pathname is None:
             pathname = Path.cwd()
         self.path = Path(pathname)
@@ -23,6 +17,10 @@ class Repo:
             self.base = '.sigil'
         else:
             self.base = '.'
+
+        dbPath = self.path.joinpath(self.base, 'sigil.db')
+        self.db = sqlite3.connect(f"file:{dbPath}", uri=True)
+        self.db.row_factory = sqlite3.Row
 
     def getRemotes(self):
         return self.db.execute('SELECT * FROM remotes')
