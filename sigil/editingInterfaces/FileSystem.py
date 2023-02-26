@@ -1,14 +1,20 @@
 import sqlite3
-import os
-import shutil
+from pathlib import Path
 from sigil.repo import RefLog
 from sigil.repo.Repo import Repo
 
 
 class FileSystem:
-    def __init__(self):
-        self.repo = Repo()
-        self.db = sqlite3.connect('file:.sigil/shadow_fs.db', uri=True)
+    def __init__(self, pathname=None):
+        if pathname is None:
+            pathname = Path.cwd()
+        self.path = Path(pathname)
+
+        self.repo = Repo(pathname)
+
+        self.base = '.sigil'
+        dbPath = self.path.joinpath(self.base, 'shadow_fs.db')
+        self.db = sqlite3.connect(f"file:{dbPath}", uri=True)
 
     def refreshShadowFs(self):
         # Files should include pathname and content
@@ -36,7 +42,7 @@ class FileSystem:
         self.db.commit()
 
     def _addNewFile(self, refid, file):
-        fstat = os.stat(file)
+        fstat = self.path.joinpath(file).stat()
         self.db.execute("INSERT INTO shadow_fstat VALUES(?,?,?,?)",
                         [refid, fstat.st_ino, fstat.st_mtime_ns, file])
 
@@ -46,7 +52,7 @@ class FileSystem:
         self.db.commit()
 
     def _updateExistingFile(self, crefid, prefid, file):
-        fstat = os.stat(file)
+        fstat = self.path.joinpath(file).stat()
         self.db.execute("""
         --sql
         UPDATE shadow_fstat SET (refid, ino, mtime_ns, pathname) = (:crefid, :ino, :mtime_ns, :pathname) WHERE refid=:prefid
@@ -77,7 +83,7 @@ class FileSystem:
         return checkedOut
 
     def isNewFile(self, file):
-        fstat = os.stat(file)
+        fstat = self.path.joinpath(file).stat()
         _inoExistsCursor = self.db.execute("""
         --sql
         SELECT COUNT(ino) FROM shadow_fstat WHERE ino=? LIMIT 1
@@ -87,7 +93,7 @@ class FileSystem:
         return _inodeCount < 1
 
     def getRefid(self, file):
-        fstat = os.stat(file)
+        fstat = self.path.joinpath(file).stat()
         _refidCursor = self.db.execute("""
         --sql
         SELECT refid FROM shadow_fstat WHERE ino=? LIMIT 1
@@ -96,7 +102,7 @@ class FileSystem:
         return _refidCursor.fetchone()[0]
 
     def hasInodeUpdated(self, file):
-        fstat = os.stat(file)
+        fstat = self.path.joinpath(file).stat()
         _inoExistsCursor = self.db.execute("""
         --sql
         SELECT COUNT(ino) FROM shadow_fstat WHERE ino=? AND mtime_ns!=? LIMIT 1

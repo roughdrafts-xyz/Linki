@@ -22,6 +22,8 @@ class Repo:
         self.db = sqlite3.connect(f"file:{dbPath}", uri=True)
         self.db.row_factory = sqlite3.Row
 
+        self.isBare = bare
+
     def getRemotes(self):
         return self.db.execute('SELECT * FROM remotes')
 
