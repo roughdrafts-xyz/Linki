@@ -19,6 +19,10 @@ class Repo:
         if pathname is None:
             pathname = Path.cwd()
         self.path = Path(pathname)
+        if not bare:
+            self.base = '.sigil'
+        else:
+            self.base = '.'
 
     def getRemotes(self):
         return self.db.execute('SELECT * FROM remotes')
@@ -61,11 +65,11 @@ class Repo:
                              algorithm='hdiffpatch')
 
     def _addNewArticleRef(self, refid, pathname):
-        with io.BytesIO(b'') as ffrom, open(pathname, 'rb') as fto, self.path.joinpath('.sigil', 'refs', refid).open('wb') as fpatch:
+        with io.BytesIO(b'') as ffrom, open(pathname, 'rb') as fto, self.path.joinpath(self.base, 'refs', refid).open('wb') as fpatch:
             self._createPatch(ffrom, fto, fpatch)
 
     def _addArticleRef(self, prefid, crefid, pathname):
-        with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, self.path.joinpath('.sigil', 'refs', crefid).open('wb') as fpatch:
+        with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, self.path.joinpath(self.base, 'refs', crefid).open('wb') as fpatch:
             self._createPatch(ffrom, fto, fpatch)
 
     def _generateContentId(self, pathname):
