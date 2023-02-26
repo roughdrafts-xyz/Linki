@@ -4,17 +4,21 @@ import hashlib
 import io
 from sigil.repo import RefLog
 from sigil.repo.backports.file_digest import file_digest
+from pathlib import Path
 
 
 class Repo:
 
-    def __init__(self, bare=False):
+    def __init__(self, pathname=None, bare=False):
         if not bare:
             self.db = sqlite3.connect("file:.sigil/sigil.db", uri=True)
         else:
             self.db = sqlite3.connect("file:./sigil.db", uri=True)
 
         self.db.row_factory = sqlite3.Row
+        if pathname is None:
+            pathname = Path.cwd()
+        self.path = Path(pathname)
 
     def getRemotes(self):
         return self.db.execute('SELECT * FROM remotes')
@@ -57,11 +61,11 @@ class Repo:
                              algorithm='hdiffpatch')
 
     def _addNewArticleRef(self, refid, pathname):
-        with io.BytesIO(b'') as ffrom, open(pathname, 'rb') as fto, open('.sigil/refs/'+refid, 'wb') as fpatch:
+        with io.BytesIO(b'') as ffrom, open(pathname, 'rb') as fto, self.path.joinpath('.sigil', 'refs', refid).open('wb') as fpatch:
             self._createPatch(ffrom, fto, fpatch)
 
     def _addArticleRef(self, prefid, crefid, pathname):
-        with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, open('./.sigil/refs/'+crefid, 'wb') as fpatch:
+        with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, self.path.joinpath('.sigil', 'refs', crefid).open('wb') as fpatch:
             self._createPatch(ffrom, fto, fpatch)
 
     def _generateContentId(self, pathname):
