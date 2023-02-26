@@ -7,8 +7,7 @@ from sigil.tests.helpers import getInitializedDirectory
 class TestGenerateNewRefid(unittest.TestCase):
     def setUp(self):
         self.dir = getInitializedDirectory()
-        os.chdir(self.dir.name)
-        self.repo = Repo()
+        self.repo = Repo(self.dir.name)
 
     def tearDown(self):
         self.dir.cleanup()

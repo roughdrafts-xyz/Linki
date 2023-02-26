@@ -9,8 +9,7 @@ from tempfile import TemporaryDirectory
 class TestLocalCopyClone(unittest.TestCase):
     def setUp(self):
         self.src = getCheckedOutDirectory()
-        os.chdir(self.src.name)
-        self.repo = Repo()
+        self.repo = Repo(self.src.name)
         self.remote = LocalCopy(self.src.name)
 
         self.dst = TemporaryDirectory()
