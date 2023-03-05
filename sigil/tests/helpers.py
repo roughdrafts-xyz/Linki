@@ -5,10 +5,10 @@ from sigil.commandInterfaces.cli.checkout import checkout
 from tempfile import TemporaryDirectory
 
 
-def getInitializedDirectory():
+def getInitializedDirectory(bare=False):
     dir = TemporaryDirectory()
     chdir(dir.name)
-    init()
+    init(bare=bare)
     return dir
 
 

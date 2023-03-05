@@ -1,7 +1,7 @@
 from os import listdir, remove
 from sigil.tests.helpers import getInitializedDirectory, populateRepo
 from sigil.commandInterfaces.cli.checkout import checkout
-from sigil.repo.RefLog import _modifyFile
+from sigil.repo.LocalRepo.RefLog import _modifyFile
 from time import time
 
 

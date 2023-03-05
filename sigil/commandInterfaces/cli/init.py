@@ -1,11 +1,12 @@
 import sqlite3
-from sigil.repo.Init import init_repo
+from sigil.repo.LocalRepo.init import init_repo, getRepoPath
 from sigil.editingInterfaces.FileSystem import FileSystem
 
 
-def init(exit_on_fail=True):
-    init_repo()
-    sqlite3.connect('.sigil/shadow_fs.db')
+def init(pathname=None, bare=False):
+    init_repo(pathname=pathname, bare=bare)
+    path = getRepoPath(pathname=pathname, bare=bare)
+    sqlite3.connect(path.joinpath('shadow_fs.db').resolve())
 
     sfs = FileSystem()
     sfs.refreshShadowFs()

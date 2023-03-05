@@ -2,7 +2,7 @@ import detools
 import sqlite3
 import hashlib
 import io
-from sigil.repo import RefLog
+from sigil.repo.LocalRepo import RefLog
 from sigil.repo.backports.file_digest import file_digest
 from pathlib import Path
 
@@ -24,14 +24,35 @@ class Repo:
 
         self.isBare = bare
 
+    def pull(self, remote):
+        # Bad Draft
+        #
+        # Get the remote's db
+        # Attach it to the local's db (https://stackoverflow.com/a/11089277)
+        # List histories in remote not in local
+        # Copy over those rows and files
+        # Repeat in reverse?
+
+        # None of these features should be interface dependent. They should all take the same input/output.
+        pass
+
+    def getRemotePath(self):
+        return self.path.joinpath(self.base).resolve()
+
+    def getRemoteStyle(self):
+        # TODO This method might lead to conflicts later.
+        return "local"
+
     def getRemotes(self):
         return self.db.execute('SELECT * FROM remotes')
 
-    def addRemote(self, pathname):
+    def addRemote(self, remote):
+        pathname = remote.getRemotePath()
+        style = remote.getRemoteStyle()
         self.db.execute("""
         --sql
-        INSERT INTO remotes VALUES(:pathname);
-        """, [pathname])
+        INSERT INTO remotes VALUES(:pathname, :style);
+        """, [pathname, style])
         self.db.commit()
 
     def delRemote(self, pathname):

@@ -1,14 +1,21 @@
 import shutil
 import os
 from sigil.editingInterfaces.FileSystem import FileSystem
-from sigil.repo.Repo import Repo
+from sigil.repo.LocalRepo.LocalRepo import Repo
+from pathlib import Path
 
 
 class LocalCopy():
-    def __init__(self, src):
-        self.src = src
-        self.srcRepoRefs = src+'/.sigil/refs/'
-        self.srcRepoDB = src+'/.sigil/sigil.db'
+    def __init__(self, src, bare=False):
+        if not bare:
+            self.base = '.sigil'
+        else:
+            self.base = '.'
+
+        self.src = Path(src).joinpath(self.base)
+        self.srcRepoRefs = self.src.joinpath('refs')
+        self.srcRepoDB = self.src.joinpath('sigil.db')
+        self.srcRepo = Repo(pathname=src, bare=bare)
 
     def clone(self, dst, bare=False):
 
@@ -25,8 +32,8 @@ class LocalCopy():
         owd = os.getcwd()
         os.chdir(dst)
 
-        repo = Repo(bare=bare)
-        repo.addRemote(self.src)
+        repo = Repo(pathname=dst, bare=bare)
+        repo.addRemote(str(self.src.resolve()))
 
         if not bare:
             sfs = FileSystem()

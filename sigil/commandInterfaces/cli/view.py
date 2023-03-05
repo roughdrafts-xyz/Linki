@@ -1,4 +1,4 @@
-from sigil.repo.Repo import Repo
+from sigil.repo.LocalRepo.LocalRepo import Repo
 
 
 def view(refid):

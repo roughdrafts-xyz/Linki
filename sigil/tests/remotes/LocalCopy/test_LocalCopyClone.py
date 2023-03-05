@@ -1,54 +1,50 @@
 import unittest
 import os
-from sigil.repo.Repo import Repo
-from sigil.tests.helpers import getCheckedOutDirectory
-from sigil.remoteInterfaces.LocalCopy import LocalCopy
-from tempfile import TemporaryDirectory
+from sigil.repo.LocalRepo.LocalRepo import Repo
+from sigil.repo.remotes import clone
+from sigil.tests.helpers import getCheckedOutDirectory, getInitializedDirectory
 
 
 class TestLocalCopyClone(unittest.TestCase):
     def setUp(self):
         self.src = getCheckedOutDirectory()
-        self.repo = Repo(self.src.name)
-        self.remote = LocalCopy(self.src.name)
-
-        self.dst = TemporaryDirectory()
-        os.chdir(self.dst.name)
+        self.srcRepo = Repo(self.src.name)
 
     def tearDown(self):
         self.src.cleanup()
-        self.dst.cleanup()
 
     def test_does_bare_copy(self):
-        os.chdir(self.src.name)
-        srcObjects = os.listdir('.sigil/refs/')
-        srcRepo = os.listdir('.sigil/')
+        with getInitializedDirectory(bare=True) as dst:
+            dstRepo = Repo(dst.name)
+            os.chdir(self.src.name)
+            srcObjects = os.listdir('.sigil/refs/')
+            srcRepo = os.listdir('.sigil/')
 
-        self.remote.clone(self.dst.name, bare=True)
+            clone(self.repo, dstRepo)
 
-        os.chdir(self.dst.name)
-        dstObjects = os.listdir('./refs/')
-        dstRepo = os.listdir('.')
+            os.chdir(dst.name)
+            dstObjects = os.listdir('./refs/')
+            dstRepo = os.listdir('.')
 
-        srcObjects.sort()
-        dstObjects.sort()
+            srcObjects.sort()
+            dstObjects.sort()
 
-        # Working Directory should be empty
-        self.assertNotEqual(dstObjects, [])
+            # Working Directory should be empty
+            self.assertNotEqual(dstObjects, [])
 
-        # Should only copy ref objects
-        self.assertEqual(srcObjects, dstObjects)
+            # Should only copy ref objects
+            self.assertEqual(srcObjects, dstObjects)
 
-        # Should only copy refs and sigil.db
-        self.assertNotEqual(srcRepo, dstRepo)
-        self.assertIn('sigil.db', dstRepo)
+            # Should only copy refs and sigil.db
+            self.assertNotEqual(srcRepo, dstRepo)
+            self.assertIn('sigil.db', dstRepo)
 
     def test_does_messy_copy(self):
         os.chdir(self.src.name)
         srcObjects = os.listdir('.sigil/refs')
         srcFiles = os.listdir('.')
 
-        self.remote.clone(self.dst.name)
+        clone(self.repo, self.dstRepo)
 
         os.chdir(self.dst.name)
         dstObjects = os.listdir('.sigil/refs')

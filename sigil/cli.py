@@ -47,12 +47,14 @@ def history(file):
 
 
 @cli.command()
+@click.argument('pathname', required=False, help="Destination to create the repository in. Defaults to the current directory.")
 @click.option('--quiet', default=False, help='Suppress output messages.', is_flag=True)
-def init(quiet):
+@click.option('--bare', default=False, help="Destination will be the sigil folder instead of the working directory.", is_flag=True)
+def init(pathname, quiet, bare):
     "Create a new Sigil repository in the current directory."
     from sigil.commandInterfaces.cli.init import init
     try:
-        init()
+        init(pathname=pathname, bare=bare)
         if not quiet:
             click.echo('.sigil directory initiated')
     except FileExistsError:

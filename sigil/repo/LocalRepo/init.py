@@ -1,11 +1,24 @@
-from os import mkdir
+from pathlib import Path
 import sqlite3
 
 
-def init_repo():
-    mkdir('.sigil')
-    mkdir('.sigil/refs')
-    con = sqlite3.connect(".sigil/sigil.db")
+def getRepoPath(pathname=None, bare=False):
+    if pathname is None:
+        pathname = Path.cwd()
+    if not bare:
+        base = '.sigil'
+    else:
+        base = '.'
+
+    path = Path(pathname).joinpath(base)
+    return path
+
+
+def init_repo(pathname=None, bare=False):
+    path = getRepoPath(pathname=pathname, bare=bare)
+    path.mkdir()
+    path.joinpath('refs').mkdir()
+    con = sqlite3.connect(path.joinpath("sigil.db").resolve())
     # sigil folder also has a folder of multiple zstd'd files that represent the various articles and their deltas and edit historys. The database merely tracks what refids care about each other. Every file is stored as a refid.
 
     con.execute("""
@@ -86,7 +99,8 @@ def init_repo():
     /**
     */
     CREATE TABLE IF NOT EXISTS remotes (
-      pathname PRIMARY KEY
+      pathname PRIMARY KEY,
+      style
       -- TODO add type eventually, depending on whether or not automatically determining type based on pathname is easier.
     ) WITHOUT ROWID
     --endsql

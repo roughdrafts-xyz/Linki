@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
-from sigil.repo import RefLog
-from sigil.repo.Repo import Repo
+from sigil.repo.LocalRepo import RefLog
+from sigil.repo.LocalRepo.LocalRepo import Repo
 
 
 class FileSystem:
