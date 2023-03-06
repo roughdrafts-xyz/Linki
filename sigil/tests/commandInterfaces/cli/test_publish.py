@@ -1,7 +1,7 @@
 import os
 import unittest
 from sigil.commandInterfaces.cli.publish import publish
-from sigil.repo.LocalRepo.LocalRepo import Repo
+from sigil.repo.LocalRepo.LocalRepo import LocalRepo
 from sigil.tests.helpers import getPopulatedDirectory
 from sigil.editingInterfaces.FileSystem import FileSystem
 

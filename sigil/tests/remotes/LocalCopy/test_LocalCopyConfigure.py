@@ -1,6 +1,6 @@
 import unittest
 import os
-from sigil.repo.LocalRepo.LocalRepo import Repo
+from sigil.repo.LocalRepo.LocalRepo import LocalRepo
 from sigil.tests.helpers import getCheckedOutDirectory, getClonedDirectory
 
 
@@ -12,7 +12,7 @@ class TestLocalCopyConfigure(unittest.TestCase):
         self.dst = getClonedDirectory(self.src.name)
         os.chdir(self.dst.name)
 
-        self.repo = Repo()
+        self.repo = LocalRepo()
 
     def tearDown(self):
         self.src.cleanup()

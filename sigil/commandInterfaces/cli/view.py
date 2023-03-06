@@ -1,6 +1,6 @@
-from sigil.repo.LocalRepo.LocalRepo import Repo
+from sigil.repo.LocalRepo.LocalRepo import LocalRepo
 
 
 def view(refid):
-    repo = Repo()
+    repo = LocalRepo()
     return repo.viewRefid(refid)

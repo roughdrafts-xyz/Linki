@@ -1,6 +1,6 @@
 import unittest
 import os
-from sigil.repo.LocalRepo.LocalRepo import Repo
+from sigil.repo.LocalRepo.LocalRepo import LocalRepo
 from sigil.commandInterfaces.cli.publish import publish
 from sigil.tests.helpers import getCheckedOutDirectory, getClonedDirectory
 from sigil.repo.remotes import sync_all_remotes
@@ -12,13 +12,13 @@ class TestLocalCopySync(unittest.TestCase):
         self.remoteFolder = getCheckedOutDirectory()
         self.remote = Path(self.remoteFolder.name)
 
-        self.remoteRepo = Repo(str(self.remote.resolve()))
+        self.remoteRepo = LocalRepo(str(self.remote.resolve()))
         self.remoteRef = self.remote.joinpath('.sigil', 'refs')
 
         self.localFolder = getClonedDirectory(self.remoteFolder.name)
         self.local = Path(self.localFolder.name)
 
-        self.localRepo = Repo(str(self.local.resolve()))
+        self.localRepo = LocalRepo(str(self.local.resolve()))
         self.localRef = self.local.joinpath('.sigil', 'refs')
 
     def tearDown(self):

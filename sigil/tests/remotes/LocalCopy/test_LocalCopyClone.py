@@ -1,6 +1,6 @@
 import unittest
 import os
-from sigil.repo.LocalRepo.LocalRepo import Repo
+from sigil.repo.LocalRepo.LocalRepo import LocalRepo
 from sigil.repo.remotes import clone
 from sigil.tests.helpers import getCheckedOutDirectory, getInitializedDirectory
 
@@ -8,14 +8,14 @@ from sigil.tests.helpers import getCheckedOutDirectory, getInitializedDirectory
 class TestLocalCopyClone(unittest.TestCase):
     def setUp(self):
         self.src = getCheckedOutDirectory()
-        self.srcRepo = Repo(self.src.name)
+        self.srcRepo = LocalRepo(self.src.name)
 
     def tearDown(self):
         self.src.cleanup()
 
     def test_does_bare_copy(self):
         with getInitializedDirectory(bare=True) as dst:
-            dstRepo = Repo(dst.name)
+            dstRepo = LocalRepo(dst.name)
             os.chdir(self.src.name)
             srcObjects = os.listdir('.sigil/refs/')
             srcRepo = os.listdir('.sigil/')

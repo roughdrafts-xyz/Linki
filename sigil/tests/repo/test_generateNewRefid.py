@@ -1,13 +1,13 @@
 import unittest
 import os
-from sigil.repo.LocalRepo.LocalRepo import Repo
+from sigil.repo.LocalRepo.LocalRepo import LocalRepo
 from sigil.tests.helpers import getInitializedDirectory
 
 
 class TestGenerateNewRefid(unittest.TestCase):
     def setUp(self):
         self.dir = getInitializedDirectory()
-        self.repo = Repo(self.dir.name)
+        self.repo = LocalRepo(self.dir.name)
 
     def tearDown(self):
         self.dir.cleanup()

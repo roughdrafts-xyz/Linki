@@ -2,48 +2,48 @@ import detools
 import sqlite3
 import hashlib
 import io
+import os
+from sigil.repo.abc import Repo
+from sigil.repo.LocalRepo.init import getRepoPath
 from sigil.repo.LocalRepo import RefLog
 from sigil.repo.backports.file_digest import file_digest
-from pathlib import Path
 
 
-class Repo:
+class LocalRepo(Repo):
 
     def __init__(self, pathname=None, bare=False):
-        if pathname is None:
-            pathname = Path.cwd()
-        self.path = Path(pathname)
-        if not bare:
-            self.base = '.sigil'
-        else:
-            self.base = '.'
-
-        dbPath = self.path.joinpath(self.base, 'sigil.db')
+        self.path = getRepoPath(pathname=pathname, bare=bare)
+        dbPath = self.path.joinpath('sigil.db')
         self.db = sqlite3.connect(f"file:{dbPath}", uri=True)
         self.db.row_factory = sqlite3.Row
 
-        self.isBare = bare
+    # I guess this should always return a set since refs should never be duplicates?
+    def getRefIds(self) -> set:
+        return set(os.listdir(self.path.joinpath('refs')))
 
-    def pull(self, remote):
-        # Bad Draft
-        #
-        # Get the remote's db
-        # Attach it to the local's db (https://stackoverflow.com/a/11089277)
-        # List histories in remote not in local
-        # Copy over those rows and files
-        # Repeat in reverse?
+    def getRef(self, ref):
+        return self.path.joinpath('refs').read_bytes(ref)
 
-        # None of these features should be interface dependent. They should all take the same input/output.
-        pass
+    def getRefs(self, refs: set):
+        return map(self.getRef, refs)
+
+    def copy(self, remote: Repo, refs: set):
+        refPath = self.path.joinpath('refs')
+        for ref in refs:
+            remoteRef = remote.getRef(ref)
+            # add ref to folder
+            refPath.joinpath(ref).write_bytes(remoteRef)
+            # add information to database
 
     def getRemotePath(self):
-        return self.path.joinpath(self.base).resolve()
+        return str(self.path.resolve())
 
     def getRemoteStyle(self):
         # TODO This method might lead to conflicts later.
         return "local"
 
-    def getRemotes(self):
+    # TODO need to do a list comprehension to make this correct to the standard.
+    def getRemotes(self) -> list:
         return self.db.execute('SELECT * FROM remotes')
 
     def addRemote(self, remote):
@@ -86,11 +86,11 @@ class Repo:
                              algorithm='hdiffpatch')
 
     def _addNewArticleRef(self, refid, pathname):
-        with io.BytesIO(b'') as ffrom, open(pathname, 'rb') as fto, self.path.joinpath(self.base, 'refs', refid).open('wb') as fpatch:
+        with io.BytesIO(b'') as ffrom, open(pathname, 'rb') as fto, self.path.joinpath('refs', refid).open('wb') as fpatch:
             self._createPatch(ffrom, fto, fpatch)
 
     def _addArticleRef(self, prefid, crefid, pathname):
-        with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, self.path.joinpath(self.base, 'refs', crefid).open('wb') as fpatch:
+        with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, self.path.joinpath('refs', crefid).open('wb') as fpatch:
             self._createPatch(ffrom, fto, fpatch)
 
     def _generateContentId(self, pathname):

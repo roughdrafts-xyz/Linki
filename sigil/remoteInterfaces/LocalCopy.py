@@ -1,7 +1,7 @@
 import shutil
 import os
 from sigil.editingInterfaces.FileSystem import FileSystem
-from sigil.repo.LocalRepo.LocalRepo import Repo
+from sigil.repo.LocalRepo.LocalRepo import LocalRepo
 from pathlib import Path
 
 
@@ -15,7 +15,7 @@ class LocalCopy():
         self.src = Path(src).joinpath(self.base)
         self.srcRepoRefs = self.src.joinpath('refs')
         self.srcRepoDB = self.src.joinpath('sigil.db')
-        self.srcRepo = Repo(pathname=src, bare=bare)
+        self.srcRepo = LocalRepo(pathname=src, bare=bare)
 
     def clone(self, dst, bare=False):
 
@@ -32,7 +32,7 @@ class LocalCopy():
         owd = os.getcwd()
         os.chdir(dst)
 
-        repo = Repo(pathname=dst, bare=bare)
+        repo = LocalRepo(pathname=dst, bare=bare)
         repo.addRemote(str(self.src.resolve()))
 
         if not bare:

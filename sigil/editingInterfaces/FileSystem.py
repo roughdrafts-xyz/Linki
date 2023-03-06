@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 from sigil.repo.LocalRepo import RefLog
-from sigil.repo.LocalRepo.LocalRepo import Repo
+from sigil.repo.LocalRepo.LocalRepo import LocalRepo
 
 
 class FileSystem:
@@ -10,7 +10,7 @@ class FileSystem:
             pathname = Path.cwd()
         self.path = Path(pathname)
 
-        self.repo = Repo(pathname)
+        self.repo = LocalRepo(pathname)
 
         self.base = '.sigil'
         dbPath = self.path.joinpath(self.base, 'shadow_fs.db')
