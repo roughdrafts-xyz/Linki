@@ -1,12 +1,12 @@
 import os
+from pathlib import Path
 from glob import iglob
 from sigil.editingInterfaces.FileSystem import FileSystem
 
 
-def publish():
-    sfs = FileSystem()
-
-    files = iglob('**', recursive=True)
+def publish(pathname: str):
+    sfs = FileSystem(pathname)
+    files = iglob('**', root_dir=pathname)
     count = [0, 0]
     for file in files:
         if not os.path.isfile(file):

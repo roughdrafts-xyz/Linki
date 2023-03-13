@@ -14,15 +14,15 @@ class TestLocalCopyClone(unittest.TestCase):
         self.src.cleanup()
 
     def test_does_bare_copy(self):
-        with getInitializedDirectory(bare=True) as dst:
-            dstRepo = LocalRepo(dst.name)
+        with getInitializedDirectory(bare=True) as dstPath:
+            dstRepo = LocalRepo(dstPath)
             os.chdir(self.src.name)
             srcObjects = os.listdir('.sigil/refs/')
             srcRepo = os.listdir('.sigil/')
 
-            clone(self.repo, dstRepo)
+            clone(self.srcRepo, dstRepo)
 
-            os.chdir(dst.name)
+            os.chdir(dstPath)
             dstObjects = os.listdir('./refs/')
             dstRepo = os.listdir('.')
 
@@ -40,20 +40,22 @@ class TestLocalCopyClone(unittest.TestCase):
             self.assertIn('sigil.db', dstRepo)
 
     def test_does_messy_copy(self):
-        os.chdir(self.src.name)
-        srcObjects = os.listdir('.sigil/refs')
-        srcFiles = os.listdir('.')
+        with getInitializedDirectory(bare=False) as dstPath:
+            os.chdir(self.src.name)
+            srcObjects = os.listdir('.sigil/refs')
+            srcFiles = os.listdir('.')
+            dstRepo = LocalRepo(dstPath)
 
-        clone(self.repo, self.dstRepo)
+            clone(self.srcRepo, dstRepo)
 
-        os.chdir(self.dst.name)
-        dstObjects = os.listdir('.sigil/refs')
-        dstFiles = os.listdir('.')
+            os.chdir(dstPath)
+            dstObjects = os.listdir('.sigil/refs')
+            dstFiles = os.listdir('.')
 
-        srcObjects.sort()
-        dstObjects.sort()
+            srcObjects.sort()
+            dstObjects.sort()
 
-        srcFiles.sort()
-        dstFiles.sort()
-        self.assertEqual(srcObjects, dstObjects)
-        self.assertEqual(srcFiles, dstFiles)
+            srcFiles.sort()
+            dstFiles.sort()
+            self.assertEqual(srcObjects, dstObjects)
+            self.assertEqual(srcFiles, dstFiles)

@@ -3,52 +3,54 @@ import sqlite3
 import hashlib
 import io
 import os
-from sigil.repo.abc import Repo
+from sigil.repo.RefItem import RefItem
+from sigil.repo.RemoteItem import RemoteItem
+from sigil.repo.abc.Repo import Repo
 from sigil.repo.LocalRepo.init import getRepoPath
-from sigil.repo.LocalRepo import RefLog
+from sigil.repo.LocalRepo.LocalRefLog import LocalRefLog
 from sigil.repo.backports.file_digest import file_digest
 
 
 class LocalRepo(Repo):
 
-    def __init__(self, pathname=None, bare=False):
+    def __init__(self, pathname: str, bare: bool = False):
+        # TODO remote the bare options from this and just make getRepoPath automatically determine that. Testing shouldn't be too heavily effected since that'll still have init_repo to set things as bare.
         self.path = getRepoPath(pathname=pathname, bare=bare)
         dbPath = self.path.joinpath('sigil.db')
-        self.db = sqlite3.connect(f"file:{dbPath}", uri=True)
+        dbPathString = f"file:{dbPath}"
+        self.db = sqlite3.connect(dbPathString, uri=True)
         self.db.row_factory = sqlite3.Row
+        self._refLog = LocalRefLog(self.db, self.path)
+
+    @property
+    def refLog(self):
+        return self._refLog
+
+    @property
+    def remotePath(self):
+        return self.path
+
+    @property
+    def remoteStyle(self):
+        # TODO This method might lead to conflicts later.
+        return "local"
 
     # I guess this should always return a set since refs should never be duplicates?
     def getRefIds(self) -> set:
         return set(os.listdir(self.path.joinpath('refs')))
 
-    def getRef(self, ref):
-        return self.path.joinpath('refs').read_bytes(ref)
-
-    def getRefs(self, refs: set):
-        return map(self.getRef, refs)
-
-    def copy(self, remote: Repo, refs: set):
-        refPath = self.path.joinpath('refs')
-        for ref in refs:
-            remoteRef = remote.getRef(ref)
-            # add ref to folder
-            refPath.joinpath(ref).write_bytes(remoteRef)
-            # add information to database
-
-    def getRemotePath(self):
-        return str(self.path.resolve())
-
-    def getRemoteStyle(self):
-        # TODO This method might lead to conflicts later.
-        return "local"
+    def _buildRemote(self, row):
+        return RemoteItem(row.path, row.type)
 
     # TODO need to do a list comprehension to make this correct to the standard.
-    def getRemotes(self) -> list:
-        return self.db.execute('SELECT * FROM remotes')
+    def getRemotes(self) -> list[RemoteItem]:
+        rows = self.db.execute('SELECT pathname, type FROM remotes')
+        items = map(self._buildRemote, rows)
+        return list(items)
 
-    def addRemote(self, remote):
-        pathname = remote.getRemotePath()
-        style = remote.getRemoteStyle()
+    def addRemote(self, remote: Repo):
+        pathname = remote.remotePath
+        style = remote.remoteStyle
         self.db.execute("""
         --sql
         INSERT INTO remotes VALUES(:pathname, :style);
@@ -62,19 +64,26 @@ class LocalRepo(Repo):
         """, [pathname])
         self.db.commit()
 
-    def getArticles(self):
+    def _getRefItem(self, row) -> RefItem:
+        return RefItem(
+            refId=row['refid'],
+            pathName=row['pathname']
+        )
+
+    def getArticlesRefItems(self) -> list[RefItem]:
         # you can iterate over a cursor
-        return self.db.execute('SELECT * FROM articles')
+        rows = self.db.execute('SELECT * FROM articles')
+        return list(map(self._getRefItem, rows))
 
     def viewRefid(self, refid):
-        with RefLog.getVersion(self.db, refid) as _version:
+        with self.refLog.getVersion(refid) as _version:
             return _version.read()
 
     def getHistory(self, refid):
-        return RefLog.getHistory(self.db, refid)
+        return self.refLog.getHistory(refid)
 
     def getDetailedHistory(self, refid, pathname):
-        return RefLog.getDetailedHistory(self.db, refid, pathname)
+        return self.refLog.getDetailedHistory(refid, pathname)
 
     def _createPatch(self, ffrom, fto, fpatch):
         detools.create_patch(ffrom=ffrom, fto=fto,
@@ -90,7 +99,7 @@ class LocalRepo(Repo):
             self._createPatch(ffrom, fto, fpatch)
 
     def _addArticleRef(self, prefid, crefid, pathname):
-        with RefLog.getVersion(self.db, prefid) as ffrom, open(pathname, 'rb') as fto, self.path.joinpath('refs', crefid).open('wb') as fpatch:
+        with self.refLog.getVersion(prefid) as ffrom, open(pathname, 'rb') as fto, self.path.joinpath('refs', crefid).open('wb') as fpatch:
             self._createPatch(ffrom, fto, fpatch)
 
     def _generateContentId(self, pathname):
@@ -121,7 +130,16 @@ class LocalRepo(Repo):
         UPDATE articles SET (refid, pathname) = (:crefid, :pathname) WHERE refid = :prefid;
         """, {'prefid': prefid, 'pathname': pathname, 'crefid': crefid})
 
+    # TODO Temporary solution, see RefItem.py for more information.
+    def _normalizePath(self, pathname):
+        _path = self.path.joinpath(pathname)
+        if not _path.exists() and not _path.is_file:
+            return FileNotFoundError
+        return str(_path.relative_to(self.path))
+
     def addNewArticle(self, pathname):
+        pathname = self._normalizePath(pathname)
+        fullPath = self.path.joinpath()
         refid = self._generateNewRefid('', pathname)
         self.db.execute("""
         --sql

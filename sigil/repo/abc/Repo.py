@@ -2,25 +2,29 @@ from abc import ABC, abstractmethod
 
 
 class Repo(ABC):
-
+    @property
     @abstractmethod
-    def getRefs(self) -> set:
+    def refLog(self) -> 'RefLog':
+        pass
+
+    @property
+    @abstractmethod
+    def remotePath(self) -> 'Path':
+        pass
+
+    @property
+    @abstractmethod
+    def remoteStyle(self) -> str:
         pass
 
     @abstractmethod
     def getRefIds(self) -> set:
         pass
 
+    # TODO This needs something like a RepoData object to list and send to a builder.
+    # Maybe a Remote object? or a RemoteList or RepoList.
     @abstractmethod
-    def getRemotePath(self):
-        pass
-
-    @abstractmethod
-    def getRemoteStyle(self):
-        pass
-
-    @abstractmethod
-    def getRemotes(self):
+    def getRemotes(self) -> list['RemoteItem']:
         pass
 
     @abstractmethod
@@ -32,7 +36,7 @@ class Repo(ABC):
         pass
 
     @abstractmethod
-    def getArticles(self):
+    def getArticlesRefItems(self) -> list['RefItem']:
         pass
 
     @abstractmethod

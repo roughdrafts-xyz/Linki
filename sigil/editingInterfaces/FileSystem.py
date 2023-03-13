@@ -1,19 +1,21 @@
 import sqlite3
+import os
 from pathlib import Path
-from sigil.repo.LocalRepo import RefLog
 from sigil.repo.LocalRepo.LocalRepo import LocalRepo
+from sigil.repo.LocalRepo.init import getRepoPath
 
 
 class FileSystem:
-    def __init__(self, pathname=None):
-        if pathname is None:
-            pathname = Path.cwd()
-        self.path = Path(pathname)
+    def __init__(self, pathname: str):
+        self.repoPath = getRepoPath(pathname)
+        if pathname is not None:
+            self.path = Path(pathname)
+        else:
+            self.path = Path.cwd()
 
-        self.repo = LocalRepo(pathname)
+        self.repo = LocalRepo(pathname=pathname)
 
-        self.base = '.sigil'
-        dbPath = self.path.joinpath(self.base, 'shadow_fs.db')
+        dbPath = self.repoPath.joinpath('shadow_fs.db')
         self.db = sqlite3.connect(f"file:{dbPath}", uri=True)
 
     def refreshShadowFs(self):
@@ -67,17 +69,19 @@ class FileSystem:
 
     def checkoutArticles(self):
         self.refreshShadowFs()
-        articles = self.repo.getArticles()
+        articles = self.repo.getArticlesRefItems()
         checkedOut = 0
         for article in articles:
+            articlePath = str(self.path.joinpath(article.pathName))
+            articleRefId = article.refId
             try:
                 checkedOut += 1
-                with RefLog.getVersion(self.repo.db, article['refid']) as _version, open(article['pathname'], 'xb') as _article:
+                with self.repo.refLog.getVersion(articleRefId) as _version, open(articlePath, 'xb') as _article:
                     _article.write(_version.getvalue())
-                self._addNewFile(article['refid'], article['pathname'])
+                self._addNewFile(articleRefId, articlePath)
             except FileExistsError:
                 checkedOut -= 1
-                self._addNewFile(article['refid'], article['pathname'])
+                self._addNewFile(articleRefId, articlePath)
                 continue
         self.db.commit()
         return checkedOut

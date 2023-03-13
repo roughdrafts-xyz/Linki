@@ -1,28 +1,27 @@
-import os
 import unittest
-from glob import glob
+import os
 from sigil.commandInterfaces.cli.init import init
 from sigil.tests.helpers import getInitializedDirectory
+from pathlib import Path
 
 
 class TestInitCommand(unittest.TestCase):
     def setUp(self):
         self.dir = getInitializedDirectory()
-        os.chdir(self.dir.name)
 
     def tearDown(self):
         self.dir.cleanup()
 
     def test_file_structure(self):
         # TODO Document the whole repo structure. 3 Weeks later and I've totally forgotten it.
-        files = glob(pathname='.sigil/**', recursive=True)
-        expected_files = ['.sigil/', '.sigil/refs',
-                          '.sigil/sigil.db', '.sigil/shadow_fs.db']
-        self.assertEqual(files, expected_files)
+        files = os.listdir(Path(self.dir.name).joinpath('.sigil'))
+
+        expected_files = ['refs', 'sigil.db', 'shadow_fs.db']
+        self.assertCountEqual(files, expected_files)
 
     def test_should_not_init_twice(self):
         with self.assertRaises(FileExistsError):
-            init()
+            init(self.dir.name)
 
 
 if __name__ == '__main__':

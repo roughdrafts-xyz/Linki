@@ -47,7 +47,7 @@ def history(file):
 
 
 @cli.command()
-@click.argument('pathname', required=False, help="Destination to create the repository in. Defaults to the current directory.")
+@click.argument('pathname', required=False, default=None, help="Destination to create the repository in. Defaults to the current directory.")
 @click.option('--quiet', default=False, help='Suppress output messages.', is_flag=True)
 @click.option('--bare', default=False, help="Destination will be the sigil folder instead of the working directory.", is_flag=True)
 def init(pathname, quiet, bare):

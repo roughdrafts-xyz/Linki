@@ -6,17 +6,19 @@ def getRepoPath(pathname=None, bare=False):
     if pathname is None:
         pathname = Path.cwd()
     if not bare:
-        base = '.sigil'
+        path = Path(pathname).joinpath('.sigil')
     else:
-        base = '.'
+        path = Path(pathname)
 
-    path = Path(pathname).joinpath(base)
-    return path
+    return path.resolve()
 
 
 def init_repo(pathname=None, bare=False):
     path = getRepoPath(pathname=pathname, bare=bare)
-    path.mkdir()
+    if not path.exists():
+        path.mkdir()
+    elif path.exists() and len(list(path.iterdir())) > 0:
+        raise FileExistsError
     path.joinpath('refs').mkdir()
     con = sqlite3.connect(path.joinpath("sigil.db").resolve())
     # sigil folder also has a folder of multiple zstd'd files that represent the various articles and their deltas and edit historys. The database merely tracks what refids care about each other. Every file is stored as a refid.

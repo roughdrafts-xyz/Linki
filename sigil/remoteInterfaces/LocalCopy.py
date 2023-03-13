@@ -33,7 +33,7 @@ class LocalCopy():
         os.chdir(dst)
 
         repo = LocalRepo(pathname=dst, bare=bare)
-        repo.addRemote(str(self.src.resolve()))
+        repo.addRemote(self.srcRepo)
 
         if not bare:
             sfs = FileSystem()
