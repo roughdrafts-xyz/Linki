@@ -1,8 +1,8 @@
 import sqlite3
 import os
 from pathlib import Path
-from sigil.repo.LocalRepo.LocalRepo import LocalRepo
-from sigil.repo.LocalRepo.init import getRepoPath
+from sigil.old_repo.LocalRepo.LocalRepo import LocalRepo
+from sigil.old_repo.LocalRepo.init import getRepoPath
 
 
 class FileSystem:

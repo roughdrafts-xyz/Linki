@@ -8,15 +8,15 @@ class RefDetail():
     prefId: str
 
 
-def getNewRefId(refId: str, update: bytes) -> str:
+def getNewRefId(refId: str, content: bytes) -> str:
     return sha224(b''.join([
         str.encode(refId),
-        update
+        content
     ])).hexdigest()
 
 
-def updateRefDetail(refId: str, update: bytes) -> RefDetail:
+def updateRefDetail(refId: str, content: bytes) -> RefDetail:
     return RefDetail(
         prefId=refId,
-        refId=getNewRefId(refId=refId, update=update)
+        refId=getNewRefId(refId=refId, content=content)
     )

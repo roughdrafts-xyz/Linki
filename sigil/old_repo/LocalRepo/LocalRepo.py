@@ -3,12 +3,12 @@ import sqlite3
 import hashlib
 import io
 import os
-from sigil.repo.RefItem import RefItem
-from sigil.repo.RemoteItem import RemoteItem
-from sigil.repo.abc.Repo import Repo
-from sigil.repo.LocalRepo.init import getRepoPath
-from sigil.repo.LocalRepo.LocalRefLog import LocalRefLog
-from sigil.repo.backports.file_digest import file_digest
+from sigil.old_repo.RefItem import RefItem
+from sigil.old_repo.RemoteItem import RemoteItem
+from sigil.old_repo.abc.Repo import Repo
+from sigil.old_repo.LocalRepo.init import getRepoPath
+from sigil.old_repo.LocalRepo.LocalRefLog import LocalRefLog
+from sigil.old_repo.backports.file_digest import file_digest
 
 
 class LocalRepo(Repo):

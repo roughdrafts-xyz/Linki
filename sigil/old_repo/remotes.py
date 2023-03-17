@@ -4,7 +4,7 @@
 # -pull (incoming updates only)
 # direction is relative to the local. IE a pull remote is a remote that you receive updates from when you sync to it.
 # pushing doesn't exist intentionally, uni-directional design is simpler.
-from sigil.repo.abc.Repo import Repo
+from sigil.old_repo.abc.Repo import Repo
 
 
 class _RepoGroup():

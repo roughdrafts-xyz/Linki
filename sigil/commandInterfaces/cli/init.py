@@ -1,5 +1,5 @@
 import sqlite3
-from sigil.repo.LocalRepo.init import init_repo, getRepoPath
+from sigil.old_repo.LocalRepo.init import init_repo, getRepoPath
 from sigil.editingInterfaces.FileSystem import FileSystem
 
 

@@ -3,8 +3,8 @@ from pathlib import Path
 from io import BytesIO
 from functools import lru_cache
 
-from sigil.repo.RefItem import RefItem
-from sigil.repo.abc.RefLog import RefLog
+from sigil.old_repo.RefItem import RefItem
+from sigil.old_repo.abc.RefLog import RefLog
 
 
 class LocalRefLog(RefLog):

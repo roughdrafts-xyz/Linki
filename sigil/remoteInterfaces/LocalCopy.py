@@ -1,7 +1,7 @@
 import shutil
 import os
 from sigil.editingInterfaces.FileSystem import FileSystem
-from sigil.repo.LocalRepo.LocalRepo import LocalRepo
+from sigil.old_repo.LocalRepo.LocalRepo import LocalRepo
 from pathlib import Path
 
 

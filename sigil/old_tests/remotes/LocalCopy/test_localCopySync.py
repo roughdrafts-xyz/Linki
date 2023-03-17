@@ -1,9 +1,9 @@
 import unittest
 import os
-from sigil.repo.LocalRepo.LocalRepo import LocalRepo
+from sigil.old_repo.LocalRepo.LocalRepo import LocalRepo
 from sigil.commandInterfaces.cli.publish import publish
 from sigil.tests.helpers import getCheckedOutDirectory, getClonedDirectory
-from sigil.repo.remotes import sync_all_remotes
+from sigil.old_repo.remotes import sync_all_remotes
 from pathlib import Path
 
 

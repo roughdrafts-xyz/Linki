@@ -1,7 +1,7 @@
 import unittest
 import os
-from sigil.repo.LocalRepo.LocalRepo import LocalRepo
-from sigil.repo.remotes import clone
+from sigil.old_repo.LocalRepo.LocalRepo import LocalRepo
+from sigil.old_repo.remotes import clone
 from sigil.tests.helpers import getCheckedOutDirectory, getInitializedDirectory
 
 

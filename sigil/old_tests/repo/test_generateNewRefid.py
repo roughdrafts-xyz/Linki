@@ -1,6 +1,6 @@
 import unittest
 import os
-from sigil.repo.LocalRepo.LocalRepo import LocalRepo
+from sigil.old_repo.LocalRepo.LocalRepo import LocalRepo
 from sigil.tests.helpers import getInitializedDirectory
 
 

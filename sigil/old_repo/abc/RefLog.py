@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sigil.repo.RefItem import RefItem
+from sigil.old_repo.RefItem import RefItem
 
 # TODO for right now this is just here to be pretty. I don't remember why I felt it needed to exist. I'm sure it will come back to me.
 
