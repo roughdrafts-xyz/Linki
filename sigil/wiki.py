@@ -2,7 +2,7 @@ from sigil.article.repository import ArticleRepository
 
 
 class Wiki():
-    def __init__(self, repositories: list[ArticleRepository]) -> None:
+    def __init__(self, repositories: set[ArticleRepository]) -> None:
         self._repositories = repositories
 
     def sync(self) -> None:

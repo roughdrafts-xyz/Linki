@@ -8,7 +8,7 @@ class TestWiki(unittest.TestCase):
     def setUp(self):
         self.remote_articles = MemoryArticleRepository()
         self.local_articles = MemoryArticleRepository()
-        self.wiki = Wiki([self.remote_articles, self.local_articles])
+        self.wiki = Wiki({self.remote_articles, self.local_articles})
 
     def test_does_sync_without_history(self):
         self.remote_articles.add_article(b'Hello World')
