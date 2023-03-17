@@ -26,3 +26,13 @@ class TestArticleRepository(unittest.TestCase):
 
         self.assertEqual(expected, actual)
         self.assertNotEqual(expected.refId, expected.prefId)
+
+    def test_does_create_and_gets_refs(self):
+        helloWorld = b'Hello World'
+        goodnightMoon = b'Goodnight Moon'
+
+        prefId = self.remote.add_article(helloWorld)
+        refId = self.remote.update_article(refId=prefId, content=goodnightMoon)
+
+        ids = self.remote.get_refs()
+        self.assertCountEqual({prefId, refId}, ids)

@@ -21,6 +21,10 @@ class ArticleRepository(ABC):
     def get_details(self, refId: str) -> RefDetail:
         raise NotImplementedError
 
+    @abstractmethod
+    def get_refs(self) -> set[str]:
+        raise NotImplementedError
+
 
 class MemoryArticleRepository(ArticleRepository):
     def __init__(self):
@@ -44,3 +48,6 @@ class MemoryArticleRepository(ArticleRepository):
 
     def get_details(self, refId: str) -> RefDetail:
         return self._log[refId]
+
+    def get_refs(self) -> set[str]:
+        return set(self._data.keys())
