@@ -23,13 +23,12 @@ def getRepository(style: str):
                 dir.cleanup()
 
 
-class TestArticleRepository(TestCase):
-    def setUp(self):
-        self.styles = {
-            MemoryArticleRepository.__name__,
-            FileSystemArticleRepository.__name__,
-            # BadArticleRepository.__name__,
-        }
+class TestArticleRepositoryStyles(TestCase):
+    styles = {
+        MemoryArticleRepository.__name__,
+        FileSystemArticleRepository.__name__,
+        # BadArticleRepository.__name__,
+    }
 
     def test_does_add_and_get_article(self):
         helloWorld = b'Hello World'

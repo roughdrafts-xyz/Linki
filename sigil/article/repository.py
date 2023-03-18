@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+import os
 
 from sigil.data.ref import RefDetail, updateRefDetail
 
@@ -81,30 +82,30 @@ class BadArticleRepository(ArticleRepository):
 
 class FileSystemArticleRepository(ArticleRepository):
     def __init__(self, path: Path):
-        self._path = path
-        pass
+        if (path.exists()):
+            self._path = path
+        else:
+            raise FileNotFoundError
+
+        self._log = {}
 
     def add_article(self, content: bytes) -> str:
-        del content
-        return ''
+        refDetails = updateRefDetail(refId='0', content=content)
+        self._path.joinpath(refDetails.refId).write_bytes(content)
+        self._log[refDetails.refId] = refDetails
+        return refDetails.refId
 
     def get_article(self, refId: str) -> bytes:
-        del refId
-        if (self._path.exists()):
-            return str.encode(self._path.as_uri())
-        return b''
+        return self._path.joinpath(refId).read_bytes()
 
     def update_article(self, refId: str, content: bytes) -> str:
-        del content
-        del refId
-        return ''
+        refDetails = updateRefDetail(refId=refId, content=content)
+        self._path.joinpath(refDetails.refId).write_bytes(content)
+        self._log[refDetails.refId] = refDetails
+        return refDetails.refId
 
     def get_details(self, refId: str) -> RefDetail:
-        del refId
-        return RefDetail(
-            prefId='',
-            refId=''
-        )
+        return self._log[refId]
 
     def get_refs(self) -> set[str]:
-        return {''}
+        return set(os.listdir(self._path))
