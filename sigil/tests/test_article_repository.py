@@ -1,9 +1,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Generator
 from unittest import TestCase
-from sigil.article.repository import ArticleRepository
 from sigil.article.repository import MemoryArticleRepository
 from sigil.article.repository import FileSystemArticleRepository
 from sigil.article.repository import BadArticleRepository
@@ -11,7 +9,7 @@ from sigil.data.ref import RefDetail
 
 
 @contextmanager
-def getRepository(style: str) -> Generator:
+def getRepository(style: str):
     match style:
         case MemoryArticleRepository.__name__:
             yield MemoryArticleRepository()
