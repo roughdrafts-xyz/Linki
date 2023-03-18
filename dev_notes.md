@@ -65,3 +65,9 @@ Need to detail this out for v0.3.
 - Should probably have a cache folder that holds compiled versions of files, or offer REDIS integration for that or something - Just in case someone accesses a version of a file a lot without putting it in the wiki.
 
 - Should Rough Drafts do some kind of data poisoning implementation? https://arxiv.org/pdf/2302.10149.pdf
+
+# Memex
+
+https://c9x.me/archive/
+
+Could be a good repository format. Focuses on archiving, uses a similar format to the diffing I described for local.

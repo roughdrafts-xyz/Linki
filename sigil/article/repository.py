@@ -51,3 +51,28 @@ class MemoryArticleRepository(ArticleRepository):
 
     def get_refs(self) -> set[str]:
         return set(self._data.keys())
+
+
+class BadArticleRepository(ArticleRepository):
+    def add_article(self, content: bytes) -> str:
+        del content
+        return ''
+
+    def get_article(self, refId: str) -> bytes:
+        del refId
+        return b''
+
+    def update_article(self, refId: str, content: bytes) -> str:
+        del content
+        del refId
+        return ''
+
+    def get_details(self, refId: str) -> RefDetail:
+        del refId
+        return RefDetail(
+            prefId='',
+            refId=''
+        )
+
+    def get_refs(self) -> set[str]:
+        return {''}
