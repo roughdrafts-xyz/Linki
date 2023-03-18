@@ -80,17 +80,22 @@ class BadArticleRepository(ArticleRepository):
         return {''}
 
 
+class RepositoryMalformedError(Exception):
+    pass
+
+
 class FileSystemArticleRepository(ArticleRepository):
     def __init__(self, path: Path):
         self._path = path
         self._data = self._path.joinpath('data')
         self._log = self._path.joinpath('log')
+        if (not self._path.exists()):
+            raise FileNotFoundError
         if (
-            not self._path.exists() or
             not self._data.exists() or
             not self._log.exists()
         ):
-            raise FileNotFoundError
+            raise RepositoryMalformedError
 
     @staticmethod
     def initialize_directory(path: Path):
