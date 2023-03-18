@@ -86,10 +86,15 @@ class FileSystemArticleRepository(ArticleRepository):
             self._path = path
             self._data = self._path.joinpath('data')
             self._log = self._path.joinpath('log')
-            if (not self._data.exists()):
+            path_is_empty = not any(self._path.iterdir())
+            if (
+                not self._data.exists() or
+                not self._log.exists()
+            ) and (path_is_empty):
                 self._data.mkdir()
-            if (not self._log.exists()):
                 self._log.mkdir()
+            else:
+                raise FileExistsError
         else:
             raise FileNotFoundError
 
