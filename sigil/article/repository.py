@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from sigil.data.ref import RefDetail, updateRefDetail
 
@@ -60,6 +61,37 @@ class BadArticleRepository(ArticleRepository):
 
     def get_article(self, refId: str) -> bytes:
         del refId
+        return b''
+
+    def update_article(self, refId: str, content: bytes) -> str:
+        del content
+        del refId
+        return ''
+
+    def get_details(self, refId: str) -> RefDetail:
+        del refId
+        return RefDetail(
+            prefId='',
+            refId=''
+        )
+
+    def get_refs(self) -> set[str]:
+        return {''}
+
+
+class FileSystemArticleRepository(ArticleRepository):
+    def __init__(self, path: Path):
+        self._path = path
+        pass
+
+    def add_article(self, content: bytes) -> str:
+        del content
+        return ''
+
+    def get_article(self, refId: str) -> bytes:
+        del refId
+        if (self._path.exists()):
+            return str.encode(self._path.as_uri())
         return b''
 
     def update_article(self, refId: str, content: bytes) -> str:
