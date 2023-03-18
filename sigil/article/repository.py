@@ -95,7 +95,8 @@ class FileSystemArticleRepository(ArticleRepository):
             not self._data.exists() or
             not self._log.exists()
         ):
-            raise RepositoryMalformedError
+            raise RepositoryMalformedError(
+                'Data or Log folder not found in repository. The folder might not be initialized. Try using initialize_directory.')
 
     @staticmethod
     def initialize_directory(path: Path):

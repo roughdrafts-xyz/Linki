@@ -1,10 +1,11 @@
 import unittest
 
-from sigil.article.repository import MemoryArticleRepository
+from sigil.article.repository import FileSystemArticleRepository, MemoryArticleRepository
 from sigil.wiki import Wiki
+from sigil.tests.test_article_repository import getRepository
 
 
-class TestWiki(unittest.TestCase):
+class TestWikiMemory(unittest.TestCase):
     def setUp(self):
         self.remote_articles = MemoryArticleRepository()
         self.local_articles = MemoryArticleRepository()
@@ -77,3 +78,21 @@ class TestWiki(unittest.TestCase):
             self.local_articles._log,
             self.remote_articles._log
         )
+
+
+class TestWikiMixed(unittest.TestCase):
+    def test_does_sync_without_history(self):
+        with (
+            getRepository(MemoryArticleRepository.__name__) as remote_articles,
+            getRepository(FileSystemArticleRepository.__name__) as local_articles
+        ):
+            wiki = Wiki({remote_articles, local_articles})
+            remote_articles.add_article(b'Hello World')
+            local_articles.add_article(b'Goodnight Moon')
+
+            wiki.sync()
+
+            self.assertCountEqual(
+                local_articles.get_refs(),
+                remote_articles.get_refs()
+            )
