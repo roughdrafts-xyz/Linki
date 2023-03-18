@@ -96,3 +96,55 @@ class TestWikiMixed(unittest.TestCase):
                 local_articles.get_refs(),
                 remote_articles.get_refs()
             )
+
+    def test_does_sync_with_history(self):
+        with (
+            getRepository(MemoryArticleRepository.__name__) as remote_articles,
+            getRepository(FileSystemArticleRepository.__name__) as local_articles
+        ):
+            wiki = Wiki({remote_articles, local_articles})
+            rprefid = remote_articles.add_article(b'Hello Moon')
+            lprefid = local_articles.add_article(b'Hello Sun')
+            remote_articles.update_article(
+                refId=rprefid,
+                content=b'Goodnight Moon'
+            )
+            local_articles.update_article(
+                refId=lprefid,
+                content=b'Goodnight Sun'
+            )
+
+            wiki.sync()
+
+            self.assertCountEqual(
+                local_articles.get_refs(),
+                remote_articles.get_refs()
+            )
+
+    def test_does_sync_with_weird_history(self):
+        """
+        Weird history is defined as when two repositories incidentally create the same history through whatever means. This is meant to be usable with sneakernets, so this might happen from time to time.
+        """
+        with (
+            getRepository(MemoryArticleRepository.__name__) as remote_articles,
+            getRepository(FileSystemArticleRepository.__name__) as local_articles
+        ):
+            wiki = Wiki({remote_articles, local_articles})
+            prefid = remote_articles.add_article(b'Hello Moon')
+            local_articles.add_article(b'Hello Moon')
+            remote_articles.update_article(
+                refId=prefid,
+                content=b'Goodnight Moon'
+            )
+
+            local_articles.update_article(
+                refId=prefid,
+                content=b'Goodnight Moon'
+            )
+
+            wiki.sync()
+
+            self.assertCountEqual(
+                local_articles.get_refs(),
+                remote_articles.get_refs()
+            )
