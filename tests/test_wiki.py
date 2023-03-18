@@ -1,5 +1,5 @@
 import unittest
-from sigil.tests.test_article_repository import getRepository
+from test_article_repository import getRepository
 
 from sigil.article.repository import FileSystemArticleRepository
 from sigil.article.repository import MemoryArticleRepository
