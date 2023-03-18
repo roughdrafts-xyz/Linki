@@ -65,5 +65,6 @@ class TestArticleRepositoryStyles(TestCase):
                     refId=prefId, content=goodnightMoon)
 
                 ids = remote.get_refs()
-                self.assertCountEqual({prefId, refId}, ids)
+                expected = {prefId, refId}
+                self.assertCountEqual(expected, ids)
                 self.assertNotEqual(refId, prefId)

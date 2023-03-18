@@ -84,28 +84,36 @@ class FileSystemArticleRepository(ArticleRepository):
     def __init__(self, path: Path):
         if (path.exists()):
             self._path = path
+            self._data = self._path.joinpath('data')
+            self._log = self._path.joinpath('log')
+            if (not self._data.exists()):
+                self._data.mkdir()
+            if (not self._log.exists()):
+                self._log.mkdir()
         else:
             raise FileNotFoundError
 
-        self._log = {}
-
     def add_article(self, content: bytes) -> str:
         refDetails = updateRefDetail(refId='0', content=content)
-        self._path.joinpath(refDetails.refId).write_bytes(content)
-        self._log[refDetails.refId] = refDetails
+        self._data.joinpath(refDetails.refId).write_bytes(content)
+        self._log.joinpath(refDetails.refId).write_text(refDetails.prefId)
         return refDetails.refId
 
     def get_article(self, refId: str) -> bytes:
-        return self._path.joinpath(refId).read_bytes()
+        return self._data.joinpath(refId).read_bytes()
 
     def update_article(self, refId: str, content: bytes) -> str:
         refDetails = updateRefDetail(refId=refId, content=content)
-        self._path.joinpath(refDetails.refId).write_bytes(content)
-        self._log[refDetails.refId] = refDetails
+        self._data.joinpath(refDetails.refId).write_bytes(content)
+        self._log.joinpath(refDetails.refId).write_text(refDetails.prefId)
         return refDetails.refId
 
     def get_details(self, refId: str) -> RefDetail:
-        return self._log[refId]
+        prefId = self._log.joinpath(refId).read_text()
+        return RefDetail(
+            refId=refId,
+            prefId=prefId
+        )
 
     def get_refs(self) -> set[str]:
-        return set(os.listdir(self._path))
+        return set(os.listdir(self._data))
