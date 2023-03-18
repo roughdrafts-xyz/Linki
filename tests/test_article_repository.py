@@ -2,10 +2,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
-from sigil.article.repository import MemoryArticleRepository
-from sigil.article.repository import FileSystemArticleRepository
-from sigil.article.repository import BadArticleRepository
-from sigil.data.ref import RefDetail
+from sigili.article.repository import MemoryArticleRepository
+from sigili.article.repository import FileSystemArticleRepository
+from sigili.article.repository import BadArticleRepository
+from sigili.data.ref import RefDetail
 
 
 @contextmanager

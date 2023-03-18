@@ -1,9 +1,9 @@
 import unittest
 from test_article_repository import getRepository
 
-from sigil.article.repository import FileSystemArticleRepository
-from sigil.article.repository import MemoryArticleRepository
-from sigil.wiki import Wiki
+from sigili.article.repository import FileSystemArticleRepository
+from sigili.article.repository import MemoryArticleRepository
+from sigili.wiki import Wiki
 
 
 class TestWikiMemory(unittest.TestCase):
