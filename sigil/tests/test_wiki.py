@@ -83,42 +83,42 @@ class TestWikiMemory(unittest.TestCase):
 class TestWikiMixed(unittest.TestCase):
     def test_does_sync_without_history(self):
         with (
-            getRepository(MemoryArticleRepository.__name__) as remote_articles,
-            getRepository(FileSystemArticleRepository.__name__) as local_articles
+            getRepository(MemoryArticleRepository.__name__) as memory_articles,
+            getRepository(FileSystemArticleRepository.__name__) as file_system_articles
         ):
-            wiki = Wiki({remote_articles, local_articles})
-            remote_articles.add_article(b'Hello World')
-            local_articles.add_article(b'Goodnight Moon')
+            wiki = Wiki({memory_articles, file_system_articles})
+            memory_articles.add_article(b'Hello World')
+            file_system_articles.add_article(b'Goodnight Moon')
 
             wiki.sync()
 
             self.assertCountEqual(
-                local_articles.get_refs(),
-                remote_articles.get_refs()
+                file_system_articles.get_refs(),
+                memory_articles.get_refs()
             )
 
     def test_does_sync_with_history(self):
         with (
-            getRepository(MemoryArticleRepository.__name__) as remote_articles,
-            getRepository(FileSystemArticleRepository.__name__) as local_articles
+            getRepository(MemoryArticleRepository.__name__) as memory_articles,
+            getRepository(FileSystemArticleRepository.__name__) as file_system_articles
         ):
-            wiki = Wiki({remote_articles, local_articles})
-            rprefid = remote_articles.add_article(b'Hello Moon')
-            lprefid = local_articles.add_article(b'Hello Sun')
-            remote_articles.update_article(
-                refId=rprefid,
+            wiki = Wiki({memory_articles, file_system_articles})
+            prefid_a = memory_articles.add_article(b'Hello Moon')
+            prefid_b = file_system_articles.add_article(b'Hello Sun')
+            memory_articles.update_article(
+                refId=prefid_a,
                 content=b'Goodnight Moon'
             )
-            local_articles.update_article(
-                refId=lprefid,
+            file_system_articles.update_article(
+                refId=prefid_b,
                 content=b'Goodnight Sun'
             )
 
             wiki.sync()
 
             self.assertCountEqual(
-                local_articles.get_refs(),
-                remote_articles.get_refs()
+                file_system_articles.get_refs(),
+                memory_articles.get_refs()
             )
 
     def test_does_sync_with_weird_history(self):
@@ -126,18 +126,18 @@ class TestWikiMixed(unittest.TestCase):
         Weird history is defined as when two repositories incidentally create the same history through whatever means. This is meant to be usable with sneakernets, so this might happen from time to time.
         """
         with (
-            getRepository(MemoryArticleRepository.__name__) as remote_articles,
-            getRepository(FileSystemArticleRepository.__name__) as local_articles
+            getRepository(MemoryArticleRepository.__name__) as memory_articles,
+            getRepository(FileSystemArticleRepository.__name__) as file_system_articles
         ):
-            wiki = Wiki({remote_articles, local_articles})
-            prefid = remote_articles.add_article(b'Hello Moon')
-            local_articles.add_article(b'Hello Moon')
-            remote_articles.update_article(
+            wiki = Wiki({memory_articles, file_system_articles})
+            prefid = memory_articles.add_article(b'Hello Moon')
+            file_system_articles.add_article(b'Hello Moon')
+            memory_articles.update_article(
                 refId=prefid,
                 content=b'Goodnight Moon'
             )
 
-            local_articles.update_article(
+            file_system_articles.update_article(
                 refId=prefid,
                 content=b'Goodnight Moon'
             )
@@ -145,6 +145,6 @@ class TestWikiMixed(unittest.TestCase):
             wiki.sync()
 
             self.assertCountEqual(
-                local_articles.get_refs(),
-                remote_articles.get_refs()
+                file_system_articles.get_refs(),
+                memory_articles.get_refs()
             )
