@@ -82,21 +82,27 @@ class BadArticleRepository(ArticleRepository):
 
 class FileSystemArticleRepository(ArticleRepository):
     def __init__(self, path: Path):
-        if (path.exists()):
-            self._path = path
-            self._data = self._path.joinpath('data')
-            self._log = self._path.joinpath('log')
-            path_is_empty = not any(self._path.iterdir())
-            if (
-                not self._data.exists() or
-                not self._log.exists()
-            ) and (path_is_empty):
-                self._data.mkdir()
-                self._log.mkdir()
-            else:
-                raise FileExistsError
-        else:
+        self._path = path
+        self._data = self._path.joinpath('data')
+        self._log = self._path.joinpath('log')
+        if (
+            not self._path.exists() or
+            not self._data.exists() or
+            not self._log.exists()
+        ):
             raise FileNotFoundError
+
+    @staticmethod
+    def initialize_directory(path: Path):
+        if (not path.exists()):
+            raise FileNotFoundError
+        path_is_not_empty = any(path.iterdir())
+        if (path_is_not_empty):
+            raise FileExistsError
+        _data = path.joinpath('data')
+        _log = path.joinpath('log')
+        _data.mkdir()
+        _log.mkdir()
 
     def add_article(self, content: bytes) -> str:
         refDetails = updateRefDetail(refId='0', content=content)

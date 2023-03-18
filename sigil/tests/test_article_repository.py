@@ -16,11 +16,13 @@ def getRepository(style: str):
         case BadArticleRepository.__name__:
             yield BadArticleRepository()
         case FileSystemArticleRepository.__name__:
-            dir = TemporaryDirectory()
+            _dir = TemporaryDirectory()
+            _dirPath = Path(_dir.name)
+            FileSystemArticleRepository.initialize_directory(_dirPath)
             try:
-                yield FileSystemArticleRepository(path=Path(dir.name))
+                yield FileSystemArticleRepository(path=_dirPath)
             finally:
-                dir.cleanup()
+                _dir.cleanup()
 
 
 class TestArticleRepositoryStyles(TestCase):
