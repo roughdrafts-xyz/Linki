@@ -149,3 +149,27 @@ class TestWikiMixed(unittest.TestCase):
                 file_system_articles.get_refs(),
                 memory_articles.get_refs()
             )
+
+    def test_does_clone_with_history(self):
+        with (
+            getRepository(MemoryArticleRepository.__name__) as memory_articles,
+            getRepository(FileSystemArticleRepository.__name__) as file_system_articles
+        ):
+            wiki = Wiki({memory_articles, file_system_articles})
+            prefid_a = memory_articles.add_article(b'Hello Moon')
+            prefid_b = memory_articles.add_article(b'Hello Sun')
+            memory_articles.update_article(
+                refId=prefid_a,
+                content=b'Goodnight Moon'
+            )
+            memory_articles.update_article(
+                refId=prefid_b,
+                content=b'Goodnight Sun'
+            )
+
+            wiki.sync()
+
+            self.assertCountEqual(
+                file_system_articles.get_refs(),
+                memory_articles.get_refs()
+            )
