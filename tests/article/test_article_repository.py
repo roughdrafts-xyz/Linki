@@ -3,6 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
+from sigili.article.repository import ArticleUpdate, ArticleDetails
 from sigili.article.repository import MemoryArticleRepository
 from sigili.article.repository import FileSystemArticleRepository
 from sigili.article.repository import BadArticleRepository
@@ -26,22 +27,55 @@ def getArticleRepository(style: str):
 
 
 styles = {
-    MemoryArticleRepository.__name__,
-    FileSystemArticleRepository.__name__,
-    # BadArticleRepository.__name__,
+    # MemoryArticleRepository.__name__,
+    # FileSystemArticleRepository.__name__,
+    BadArticleRepository.__name__,
 }
 
+# ArticleUpdate(bytes, [groups]) @dataclass
+# ArticleDetails() @dataclass?
 # ArticleRepository
-#   add_article
-#   update_article
-#   merge_article
+#   add_article(ArticleUpdate) -> ArticleDetails
+#   update_article(ArticleUpdate) -> ArticleDetails
+#   merge_article(ArticleUpdate) -> ArticleDetails
 #
 
 
 @pytest.mark.parametrize('style', styles)
 def test_does_add_article(style):
     with getArticleRepository(style) as repo:
-        # wiki.publish(ArticleUpdate(bytes, [groups]))
-        # groups is more flexible than paths and can be reconstructed into folder structures
-        # sub-folder is a sub-group. groups can be part of other groups.
-        pass
+        articleUpdate = ArticleUpdate(b'Hello World', ['hello world'])
+        articleDetails = repo.add_article(articleUpdate)
+        assert articleDetails == ArticleDetails(
+            articleId='1'
+        )
+
+
+@pytest.mark.parametrize('style', styles)
+def test_does_update_article(style):
+    with getArticleRepository(style) as repo:
+        articleUpdate = ArticleUpdate(b'Hello World', ['hello world'])
+        repo.add_article(articleUpdate)
+        articleUpdate = ArticleUpdate(b'Goodnight Moon', ['hello world'])
+        articleDetails = repo.update_article(articleUpdate)
+        assert articleDetails == ArticleDetails(
+            articleId='1'
+        )
+
+
+@pytest.mark.parametrize('style', styles)
+def test_does_merge_article(style):
+    with getArticleRepository(style) as repo:
+        # Add
+        articleUpdate = ArticleUpdate(b'Hello World', ['hello world'])
+        articleDetails = repo.merge_article(articleUpdate)
+        assert articleDetails == ArticleDetails(
+            articleId='1'
+        )
+
+        # Update
+        articleUpdate = ArticleUpdate(b'Goodnight Moon', ['hello world'])
+        articleDetails = repo.merge_article(articleUpdate)
+        assert articleDetails == ArticleDetails(
+            articleId='1'
+        )
