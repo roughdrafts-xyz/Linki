@@ -3,10 +3,6 @@
 #   add_title(refId, title)
 #   get_groups(refId)
 #   get_title(refId)
-# HistoryRepository
-#   add_edit(prefId, refId)
-#   get_parent(refId)
-#   get_children(refId)
 # ArticleRepository = (ContentRepository + MetadataRepository + HistoryRepository)
 #   update_article(prefId, bytes)
 
@@ -20,3 +16,8 @@
 # ContentRepository
 #   add_content(bytes)
 #   get_content(refId)
+
+# HistoryRepository
+#   add_edit(prefId, refId)
+#   get_parent(refId)
+#   get_children(refId)
