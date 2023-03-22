@@ -13,7 +13,7 @@ class ContentRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_content(self, refId: str) -> bytes:
+    def get_content(self, contentId: str) -> bytes:
         raise NotImplementedError
 
 
@@ -26,8 +26,8 @@ class MemoryContentRepository(ContentRepository):
         self._data[refDetails.refId] = content
         return refDetails.refId
 
-    def get_content(self, refId: str) -> bytes:
-        return self._data[refId]
+    def get_content(self, contentId: str) -> bytes:
+        return self._data[contentId]
 
 
 class BadContentRepository(ContentRepository):
@@ -35,8 +35,8 @@ class BadContentRepository(ContentRepository):
         del content
         return ''
 
-    def get_content(self, refId: str) -> bytes:
-        del refId
+    def get_content(self, contentId: str) -> bytes:
+        del contentId
         return b''
 
 
@@ -54,12 +54,14 @@ class FileSystemContentRepository(ContentRepository):
         path_is_not_empty = any(path.iterdir())
         if (path_is_not_empty):
             raise FileExistsError
-        path.joinpath('content').mkdir()
+        _contentPath = path.joinpath('content')
+        _contentPath.mkdir()
+        return _contentPath
 
     def add_content(self, content: bytes) -> str:
         refDetails = updateRefDetail(refId='0', content=content)
         self._content.joinpath(refDetails.refId).write_bytes(content)
         return refDetails.refId
 
-    def get_content(self, refId: str) -> bytes:
-        return self._content.joinpath(refId).read_bytes()
+    def get_content(self, contentId: str) -> bytes:
+        return self._content.joinpath(contentId).read_bytes()

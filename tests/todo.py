@@ -1,8 +1,3 @@
-# MetadataRepository
-#   add_group(refId, group)
-#   add_title(refId, title)
-#   get_groups(refId)
-#   get_title(refId)
 # ArticleRepository = (ContentRepository + MetadataRepository + HistoryRepository)
 #   update_article(prefId, bytes)
 
@@ -21,3 +16,10 @@
 #   add_edit(prefId, refId)
 #   get_parent(refId)
 #   get_children(refId)
+
+# MetadataRepository
+# (became GroupsRepository)
+#   add_group(refId, group)
+#   add_title(refId, title)
+#   get_groups(refId)
+#   get_title(refId)

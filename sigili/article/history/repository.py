@@ -5,56 +5,56 @@ from pathlib import Path
 
 class HistoryRepository(ABC):
     @abstractmethod
-    def add_edit(self, prefId: str, crefId: str) -> None:
+    def add_edit(self, parentId: str, childId: str) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def get_parent(self, refId: str) -> str:
+    def get_parent(self, childId: str) -> str:
         raise NotImplementedError
 
     @abstractmethod
-    def get_children(self, refId: str) -> list[str]:
+    def get_children(self, parentId: str) -> list[str]:
         raise NotImplementedError
 
 
 class MemoryHistoryRepository(HistoryRepository):
     def __init__(self) -> None:
-        self._parents = dict()
-        self._children = dict()
+        self._parentOf = dict()
+        self._childrenOf = dict()
 
-    def add_edit(self, prefId: str, crefId: str) -> None:
-        self._parents[crefId] = prefId
-        if (prefId not in self._children):
-            self._children[prefId] = []
-        self._children[prefId].append(crefId)
+    def add_edit(self, parentId: str, childId: str) -> None:
+        self._parentOf[childId] = parentId
+        if (parentId not in self._childrenOf):
+            self._childrenOf[parentId] = []
+        self._childrenOf[parentId].append(childId)
 
-    def get_parent(self, refId: str) -> str:
-        return self._parents[refId]
+    def get_parent(self, childId: str) -> str:
+        return self._parentOf[childId]
 
-    def get_children(self, refId: str) -> list[str]:
-        return self._children[refId]
+    def get_children(self, parentId: str) -> list[str]:
+        return self._childrenOf[parentId]
 
 
 class BadHistoryRepository(HistoryRepository):
-    def add_edit(self, prefId: str, crefId: str) -> None:
-        del prefId
-        del crefId
+    def add_edit(self, parentId: str, childId: str) -> None:
+        del parentId
+        del childId
         return None
 
-    def get_parent(self, refId: str) -> str:
-        del refId
+    def get_parent(self, childId: str) -> str:
+        del childId
         return ''
 
-    def get_children(self, refId: str) -> list[str]:
-        del refId
+    def get_children(self, parentId: str) -> list[str]:
+        del parentId
         return ['']
 
 
 class FileSystemHistoryRepository(HistoryRepository):
     def __init__(self, path: Path):
         self._history = path
-        self._parents = self._history.joinpath('parents')
-        self._children = self._history.joinpath('children')
+        self._parentOf = self._history.joinpath('parentOf')
+        self._childrenOf = self._history.joinpath('childrenOf')
         if (not self._history.exists()):
             raise FileNotFoundError(
                 f'History folder not found in repository. The folder might not be initialized.')
@@ -66,20 +66,22 @@ class FileSystemHistoryRepository(HistoryRepository):
         path_is_not_empty = any(path.iterdir())
         if (path_is_not_empty):
             raise FileExistsError
-        path.joinpath('history').mkdir()
-        path.joinpath('history', 'children').mkdir()
-        path.joinpath('history', 'parents').mkdir()
+        _historyPath = path.joinpath('history')
+        _historyPath.mkdir()
+        _historyPath.joinpath('childrenOf').mkdir()
+        _historyPath.joinpath('parentOf').mkdir()
+        return _historyPath
 
-    def add_edit(self, prefId: str, crefId: str) -> None:
-        self._parents.joinpath(crefId).write_text(prefId)
+    def add_edit(self, parentId: str, childId: str) -> None:
+        self._parentOf.joinpath(childId).write_text(parentId)
 
-        _refPath = self._children.joinpath(prefId)
-        if (not _refPath.exists()):
-            _refPath.mkdir()
-        _refPath.joinpath(crefId).touch()
+        _childrenPath = self._childrenOf.joinpath(parentId)
+        if (not _childrenPath.exists()):
+            _childrenPath.mkdir()
+        _childrenPath.joinpath(childId).touch()
 
-    def get_parent(self, refId: str) -> str:
-        return self._parents.joinpath(refId).read_text()
+    def get_parent(self, childId: str) -> str:
+        return self._parentOf.joinpath(childId).read_text()
 
-    def get_children(self, refId: str) -> list[str]:
-        return os.listdir(self._children.joinpath(refId))
+    def get_children(self, parentId: str) -> list[str]:
+        return os.listdir(self._childrenOf.joinpath(parentId))

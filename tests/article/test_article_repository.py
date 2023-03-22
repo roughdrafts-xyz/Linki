@@ -1,33 +1,38 @@
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest import TestCase
-from sigili.article.content.repository import MemoryContentRepository
-from sigili.article.content.repository import FileSystemContentRepository
-from sigili.article.content.repository import BadContentRepository
-from sigili.data.ref import RefDetail
+
+import pytest
+from sigili.article.repository import MemoryArticleRepository
+from sigili.article.repository import FileSystemArticleRepository
+from sigili.article.repository import BadArticleRepository
 
 
 @contextmanager
-def getRepository(style: str):
+def getArticleRepository(style: str):
     match style:
-        case MemoryContentRepository.__name__:
-            yield MemoryContentRepository()
-        case BadContentRepository.__name__:
-            yield BadContentRepository()
-        case FileSystemContentRepository.__name__:
+        case MemoryArticleRepository.__name__:
+            yield MemoryArticleRepository()
+        case BadArticleRepository.__name__:
+            yield BadArticleRepository()
+        case FileSystemArticleRepository.__name__:
             _dir = TemporaryDirectory()
             _dirPath = Path(_dir.name)
-            FileSystemContentRepository.initialize_directory(_dirPath)
+            FileSystemArticleRepository.initialize_directory(_dirPath)
             try:
-                yield FileSystemContentRepository(path=_dirPath)
+                yield FileSystemArticleRepository(path=_dirPath)
             finally:
                 _dir.cleanup()
 
 
-class TestArticleRepositoryStyles(TestCase):
-    styles = {
-        MemoryContentRepository.__name__,
-        FileSystemContentRepository.__name__,
-        # BadArticleRepository.__name__,
-    }
+styles = {
+    MemoryArticleRepository.__name__,
+    FileSystemArticleRepository.__name__,
+    # BadArticleRepository.__name__,
+}
+
+
+@pytest.mark.parametrize('style', styles)
+def test_does_update_articles(style):
+    with getArticleRepository(style) as repo:
+        pass
