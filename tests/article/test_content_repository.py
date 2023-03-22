@@ -1,10 +1,11 @@
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest import TestCase
 from sigili.article.content.repository import MemoryContentRepository
 from sigili.article.content.repository import FileSystemContentRepository
 from sigili.article.content.repository import BadContentRepository
+
+import pytest
 
 
 @contextmanager
@@ -24,18 +25,18 @@ def getContentRepository(style: str):
                 _dir.cleanup()
 
 
-class TestContentRepositoryStyles(TestCase):
-    styles = {
-        MemoryContentRepository.__name__,
-        FileSystemContentRepository.__name__,
-        # BadArticleDataRepository.__name__,
-    }
+styles = {
+    MemoryContentRepository.__name__,
+    FileSystemContentRepository.__name__,
+    # BadContentRepository.__name__,
+}
 
-    def test_does_add_and_get_content(self):
-        helloWorld = b'Hello World'
-        expected = helloWorld
-        for style in self.styles:
-            with self.subTest(style=style), getContentRepository(style) as repo:
-                refId = repo.add_content(helloWorld)
-                actual = repo.get_content(refId)
-                self.assertEqual(expected, actual)
+
+@pytest.mark.parametrize('style', styles)
+def test_does_add_and_get_content(style):
+    helloWorld = b'Hello World'
+    expected = helloWorld
+    with getContentRepository(style) as repo:
+        refId = repo.add_content(helloWorld)
+        actual = repo.get_content(refId)
+        assert expected == actual
