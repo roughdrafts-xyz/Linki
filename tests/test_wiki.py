@@ -1,20 +1,20 @@
 import unittest
-from test_article_repository import getRepository
+from tests.article.test_content_repository import getContentRepository
 
-from sigili.article.data.repository import FileSystemArticleDataRepository
-from sigili.article.data.repository import MemoryArticleDataRepository
+from sigili.article.content.repository import FileSystemContentRepository
+from sigili.article.content.repository import MemoryContentRepository
 from sigili.wiki import Wiki
 
 
 class TestWikiMemory(unittest.TestCase):
     def setUp(self):
-        self.remote_articles = MemoryArticleDataRepository()
-        self.local_articles = MemoryArticleDataRepository()
+        self.remote_articles = MemoryContentRepository()
+        self.local_articles = MemoryContentRepository()
         self.wiki = Wiki({self.remote_articles, self.local_articles})
 
     def test_does_sync_without_history(self):
-        self.remote_articles.add_article(b'Hello World')
-        self.local_articles.add_article(b'Goodnight Moon')
+        self.remote_articles.add_content(b'Hello World')
+        self.local_articles.add_content(b'Goodnight Moon')
 
         self.wiki.sync()
 
@@ -29,8 +29,8 @@ class TestWikiMemory(unittest.TestCase):
         )
 
     def test_does_sync_with_history(self):
-        rprefid = self.remote_articles.add_article(b'Hello Moon')
-        lprefid = self.local_articles.add_article(b'Hello Sun')
+        rprefid = self.remote_articles.add_content(b'Hello Moon')
+        lprefid = self.local_articles.add_content(b'Hello Sun')
         self.remote_articles.update_article(
             refId=rprefid,
             content=b'Goodnight Moon'
@@ -56,8 +56,8 @@ class TestWikiMemory(unittest.TestCase):
         """
         Weird history is defined as when two repositories incidentally create the same history through whatever means. This is meant to be usable with sneakernets, so this might happen from time to time.
         """
-        prefid = self.remote_articles.add_article(b'Hello Moon')
-        self.local_articles.add_article(b'Hello Moon')
+        prefid = self.remote_articles.add_content(b'Hello Moon')
+        self.local_articles.add_content(b'Hello Moon')
         self.remote_articles.update_article(
             refId=prefid,
             content=b'Goodnight Moon'
@@ -84,12 +84,12 @@ class TestWikiMemory(unittest.TestCase):
 class TestWikiMixed(unittest.TestCase):
     def test_does_sync_without_history(self):
         with (
-            getRepository(MemoryArticleDataRepository.__name__) as memory_articles,
-            getRepository(FileSystemArticleDataRepository.__name__) as file_system_articles
+            getContentRepository(MemoryContentRepository.__name__) as memory_articles,
+            getContentRepository(FileSystemContentRepository.__name__) as file_system_articles
         ):
             wiki = Wiki({memory_articles, file_system_articles})
-            memory_articles.add_article(b'Hello World')
-            file_system_articles.add_article(b'Goodnight Moon')
+            memory_articles.add_content(b'Hello World')
+            file_system_articles.add_content(b'Goodnight Moon')
 
             wiki.sync()
 
@@ -100,12 +100,12 @@ class TestWikiMixed(unittest.TestCase):
 
     def test_does_sync_with_history(self):
         with (
-            getRepository(MemoryArticleDataRepository.__name__) as memory_articles,
-            getRepository(FileSystemArticleDataRepository.__name__) as file_system_articles
+            getContentRepository(MemoryContentRepository.__name__) as memory_articles,
+            getContentRepository(FileSystemContentRepository.__name__) as file_system_articles
         ):
             wiki = Wiki({memory_articles, file_system_articles})
-            prefid_a = memory_articles.add_article(b'Hello Moon')
-            prefid_b = file_system_articles.add_article(b'Hello Sun')
+            prefid_a = memory_articles.add_content(b'Hello Moon')
+            prefid_b = file_system_articles.add_content(b'Hello Sun')
             memory_articles.update_article(
                 refId=prefid_a,
                 content=b'Goodnight Moon'
@@ -127,12 +127,12 @@ class TestWikiMixed(unittest.TestCase):
         Weird history is defined as when two repositories incidentally create the same history through whatever means. This is meant to be usable with sneakernets, so this might happen from time to time.
         """
         with (
-            getRepository(MemoryArticleDataRepository.__name__) as memory_articles,
-            getRepository(FileSystemArticleDataRepository.__name__) as file_system_articles
+            getContentRepository(MemoryContentRepository.__name__) as memory_articles,
+            getContentRepository(FileSystemContentRepository.__name__) as file_system_articles
         ):
             wiki = Wiki({memory_articles, file_system_articles})
-            prefid = memory_articles.add_article(b'Hello Moon')
-            file_system_articles.add_article(b'Hello Moon')
+            prefid = memory_articles.add_content(b'Hello Moon')
+            file_system_articles.add_content(b'Hello Moon')
             memory_articles.update_article(
                 refId=prefid,
                 content=b'Goodnight Moon'
@@ -152,12 +152,12 @@ class TestWikiMixed(unittest.TestCase):
 
     def test_does_clone_with_history(self):
         with (
-            getRepository(MemoryArticleDataRepository.__name__) as memory_articles,
-            getRepository(FileSystemArticleDataRepository.__name__) as file_system_articles
+            getContentRepository(MemoryContentRepository.__name__) as memory_articles,
+            getContentRepository(FileSystemContentRepository.__name__) as file_system_articles
         ):
             wiki = Wiki({memory_articles, file_system_articles})
-            prefid_a = memory_articles.add_article(b'Hello Moon')
-            prefid_b = memory_articles.add_article(b'Hello Sun')
+            prefid_a = memory_articles.add_content(b'Hello Moon')
+            prefid_b = memory_articles.add_content(b'Hello Sun')
             memory_articles.update_article(
                 refId=prefid_a,
                 content=b'Goodnight Moon'

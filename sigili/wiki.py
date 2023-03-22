@@ -1,8 +1,8 @@
-from sigili.article.data.repository import ArticleDataRepository
+from sigili.article.content.repository import ContentRepository
 
 
 class Wiki():
-    def __init__(self, repositories: set[ArticleDataRepository]) -> None:
+    def __init__(self, repositories: set[ContentRepository]) -> None:
         self._repositories = repositories
 
     def sync(self) -> None:
@@ -12,7 +12,7 @@ class Wiki():
                 in_refs = in_repo.get_refs()
                 missing_refs = in_refs - out_refs
                 for ref in missing_refs:
-                    article = in_repo.get_article(ref)
+                    article = in_repo.get_content(ref)
                     details = in_repo.get_details(ref)
                     out_repo.update_article(
                         refId=details.prefId,
