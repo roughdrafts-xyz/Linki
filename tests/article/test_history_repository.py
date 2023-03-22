@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from sigili.article.history.repository import MemoryHistoryRepository
+from sigili.article.history.repository import BadHistoryRepository, MemoryHistoryRepository
 
 import pytest
 
@@ -25,8 +25,8 @@ def getHistoryRepository(style: str):
 
 styles = {
     MemoryHistoryRepository.__name__,
+    # BadHistoryRepository.__name__,
     # FileSystemHistoryRepository.__name__,
-    # BadArticleRepository.__name__,
 }
 
 

@@ -31,3 +31,18 @@ class MemoryHistoryRepository(HistoryRepository):
 
     def get_children(self, refId: str) -> list[str]:
         return self._children[refId]
+
+
+class BadHistoryRepository(HistoryRepository):
+    def add_edit(self, prefId: str, refId: str) -> None:
+        del prefId
+        del refId
+        return None
+
+    def get_parent(self, refId: str) -> str:
+        del refId
+        return ''
+
+    def get_children(self, refId: str) -> list[str]:
+        del refId
+        return ['']
