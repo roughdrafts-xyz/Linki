@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from sigili.article.history.repository import BadHistoryRepository, MemoryHistoryRepository
+from sigili.article.history.repository import BadHistoryRepository, FileSystemHistoryRepository, MemoryHistoryRepository
 
 import pytest
 
@@ -18,7 +18,7 @@ def getHistoryRepository(style: str):
             _dirPath = Path(_dir.name)
             FileSystemHistoryRepository.initialize_directory(_dirPath)
             try:
-                yield FileSystemHistoryRepository(path=_dirPath)
+                yield FileSystemHistoryRepository(path=_dirPath.joinpath('history'))
             finally:
                 _dir.cleanup()
 
@@ -26,7 +26,7 @@ def getHistoryRepository(style: str):
 styles = {
     MemoryHistoryRepository.__name__,
     # BadHistoryRepository.__name__,
-    # FileSystemHistoryRepository.__name__,
+    FileSystemHistoryRepository.__name__,
 }
 
 
