@@ -18,9 +18,10 @@ def getContentRepository(style: str):
         case FileSystemContentRepository.__name__:
             _dir = TemporaryDirectory()
             _dirPath = Path(_dir.name)
-            FileSystemContentRepository.initialize_directory(_dirPath)
+            _contentPath = FileSystemContentRepository.initialize_directory(
+                _dirPath)
             try:
-                yield FileSystemContentRepository(path=_dirPath)
+                yield FileSystemContentRepository(path=_contentPath)
             finally:
                 _dir.cleanup()
 

@@ -15,9 +15,10 @@ def getGroupRepository(style: str):
         case FileSystemGroupRepository.__name__:
             _dir = TemporaryDirectory()
             _dirPath = Path(_dir.name)
-            FileSystemGroupRepository.initialize_directory(_dirPath)
+            _groupPath = FileSystemGroupRepository.initialize_directory(
+                _dirPath)
             try:
-                yield FileSystemGroupRepository(path=_dirPath.joinpath('groups'))
+                yield FileSystemGroupRepository(path=_groupPath)
             finally:
                 _dir.cleanup()
 

@@ -31,8 +31,17 @@ styles = {
     # BadArticleRepository.__name__,
 }
 
+# ArticleRepository
+#   add_article
+#   update_article
+#   merge_article
+#
+
 
 @pytest.mark.parametrize('style', styles)
-def test_does_update_articles(style):
+def test_does_add_article(style):
     with getArticleRepository(style) as repo:
+        # wiki.publish(ArticleUpdate(bytes, [groups]))
+        # groups is more flexible than paths and can be reconstructed into folder structures
+        # sub-folder is a sub-group. groups can be part of other groups.
         pass

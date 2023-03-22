@@ -16,9 +16,10 @@ def getHistoryRepository(style: str):
         case FileSystemHistoryRepository.__name__:
             _dir = TemporaryDirectory()
             _dirPath = Path(_dir.name)
-            FileSystemHistoryRepository.initialize_directory(_dirPath)
+            _historyPath = FileSystemHistoryRepository.initialize_directory(
+                _dirPath)
             try:
-                yield FileSystemHistoryRepository(path=_dirPath.joinpath('history'))
+                yield FileSystemHistoryRepository(path=_historyPath)
             finally:
                 _dir.cleanup()
 
