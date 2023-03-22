@@ -1,11 +1,19 @@
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from sigili.article.content.repository import MemoryContentRepository
+from sigili.article.content.repository import ContentRepository, MemoryContentRepository
 from sigili.article.content.repository import FileSystemContentRepository
-from sigili.article.content.repository import BadContentRepository
 
 import pytest
+
+
+class TestContentRepository(ContentRepository):
+    def add_content(self, content: bytes) -> str:
+        return self.getContentID('0', content)
+
+    def get_content(self, contentId: str) -> bytes:
+        del contentId
+        return b'Hello World'
 
 
 @contextmanager
@@ -13,8 +21,8 @@ def getContentRepository(style: str):
     match style:
         case MemoryContentRepository.__name__:
             yield MemoryContentRepository()
-        case BadContentRepository.__name__:
-            yield BadContentRepository()
+        case TestContentRepository.__name__:
+            yield TestContentRepository()
         case FileSystemContentRepository.__name__:
             _dir = TemporaryDirectory()
             _dirPath = Path(_dir.name)
@@ -29,7 +37,7 @@ def getContentRepository(style: str):
 styles = {
     MemoryContentRepository.__name__,
     FileSystemContentRepository.__name__,
-    # BadContentRepository.__name__,
+    TestContentRepository.__name__,
 }
 
 

@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
+from hashlib import sha224
 from pathlib import Path
-import os
-from sigili.article.error import RepositoryMalformedError
-
-from sigili.data.ref import RefDetail, updateRefDetail
 
 
 class ContentRepository(ABC):
+    @staticmethod
+    def getContentID(contentId: str, content: bytes):
+        return sha224(b''.join([
+            str.encode(contentId),
+            content
+        ])).hexdigest()
 
     @abstractmethod
     def add_content(self, content: bytes) -> str:
@@ -22,22 +25,12 @@ class MemoryContentRepository(ContentRepository):
         self._data = {}
 
     def add_content(self, content: bytes) -> str:
-        refDetails = updateRefDetail(refId='0', content=content)
-        self._data[refDetails.refId] = content
-        return refDetails.refId
+        contentId = self.getContentID('0', content)
+        self._data[contentId] = content
+        return contentId
 
     def get_content(self, contentId: str) -> bytes:
         return self._data[contentId]
-
-
-class BadContentRepository(ContentRepository):
-    def add_content(self, content: bytes) -> str:
-        del content
-        return ''
-
-    def get_content(self, contentId: str) -> bytes:
-        del contentId
-        return b''
 
 
 class FileSystemContentRepository(ContentRepository):
@@ -59,9 +52,9 @@ class FileSystemContentRepository(ContentRepository):
         return _contentPath
 
     def add_content(self, content: bytes) -> str:
-        refDetails = updateRefDetail(refId='0', content=content)
-        self._content.joinpath(refDetails.refId).write_bytes(content)
-        return refDetails.refId
+        contentId = self.getContentID('0', content)
+        self._content.joinpath(contentId).write_bytes(content)
+        return contentId
 
     def get_content(self, contentId: str) -> bytes:
         return self._content.joinpath(contentId).read_bytes()
