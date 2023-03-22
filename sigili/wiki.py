@@ -1,8 +1,8 @@
-from sigili.article.repository import ArticleRepository
+from sigili.article.data.repository import ArticleDataRepository
 
 
 class Wiki():
-    def __init__(self, repositories: set[ArticleRepository]) -> None:
+    def __init__(self, repositories: set[ArticleDataRepository]) -> None:
         self._repositories = repositories
 
     def sync(self) -> None:

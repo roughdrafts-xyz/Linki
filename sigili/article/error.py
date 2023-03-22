@@ -1,0 +1,3 @@
+
+class RepositoryMalformedError(Exception):
+    pass

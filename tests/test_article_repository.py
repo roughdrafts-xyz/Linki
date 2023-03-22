@@ -2,33 +2,33 @@ from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
-from sigili.article.repository import MemoryArticleRepository
-from sigili.article.repository import FileSystemArticleRepository
-from sigili.article.repository import BadArticleRepository
+from sigili.article.data.repository import MemoryArticleDataRepository
+from sigili.article.data.repository import FileSystemArticleDataRepository
+from sigili.article.data.repository import BadArticleDataRepository
 from sigili.data.ref import RefDetail
 
 
 @contextmanager
 def getRepository(style: str):
     match style:
-        case MemoryArticleRepository.__name__:
-            yield MemoryArticleRepository()
-        case BadArticleRepository.__name__:
-            yield BadArticleRepository()
-        case FileSystemArticleRepository.__name__:
+        case MemoryArticleDataRepository.__name__:
+            yield MemoryArticleDataRepository()
+        case BadArticleDataRepository.__name__:
+            yield BadArticleDataRepository()
+        case FileSystemArticleDataRepository.__name__:
             _dir = TemporaryDirectory()
             _dirPath = Path(_dir.name)
-            FileSystemArticleRepository.initialize_directory(_dirPath)
+            FileSystemArticleDataRepository.initialize_directory(_dirPath)
             try:
-                yield FileSystemArticleRepository(path=_dirPath)
+                yield FileSystemArticleDataRepository(path=_dirPath)
             finally:
                 _dir.cleanup()
 
 
 class TestArticleRepositoryStyles(TestCase):
     styles = {
-        MemoryArticleRepository.__name__,
-        FileSystemArticleRepository.__name__,
+        MemoryArticleDataRepository.__name__,
+        FileSystemArticleDataRepository.__name__,
         # BadArticleRepository.__name__,
     }
 
