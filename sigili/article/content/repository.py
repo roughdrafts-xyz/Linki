@@ -41,9 +41,6 @@ class FileSystemContentRepository(ContentRepository):
     def initialize_directory(path: Path):
         if (not path.exists()):
             raise FileNotFoundError
-        path_is_not_empty = any(path.iterdir())
-        if (path_is_not_empty):
-            raise FileExistsError
         _contentPath = path.joinpath('content')
         _contentPath.mkdir()
         return _contentPath

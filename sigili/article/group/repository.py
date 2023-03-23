@@ -64,9 +64,6 @@ class FileSystemGroupRepository(GroupRepository):
     def initialize_directory(path: Path):
         if (not path.exists()):
             raise FileNotFoundError
-        path_is_not_empty = any(path.iterdir())
-        if (path_is_not_empty):
-            raise FileExistsError
         _groupPath = path.joinpath('groups')
         _groupPath.mkdir()
         _groupPath.joinpath('byMember').mkdir()

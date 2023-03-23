@@ -6,7 +6,7 @@ import pytest
 from sigili.article.content.repository import ContentRepository
 from sigili.article.repository import ArticleRepository, ArticleUpdate, ArticleDetails
 from sigili.article.repository import MemoryArticleRepository
-# from sigili.article.repository import FileSystemArticleRepository
+from sigili.article.repository import FileSystemArticleRepository
 
 
 class TestArticleRepository(ArticleRepository):
@@ -32,9 +32,6 @@ class TestArticleRepository(ArticleRepository):
             raise KeyError
         return self.add_article(update)
 
-    def merge_article(self, update: ArticleUpdate) -> ArticleDetails:
-        return self.add_article(update)
-
     def get_article(self, articleId: str) -> ArticleDetails:
         return self.articles[articleId]
 
@@ -49,29 +46,21 @@ def getArticleRepository(style: str):
             yield TestArticleRepository()
         case MemoryArticleRepository.__name__:
             yield MemoryArticleRepository()
-#       case FileSystemArticleRepository.__name__:
-#           _dir = TemporaryDirectory()
-#           _dirPath = Path(_dir.name)
-#           FileSystemArticleRepository.initialize_directory(_dirPath)
-#           try:
-#               yield FileSystemArticleRepository(path=_dirPath)
-#           finally:
-#               _dir.cleanup()
+        case FileSystemArticleRepository.__name__:
+            _dir = TemporaryDirectory()
+            _dirPath = Path(_dir.name)
+            _paths = FileSystemArticleRepository.initialize_directory(_dirPath)
+            try:
+                yield FileSystemArticleRepository(_paths)
+            finally:
+                _dir.cleanup()
 
 
 styles = {
     MemoryArticleRepository.__name__,
-    # FileSystemArticleRepository.__name__,
+    FileSystemArticleRepository.__name__,
     TestArticleRepository.__name__,
 }
-
-# ArticleUpdate(bytes, [groups]) @dataclass
-# ArticleDetails() @dataclass?
-# ArticleRepository
-#   add_article(ArticleUpdate) -> ArticleDetails
-#   update_article(ArticleUpdate) -> ArticleDetails
-#   merge_article(ArticleUpdate) -> ArticleDetails
-#
 
 
 @pytest.mark.parametrize('style', styles)
