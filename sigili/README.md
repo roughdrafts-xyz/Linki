@@ -26,20 +26,21 @@ erDiagram
     WIKI ||--|{ ARTICLE-REPOSITORIES: clones
     ARTICLE-REPOSITORIES||..||LOCALLY: located
     ARTICLE-REPOSITORIES||..||REMOTELY: located
+    ARTICLE-REPOSITORIES}|--o{ARTICLES: contain
 ```
 
 A wiki is just a library that manages and collates article repositories. You can find this in sigili/wiki.py
 
 ```mermaid
 erDiagram
-    ARTICLE-REPOSITORIES||--||CONTENT: manage
-    ARTICLE-REPOSITORIES||--||ARTICLE-REPOSITORIES: manage
-    ARTICLE-REPOSITORIES||--||HISTORY: manage
-    ARTICLE-REPOSITORIES||--||GROUP: manage
-    ARTICLE-REPOSITORIES||--||STORAGE-INTERFACE: records-on
-    HISTORY}|--o{STORAGE-INTERFACE:records-on
-    CONTENT}|--o{STORAGE-INTERFACE:records-on
-    GROUP}|--o{STORAGE-INTERFACE:records-on
+    CONTENT||--||ARTICLES: comprise
+    HISTORY||--||ARTICLES: comprise
+    GROUPS||--||ARTICLES: comprise
+    ARTICLE-DATA||--||ARTICLES: comprise
+    STORAGE-INTERFACE}o--|{ARTICLE-DATA: store
+    STORAGE-INTERFACE}o--|{HISTORY: store
+    STORAGE-INTERFACE}o--|{GROUPS: store
+    STORAGE-INTERFACE}o--|{CONTENT: store
 ```
 
 An article repository receives commands from a wiki, and then manages everything from there. This is just instructing different services on top of storage interfaces. You can see the repository types and their services in sigili/article/
