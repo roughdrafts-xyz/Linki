@@ -68,7 +68,7 @@ class FileSystemGroupRepository(GroupRepository):
         _groupPath.mkdir()
         _groupPath.joinpath('byMember').mkdir()
         _groupPath.joinpath('byGroup').mkdir()
-        return _groupPath
+        return _groupPath.resolve()
 
     def add_to_group(self, memberId: str, groupId: str) -> None:
         _memberPath = self._byMember.joinpath(memberId)

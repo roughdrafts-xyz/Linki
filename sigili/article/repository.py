@@ -100,10 +100,16 @@ class MemoryArticleRepository(ArticleRepository):
         return newArticle
 
     def get_articleIds(self) -> set[str]:
-        return set()
+        return set(self._articles)
 
     def get_update(self, articleId: str) -> ArticleUpdate:
-        return ArticleUpdate(b'', [])
+        _content = self._content.get_content(articleId)
+        _article = self._articles[articleId]
+        return ArticleUpdate(
+            _content,
+            _article.groups,
+            _article.editOf
+        )
 
 
 class FileSystemArticleRepository(ArticleRepository):
@@ -130,7 +136,7 @@ class FileSystemArticleRepository(ArticleRepository):
         _historyPath = FileSystemHistoryRepository.initialize_directory(path)
         _groupPath = FileSystemGroupRepository.initialize_directory(path)
         return {
-            'articles': _articlePath,
+            'articles': _articlePath.resolve(),
             'content': _contentPath,
             'history': _historyPath,
             'groups': _groupPath
@@ -189,3 +195,15 @@ class FileSystemArticleRepository(ArticleRepository):
         self._write_article(newArticle)
 
         return newArticle
+
+    def get_articleIds(self) -> set[str]:
+        return {_articles.name for _articles in self._articles.iterdir()}
+
+    def get_update(self, articleId: str) -> ArticleUpdate:
+        _article = self.get_article(articleId)
+        _content = self._content.get_content(articleId)
+        return ArticleUpdate(
+            _content,
+            _article.groups,
+            _article.editOf
+        )

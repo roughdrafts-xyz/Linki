@@ -67,7 +67,7 @@ class FileSystemHistoryRepository(HistoryRepository):
         _historyPath.mkdir()
         _historyPath.joinpath('childrenOf').mkdir()
         _historyPath.joinpath('parentOf').mkdir()
-        return _historyPath
+        return _historyPath.resolve()
 
     def add_edit(self, parentId: str, childId: str) -> None:
         self._parentOf.joinpath(childId).write_text(parentId)

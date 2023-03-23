@@ -43,7 +43,7 @@ class FileSystemContentRepository(ContentRepository):
             raise FileNotFoundError
         _contentPath = path.joinpath('content')
         _contentPath.mkdir()
-        return _contentPath
+        return _contentPath.resolve()
 
     def add_content(self, content: bytes) -> str:
         contentId = self.getContentID(content)

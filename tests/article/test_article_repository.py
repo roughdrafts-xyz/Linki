@@ -5,8 +5,8 @@ from tempfile import TemporaryDirectory
 import pytest
 from sigili.article.content.repository import ContentRepository
 from sigili.article.repository import ArticleRepository, ArticleUpdate, ArticleDetails
-# from sigili.article.repository import MemoryArticleRepository
-# from sigili.article.repository import FileSystemArticleRepository
+from sigili.article.repository import MemoryArticleRepository
+from sigili.article.repository import FileSystemArticleRepository
 
 
 class TestArticleRepository(ArticleRepository):
@@ -47,26 +47,42 @@ class TestArticleRepository(ArticleRepository):
         return self.updates[articleId]
 
 
+@pytest.fixture
+def fileRepo(tmp_path):
+    _paths = FileSystemArticleRepository.initialize_directory(tmp_path)
+    yield FileSystemArticleRepository(_paths)
+
+
+@pytest.fixture
+def memoryRepo():
+    yield MemoryArticleRepository()
+
+
+@pytest.fixture
+def simpleRepo():
+    yield TestArticleRepository()
+
+
 @contextmanager
 def getArticleRepository(style: str):
     match style:
         case TestArticleRepository.__name__:
             yield TestArticleRepository()
-#       case MemoryArticleRepository.__name__:
-#           yield MemoryArticleRepository()
-#       case FileSystemArticleRepository.__name__:
-#           _dir = TemporaryDirectory()
-#           _dirPath = Path(_dir.name)
-#           _paths = FileSystemArticleRepository.initialize_directory(_dirPath)
-#           try:
-#               yield FileSystemArticleRepository(_paths)
-#           finally:
-#               _dir.cleanup()
+        case MemoryArticleRepository.__name__:
+            yield MemoryArticleRepository()
+        case FileSystemArticleRepository.__name__:
+            _dir = TemporaryDirectory()
+            _dirPath = Path(_dir.name)
+            _paths = FileSystemArticleRepository.initialize_directory(_dirPath)
+            try:
+                yield FileSystemArticleRepository(_paths)
+            finally:
+                _dir.cleanup()
 
 
 styles = {
-    #   MemoryArticleRepository.__name__,
-    #   FileSystemArticleRepository.__name__,
+    MemoryArticleRepository.__name__,
+    FileSystemArticleRepository.__name__,
     TestArticleRepository.__name__,
 }
 
