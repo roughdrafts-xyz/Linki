@@ -9,7 +9,7 @@ import pytest
 
 class TestContentRepository(ContentRepository):
     def add_content(self, content: bytes) -> str:
-        return self.getContentID('0', content)
+        return self.getContentID(content)
 
     def get_content(self, contentId: str) -> bytes:
         del contentId

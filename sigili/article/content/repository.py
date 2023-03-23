@@ -5,11 +5,8 @@ from pathlib import Path
 
 class ContentRepository(ABC):
     @staticmethod
-    def getContentID(contentId: str, content: bytes):
-        return sha224(b''.join([
-            str.encode(contentId),
-            content
-        ])).hexdigest()
+    def getContentID(content: bytes):
+        return sha224(content).hexdigest()
 
     @abstractmethod
     def add_content(self, content: bytes) -> str:
@@ -25,7 +22,7 @@ class MemoryContentRepository(ContentRepository):
         self._data = {}
 
     def add_content(self, content: bytes) -> str:
-        contentId = self.getContentID('0', content)
+        contentId = self.getContentID(content)
         self._data[contentId] = content
         return contentId
 
@@ -52,7 +49,7 @@ class FileSystemContentRepository(ContentRepository):
         return _contentPath
 
     def add_content(self, content: bytes) -> str:
-        contentId = self.getContentID('0', content)
+        contentId = self.getContentID(content)
         self._content.joinpath(contentId).write_bytes(content)
         return contentId
 
