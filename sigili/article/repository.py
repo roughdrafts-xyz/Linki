@@ -113,18 +113,27 @@ class MemoryArticleRepository(ArticleRepository):
 
 
 class FileSystemArticleRepository(ArticleRepository):
-    def __init__(self, paths: dict):
+    def __init__(self, paths: dict[str, Path]):
         if (not paths['articles'].exists()):
             raise FileNotFoundError(
                 f'Articles folder not found in repository. The folder might not be initialized.')
 
-        self._articles: Path = paths['articles']
+        self._articles = paths['articles']
         self._content = FileSystemContentRepository(paths['content'])
         self._history = FileSystemHistoryRepository(paths['history'])
         self._groups = FileSystemGroupRepository(paths['groups'])
 
     @staticmethod
-    def initialize_directory(path: Path):
+    def get_paths(path: Path) -> dict[str, Path]:
+        return {
+            'articles': path.joinpath('articles').resolve(),
+            'content': path.joinpath('content').resolve(),
+            'history': path.joinpath('history').resolve(),
+            'groups': path.joinpath('groups').resolve()
+        }
+
+    @classmethod
+    def initialize_directory(cls, path: Path) -> dict[str, Path]:
         if (not path.exists()):
             raise FileNotFoundError
         path_is_not_empty = any(path.iterdir())
@@ -132,15 +141,10 @@ class FileSystemArticleRepository(ArticleRepository):
             raise FileExistsError
         _articlePath = path.joinpath('articles')
         _articlePath.mkdir()
-        _contentPath = FileSystemContentRepository.initialize_directory(path)
-        _historyPath = FileSystemHistoryRepository.initialize_directory(path)
-        _groupPath = FileSystemGroupRepository.initialize_directory(path)
-        return {
-            'articles': _articlePath.resolve(),
-            'content': _contentPath,
-            'history': _historyPath,
-            'groups': _groupPath
-        }
+        FileSystemContentRepository.initialize_directory(path)
+        FileSystemHistoryRepository.initialize_directory(path)
+        FileSystemGroupRepository.initialize_directory(path)
+        return cls.get_paths(path)
 
     def _add_article(self, update: ArticleUpdate) -> ArticleDetails:
         _content = update.content
