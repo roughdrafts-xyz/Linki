@@ -8,13 +8,9 @@ class Wiki():
     def sync(self) -> None:
         for out_repo in self._repositories:
             for in_repo in self._repositories:
-                out_refs = out_repo.get_refs()
-                in_refs = in_repo.get_refs()
+                out_refs = out_repo.get_articleIds()
+                in_refs = in_repo.get_articleIds()
                 missing_refs = in_refs - out_refs
                 for ref in missing_refs:
-                    article = in_repo.get_content(ref)
-                    details = in_repo.get_details(ref)
-                    out_repo.update_article(
-                        refId=details.prefId,
-                        content=article
-                    )
+                    update = in_repo.get_update(ref)
+                    out_repo.merge_article(update)

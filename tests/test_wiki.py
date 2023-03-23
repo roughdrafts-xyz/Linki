@@ -1,4 +1,3 @@
-import pytest
 from tests.article.test_article_repository import getArticleRepository
 
 from sigili.article.repository import ArticleUpdate, FileSystemArticleRepository

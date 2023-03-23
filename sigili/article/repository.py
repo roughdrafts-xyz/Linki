@@ -39,6 +39,14 @@ class ArticleRepository(ABC):
     def has_article(self, articleId: str | None) -> bool:
         raise NotImplementedError
 
+    @abstractmethod
+    def get_articleIds(self) -> set[str]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_update(self, articleId: str) -> ArticleUpdate:
+        raise NotImplementedError
+
     def merge_article(self, update: ArticleUpdate) -> ArticleDetails:
         if (self.has_article(update.editOf)):
             return self.update_article(update)
@@ -90,6 +98,12 @@ class MemoryArticleRepository(ArticleRepository):
         self._articles[newArticle.articleId] = newArticle
 
         return newArticle
+
+    def get_articleIds(self) -> set[str]:
+        return set()
+
+    def get_update(self, articleId: str) -> ArticleUpdate:
+        return ArticleUpdate(b'', [])
 
 
 class FileSystemArticleRepository(ArticleRepository):
