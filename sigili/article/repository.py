@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, asdict
+from hashlib import sha224
 import json
 from pathlib import Path
 
-from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
+from sigili.article.content.repository import FileSystemContentRepository, MemoryContentRepository
 from sigili.article.group.repository import FileSystemGroupRepository, MemoryGroupRepository
 from sigili.article.history.repository import FileSystemHistoryRepository, MemoryHistoryRepository
 
@@ -18,6 +19,7 @@ class ArticleUpdate():
 @dataclass
 class ArticleDetails():
     articleId: str
+    contentId: str
     groups: list[str]
     editOf: str | None = None
 
@@ -53,13 +55,21 @@ class ArticleRepository(ABC):
         return self.add_article(update)
 
     @staticmethod
-    def getArticleID(content: bytes) -> str:
-        return ContentRepository.getContentID(content)
+    def getArticleID(update: ArticleUpdate) -> str:
+        _groups = map(str.encode, update.groups)
+        _editOf = str.encode(update.editOf or '')
+        return sha224(
+            b''.join([
+                _editOf,
+                *_groups,
+                update.content
+            ])
+        ).hexdigest()
 
 
 class MemoryArticleRepository(ArticleRepository):
     def __init__(self) -> None:
-        self._articles = {}
+        self._articles: dict[str, ArticleDetails] = {}
         self._content = MemoryContentRepository()
         self._history = MemoryHistoryRepository()
         self._groups = MemoryGroupRepository()
@@ -67,14 +77,15 @@ class MemoryArticleRepository(ArticleRepository):
     def _add_article(self, update: ArticleUpdate) -> ArticleDetails:
         _content = update.content
         _groups = update.groups
-
         _contentId = self._content.add_content(_content)
+        _articleId = self.getArticleID(update)
         for group in _groups:
             self._groups.add_to_group(_contentId, group)
 
         return ArticleDetails(
-            articleId=_contentId,
-            groups=_groups
+            _articleId,
+            _contentId,
+            _groups,
         )
 
     def add_article(self, update: ArticleUpdate) -> ArticleDetails:
@@ -107,8 +118,8 @@ class MemoryArticleRepository(ArticleRepository):
         return set(self._articles)
 
     def get_update(self, articleId: str) -> ArticleUpdate:
-        _content = self._content.get_content(articleId)
         _article = self._articles[articleId]
+        _content = self._content.get_content(_article.contentId)
         return ArticleUpdate(
             _content,
             _article.groups,
@@ -153,14 +164,16 @@ class FileSystemArticleRepository(ArticleRepository):
     def _add_article(self, update: ArticleUpdate) -> ArticleDetails:
         _content = update.content
         _groups = update.groups
-
         _contentId = self._content.add_content(_content)
+        _articleId = self.getArticleID(update)
+
         for group in _groups:
             self._groups.add_to_group(_contentId, group)
 
         return ArticleDetails(
-            articleId=_contentId,
-            groups=_groups
+            _articleId,
+            _contentId,
+            _groups
         )
 
     def _write_article(self, article: ArticleDetails) -> None:
@@ -172,6 +185,7 @@ class FileSystemArticleRepository(ArticleRepository):
             _json = json.load(_jsonPath)
             return ArticleDetails(
                 _json['articleId'],
+                _json['contentId'],
                 _json['groups'],
                 _json['editOf']
             )
@@ -209,7 +223,7 @@ class FileSystemArticleRepository(ArticleRepository):
 
     def get_update(self, articleId: str) -> ArticleUpdate:
         _article = self.get_article(articleId)
-        _content = self._content.get_content(articleId)
+        _content = self._content.get_content(_article.contentId)
         return ArticleUpdate(
             _content,
             _article.groups,

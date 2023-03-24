@@ -5,3 +5,5 @@ from sigili.article.repository import MemoryArticleRepository as MemoryArticleRe
 
 from sigili.article.repository import ArticleDetails as ArticleDetails
 from sigili.article.repository import ArticleUpdate as ArticleUpdate
+
+from sigili.article.content.repository import ContentRepository as ContentRepository

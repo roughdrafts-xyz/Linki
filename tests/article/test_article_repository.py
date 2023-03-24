@@ -15,9 +15,11 @@ class TestArticleRepository(ArticleRepository):
         self.updates = {}
 
     def _add_article(self, update: ArticleUpdate) -> ArticleDetails:
-        articleId = ContentRepository.getContentID(update.content)
+        articleId = self.getArticleID(update)
+        contentId = ContentRepository.getContentID(update.content)
         newArticle = ArticleDetails(
             articleId,
+            contentId,
             update.groups,
             update.editOf
         )
