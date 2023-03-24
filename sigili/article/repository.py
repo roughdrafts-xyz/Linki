@@ -3,7 +3,7 @@ from dataclasses import dataclass, asdict
 import json
 from pathlib import Path
 
-from sigili.article.content.repository import FileSystemContentRepository, MemoryContentRepository
+from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
 from sigili.article.group.repository import FileSystemGroupRepository, MemoryGroupRepository
 from sigili.article.history.repository import FileSystemHistoryRepository, MemoryHistoryRepository
 
@@ -51,6 +51,10 @@ class ArticleRepository(ABC):
         if (self.has_article(update.editOf)):
             return self.update_article(update)
         return self.add_article(update)
+
+    @staticmethod
+    def getArticleID(content: bytes) -> str:
+        return ContentRepository.getContentID(content)
 
 
 class MemoryArticleRepository(ArticleRepository):
