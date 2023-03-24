@@ -11,32 +11,22 @@ class GroupRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_groups(self, memberId: str) -> list[str]:
+    def get_groups_of(self, memberId: str) -> list[str]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_members(self, groupId: str) -> list[str]:
+    def get_members_of(self, groupId: str) -> list[str]:
         raise NotImplementedError
 
-
-class BadGroupRepository(GroupRepository):
-    def add_to_group(self, memberId: str, groupId: str) -> None:
-        del memberId
-        del groupId
-
-    def get_groups(self, memberId: str) -> list[str]:
-        del memberId
-        return []
-
-    def get_members(self, groupId: str) -> list[str]:
-        del groupId
-        return []
+    @abstractmethod
+    def get_groups(self) -> dict[str, list[str]]:
+        return NotImplementedError
 
 
 class MemoryGroupRepository(GroupRepository):
     def __init__(self) -> None:
-        self._byGroup = dict()
-        self._byMember = dict()
+        self._byGroup: dict[str, list[str]] = dict()
+        self._byMember: dict[str, list[str]] = dict()
 
     def add_to_group(self, memberId: str, groupId: str) -> None:
         if (groupId not in self._byGroup):
@@ -46,11 +36,14 @@ class MemoryGroupRepository(GroupRepository):
         self._byGroup[groupId].append(memberId)
         self._byMember[memberId].append(groupId)
 
-    def get_groups(self, memberId: str) -> list[str]:
+    def get_groups_of(self, memberId: str) -> list[str]:
         return self._byMember[memberId]
 
-    def get_members(self, groupId: str) -> list[str]:
+    def get_members_of(self, groupId: str) -> list[str]:
         return self._byGroup[groupId]
+
+    def get_groups(self) -> dict[str, list[str]]:
+        return self._byMember
 
 
 class FileSystemGroupRepository(GroupRepository):
@@ -84,10 +77,18 @@ class FileSystemGroupRepository(GroupRepository):
         _memberPath.joinpath(groupId).symlink_to(_groupPath)
         _groupPath.joinpath(memberId).symlink_to(_memberPath)
 
-    def get_groups(self, memberId: str) -> list[str]:
+    def get_groups_of(self, memberId: str) -> list[str]:
         _path = self._byMember.joinpath(memberId)
         return os.listdir(_path)
 
-    def get_members(self, groupId: str) -> list[str]:
+    def get_members_of(self, groupId: str) -> list[str]:
         _path = self._byGroup.joinpath(groupId)
         return os.listdir(_path)
+
+    def get_groups(self) -> dict[str, list[str]]:
+        groups: dict[str, list[str]] = dict()
+        for member in self._byMember.iterdir():
+            groups[member.name] = [
+                _member.name for _member in member.iterdir()]
+
+        return groups

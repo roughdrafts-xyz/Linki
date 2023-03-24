@@ -4,9 +4,9 @@ from hashlib import sha224
 import json
 from pathlib import Path
 
-from sigili.article.content.repository import FileSystemContentRepository, MemoryContentRepository
-from sigili.article.group.repository import FileSystemGroupRepository, MemoryGroupRepository
-from sigili.article.history.repository import FileSystemHistoryRepository, MemoryHistoryRepository
+from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
+from sigili.article.group.repository import FileSystemGroupRepository, GroupRepository, MemoryGroupRepository
+from sigili.article.history.repository import FileSystemHistoryRepository, HistoryRepository, MemoryHistoryRepository
 
 
 @dataclass
@@ -25,6 +25,14 @@ class ArticleDetails():
 
 
 class ArticleRepository(ABC):
+    _content: ContentRepository
+    _history: HistoryRepository
+    _groups: GroupRepository
+
+    @property
+    def groups(self) -> GroupRepository:
+        return self.groups
+
     @abstractmethod
     def add_article(self, update: ArticleUpdate) -> ArticleDetails:
         raise NotImplementedError

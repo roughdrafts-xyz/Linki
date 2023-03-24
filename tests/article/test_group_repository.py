@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from pathlib import Path
 import pytest
 from tempfile import TemporaryDirectory
-from sigili.article.group.repository import MemoryGroupRepository, BadGroupRepository, FileSystemGroupRepository
+from sigili.article.group.repository import MemoryGroupRepository, FileSystemGroupRepository
 
 
 @contextmanager
@@ -10,8 +10,6 @@ def getGroupRepository(style: str):
     match style:
         case MemoryGroupRepository.__name__:
             yield MemoryGroupRepository()
-        case BadGroupRepository.__name__:
-            yield BadGroupRepository()
         case FileSystemGroupRepository.__name__:
             _dir = TemporaryDirectory()
             _dirPath = Path(_dir.name)
@@ -25,19 +23,18 @@ def getGroupRepository(style: str):
 
 styles = {
     MemoryGroupRepository.__name__,
-    # BadGroupRepository.__name__,
     FileSystemGroupRepository.__name__,
 }
 
 
 @pytest.mark.parametrize('style', styles)
-def test_does_get_groups(style):
+def test_does_get_groups_of(style):
     with getGroupRepository(style) as repo:
         expected = 'group'
 
         repo.add_to_group('0', expected)
 
-        actual = repo.get_groups('0')
+        actual = repo.get_groups_of('0')
 
         assert sorted([expected]) == sorted(actual)
         # GroupRepository
@@ -51,13 +48,37 @@ def test_does_get_groups(style):
 
 
 @pytest.mark.parametrize('style', styles)
+def test_does_get_groups(style):
+    with getGroupRepository(style) as repo:
+        articleId = '0'
+
+        # articles get added to all their groups
+        repo.add_to_group(articleId, 'three')
+        repo.add_to_group(articleId, 'two')
+        repo.add_to_group(articleId, 'one')
+
+        # groups have hierarchies
+        repo.add_to_group('three', 'two')
+        repo.add_to_group('two', 'one')
+
+        actual = repo.get_groups()
+
+        assert (len(actual)) == 3
+        article_groups = actual.get(articleId) or []
+        assert sorted(article_groups) == sorted(['three', 'two', 'one'])
+        assert actual.get('three') == ['two']
+        assert actual.get('two') == ['one']
+        assert actual.get('one') == None
+
+
+@pytest.mark.parametrize('style', styles)
 def test_does_get_members(style):
     with getGroupRepository(style) as repo:
         expected = '0'
 
         repo.add_to_group(expected, 'group')
 
-        actual = repo.get_members('group')
+        actual = repo.get_members_of('group')
 
         assert sorted([expected]) == sorted(actual)
 
@@ -68,6 +89,6 @@ def test_does_group_groups(style):
         repo.add_to_group('0', 'a')
         repo.add_to_group('a', 'b')
 
-        actual = repo.get_groups('a')
+        actual = repo.get_groups_of('a')
 
         assert sorted(['b']) == sorted(actual)
