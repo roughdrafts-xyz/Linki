@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
+from unittest import TestCase
 import pytest
 
 # from sigili.title.repository import TitleDetails
@@ -111,22 +112,45 @@ def test_should_set_current_title(style):
 def test_should_get_options(style):
     with getTitleRepository(style) as repo:
         # return a list of titles with title
+        title = "Chegg"
+        articleId = "12345"
+        repo.set_title(title, articleId)
+        title = "Clorg"
+        articleId = "12345"
+        repo.set_title(title, articleId)
+
         options = repo.get_options(title)
-        assert options == [TitleDetails()]
-        pass
+        assert options == [TitleDetails(title, articleId)]
 
 
 @pytest.mark.parametrize('style', styles)
 def test_should_get_current_title(style):
     with getTitleRepository(style) as repo:
+        title = "Chegg"
+        articleId = "12345"
+        repo.set_title(title, articleId)
+        title = "Clorg"
+        articleId = "12345"
+        repo.set_title(title, articleId)
+
         current_title_details = repo.get_title(title)
-        assert current_title_details == TitleDetails()
-        pass
+        assert current_title_details == TitleDetails(title, articleId)
 
 
 @pytest.mark.parametrize('style', styles)
 def test_should_list_current_titles(style):
     with getTitleRepository(style) as repo:
+        title = "Chegg"
+        articleId = "12345"
+        repo.set_title(title, articleId)
+        _title = "Clorg"
+        _articleId = "12345"
+        repo.set_title(_title, _articleId)
+
         current_titles_details = repo.get_titles()
-        assert current_titles_details == [TitleDetails()]
-        pass
+
+        test_case = TestCase()
+        test_case.assertCountEqual(current_titles_details, [
+            TitleDetails(title, articleId),
+            TitleDetails(_title, _articleId)
+        ])
