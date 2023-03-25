@@ -29,10 +29,9 @@ class MemoryGroupRepository(GroupRepository):
         self._byMember: dict[str, list[str]] = dict()
 
     def add_to_group(self, memberId: str, groupId: str) -> None:
-        if ((len(self._byGroup.get(groupId, [])) > 0 or
-            len(self._byGroup.get(groupId, [])) > 0) and
-            ((memberId in self.get_members_of(groupId)) and
-                (groupId in self.get_groups_of(memberId)))):
+        _groups = self.get_groups_of(memberId)
+        _members = self.get_members_of(groupId)
+        if ((memberId in _members) and (groupId in _groups)):
             return None
 
         if (groupId not in self._byGroup):
@@ -74,8 +73,9 @@ class FileSystemGroupRepository(GroupRepository):
         _memberPath = self._byMember.joinpath(memberId)
         _groupPath = self._byGroup.joinpath(groupId)
 
-        if (memberId in self.get_members_of(groupId)
-                and groupId in self.get_groups_of(memberId)):
+        _members = self.get_members_of(groupId)
+        _groups = self.get_groups_of(memberId)
+        if ((memberId in _members) and (groupId in _groups)):
             return None
 
         if (not _memberPath.exists()):
