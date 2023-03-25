@@ -29,6 +29,12 @@ class MemoryGroupRepository(GroupRepository):
         self._byMember: dict[str, list[str]] = dict()
 
     def add_to_group(self, memberId: str, groupId: str) -> None:
+        if ((len(self._byGroup.get(groupId, [])) > 0 or
+            len(self._byGroup.get(groupId, [])) > 0) and
+            ((memberId in self.get_members_of(groupId)) and
+                (groupId in self.get_groups_of(memberId)))):
+            return None
+
         if (groupId not in self._byGroup):
             self._byGroup[groupId] = []
         if (memberId not in self._byMember):
@@ -37,10 +43,10 @@ class MemoryGroupRepository(GroupRepository):
         self._byMember[memberId].append(groupId)
 
     def get_groups_of(self, memberId: str) -> list[str]:
-        return self._byMember[memberId]
+        return self._byMember.get(memberId, [])
 
     def get_members_of(self, groupId: str) -> list[str]:
-        return self._byGroup[groupId]
+        return self._byGroup.get(groupId, [])
 
     def get_groups(self) -> dict[str, list[str]]:
         return self._byMember
@@ -68,6 +74,10 @@ class FileSystemGroupRepository(GroupRepository):
         _memberPath = self._byMember.joinpath(memberId)
         _groupPath = self._byGroup.joinpath(groupId)
 
+        if (memberId in self.get_members_of(groupId)
+                and groupId in self.get_groups_of(memberId)):
+            return None
+
         if (not _memberPath.exists()):
             _memberPath.mkdir()
 
@@ -79,10 +89,14 @@ class FileSystemGroupRepository(GroupRepository):
 
     def get_groups_of(self, memberId: str) -> list[str]:
         _path = self._byMember.joinpath(memberId)
+        if (not _path.exists()):
+            return []
         return os.listdir(_path)
 
     def get_members_of(self, groupId: str) -> list[str]:
         _path = self._byGroup.joinpath(groupId)
+        if (not _path.exists()):
+            return []
         return os.listdir(_path)
 
     def get_groups(self) -> dict[str, list[str]]:

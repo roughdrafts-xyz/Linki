@@ -92,3 +92,14 @@ def test_does_group_groups(style):
         actual = repo.get_groups_of('a')
 
         assert sorted(['b']) == sorted(actual)
+
+
+@pytest.mark.parametrize('style', styles)
+def test_does_not_add_existing_groups(style):
+    with getGroupRepository(style) as repo:
+        repo.add_to_group('0', 'a')
+        repo.add_to_group('0', 'a')
+
+        actual = repo.get_groups_of('0')
+
+        assert sorted(['a']) == sorted(actual)

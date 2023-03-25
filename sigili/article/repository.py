@@ -31,7 +31,7 @@ class ArticleRepository(ABC):
 
     @property
     def groups(self) -> GroupRepository:
-        return self.groups
+        return self._groups
 
     @abstractmethod
     def add_article(self, update: ArticleUpdate) -> ArticleDetails:
