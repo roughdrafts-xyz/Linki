@@ -2,9 +2,19 @@
 
 > A library to create a Distributed Wiki.
 
-You're looking at the workhorse library that makes the whole thing work.
+```
+pip install sigili
+```
 
-If you wanna use it for your own project, install it with `pip install sigili`
+## What is Sigili?
+
+A distributed wiki concept, library, and set of tools. By replicating files using deterministic identifiers, we can have all the benefits of a wiki and a distributed repository. This means no central host. This means peer-to-peer replication.
+
+## Who is this for?
+
+Anyone who would benefit from distributed documentation. While making this I had Activists, Collaborative Fiction Authors, Developers, and Fandoms in mind. People who are either already familiar with distributed concepts, or those who have been burned from centralized document storage.
+
+# How does this work?
 
 ## Users and Editors
 
@@ -52,11 +62,11 @@ An article repository receives commands from a wiki, and then manages everything
 
 ```mermaid
 erDiagram
-STORAGE-INTERFACE||..||FILE-SYSTEM:can-be
-STORAGE-INTERFACE||..||MEMORY:can-be
-STORAGE-INTERFACE||..||SSH-CONNECTION:can-be
-STORAGE-INTERFACE||..||API-CONNECTION:can-be
-STORAGE-INTERFACE||..||PLUGINS:can-be
+FILE-SYSTEM||..||STORAGE-INTERFACE:is
+MEMORY||..||STORAGE-INTERFACE: is
+SSH-CONNECTION||..||STORAGE-INTERFACE: is
+API-CONNECTION||..||STORAGE-INTERFACE: is
+PLUGIN||..||STORAGE-INTERFACE: is
 ```
 
 A storage interface can be a large number of things - If it can be written and read from, it can be used as a storage interface. An Article Repository's services can all be connected to different storage interfaces as well.
@@ -81,9 +91,9 @@ Since articles and content get their ids deterministically, multiple wikis can d
 
 ```mermaid
 erDiagram
-CONTENT||--||ARTICLE: form
-TITLE||--||ARTICLE: form
-EDIT-OF||--||ARTICLE: form
+CONTENT||--||ARTICLE: identify
+TITLE||--||ARTICLE: identify
+EDIT-OF||--||ARTICLE: identify
 ```
 
 Articles have an identification code. Content does as well, to help cut down on storage used. An Article's ID is created from the title's name, the content's id, and the id of the article that the article is an edit of.
@@ -92,4 +102,6 @@ This helps to provide an edit history that can account for changes in title or c
 
 ## What does Sigili mean?
 
-I wanted to use the name Sigil, but a popular library on pypi already uses that. Sigili is the plural of Sigil. It also means a few things in different languages.
+I wanted to use the name Sigil, but a popular library on pypi already uses that. Sigili is the plural of Sigil. Sigils are representations of concepts. I like that.
+
+A collection of representations of concepts.
