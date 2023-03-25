@@ -17,9 +17,5 @@ class Editor(ABC):
         pass
 
     @abstractmethod
-    def update_sources(self):
-        pass
-
-    @abstractmethod
-    def load_sources(self):
+    def load_titles(self):
         pass

@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from unittest import TestCase
+from hypothesis import given, strategies as st, example
 import pytest
 
 from sigili.title.repository import MemoryTitleRepository, TitleDetails
@@ -119,4 +120,24 @@ def test_should_list_current_titles(style):
         test_case.assertCountEqual(current_titles_details, [
             TitleDetails(title, articleId),
             TitleDetails(_title, _articleId)
+        ])
+
+
+st_title = st.tuples(st.text(), st.text())
+
+
+@given(st_title, st_title)
+@pytest.mark.parametrize('style', styles)
+@pytest.mark.skip(reason="Not focusing on safety and optimization yet.")
+def test_should_list_current_titles_hard(style, title1, title2):
+    with getTitleRepository(style) as repo:
+        repo.set_title(*title1)
+        repo.set_title(*title2)
+
+        current_titles_details = repo.get_titles()
+
+        test_case = TestCase()
+        test_case.assertCountEqual(current_titles_details, [
+            TitleDetails(*title1),
+            TitleDetails(*title2)
         ])
