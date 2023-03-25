@@ -71,3 +71,7 @@ Need to detail this out for v0.3.
 https://c9x.me/archive/
 
 Could be a good repository format. Focuses on archiving, uses a similar format to the diffing I described for local.
+
+# Conversion to rust
+
+https://docs.rs/diffy/latest/diffy/ diff/patch tool written by someone who worked on git in the past
