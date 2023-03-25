@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import os
 from pathlib import Path
+import string
 
 
 class GroupRepository(ABC):
@@ -22,8 +23,18 @@ class GroupRepository(ABC):
         return NotImplementedError
 
     def _validate_ids(self, memberId: str, groupId: str) -> list[str]:
-        memberId = memberId.strip()
-        groupId = groupId.strip()
+
+        badEdgeCharacters = string.whitespace + './\\'
+        memberId = memberId.strip(badEdgeCharacters)
+        groupId = groupId.strip(badEdgeCharacters)
+
+        for character in string.whitespace:
+            memberId.replace(character, ' ')
+            groupId.replace(character, ' ')
+
+        badCharacters = '/\\'
+        for character in badCharacters:
+            memberId.replace(character, '.')
 
         assert memberId and memberId.isprintable()
         assert groupId and groupId.isprintable()
