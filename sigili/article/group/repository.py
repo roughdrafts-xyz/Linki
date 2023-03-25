@@ -29,6 +29,11 @@ class MemoryGroupRepository(GroupRepository):
         self._byMember: dict[str, list[str]] = dict()
 
     def add_to_group(self, memberId: str, groupId: str) -> None:
+        memberId = memberId.strip()
+        groupId = memberId.strip()
+        if (not memberId) or (not groupId) or (memberId == groupId):
+            return None
+
         _groups = self.get_groups_of(memberId)
         _members = self.get_members_of(groupId)
         if ((memberId in _members) and (groupId in _groups)):
@@ -70,6 +75,11 @@ class FileSystemGroupRepository(GroupRepository):
         return _groupPath.resolve()
 
     def add_to_group(self, memberId: str, groupId: str) -> None:
+        memberId = memberId.strip()
+        groupId = memberId.strip()
+        if (not memberId) or (not groupId) or (memberId == groupId):
+            return None
+
         _memberPath = self._byMember.joinpath(memberId)
         _groupPath = self._byGroup.joinpath(groupId)
 
