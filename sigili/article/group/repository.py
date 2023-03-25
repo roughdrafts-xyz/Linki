@@ -22,6 +22,20 @@ class GroupRepository(ABC):
     def get_groups(self) -> dict[str, list[str]]:
         return NotImplementedError
 
+    def _validate_ids(self, memberId: str, groupId: str) -> list[str]:
+        memberId = memberId.strip()
+        groupId = groupId.strip()
+
+        assert memberId and memberId.isprintable()
+        assert groupId and groupId.isprintable()
+        assert memberId is not groupId
+
+        _members = self.get_members_of(groupId)
+        _groups = self.get_groups_of(memberId)
+        assert not ((memberId in _members) and (groupId in _groups))
+
+        return [memberId, groupId]
+
 
 class MemoryGroupRepository(GroupRepository):
     def __init__(self) -> None:
@@ -29,14 +43,9 @@ class MemoryGroupRepository(GroupRepository):
         self._byMember: dict[str, list[str]] = dict()
 
     def add_to_group(self, memberId: str, groupId: str) -> None:
-        memberId = memberId.strip()
-        groupId = memberId.strip()
-        if (not memberId) or (not groupId) or (memberId == groupId):
-            return None
-
-        _groups = self.get_groups_of(memberId)
-        _members = self.get_members_of(groupId)
-        if ((memberId in _members) and (groupId in _groups)):
+        try:
+            memberId, groupId = self._validate_ids(memberId, groupId)
+        except AssertionError:
             return None
 
         if (groupId not in self._byGroup):
@@ -75,18 +84,13 @@ class FileSystemGroupRepository(GroupRepository):
         return _groupPath.resolve()
 
     def add_to_group(self, memberId: str, groupId: str) -> None:
-        memberId = memberId.strip()
-        groupId = memberId.strip()
-        if (not memberId) or (not groupId) or (memberId == groupId):
+        try:
+            memberId, groupId = self._validate_ids(memberId, groupId)
+        except AssertionError:
             return None
 
         _memberPath = self._byMember.joinpath(memberId)
         _groupPath = self._byGroup.joinpath(groupId)
-
-        _members = self.get_members_of(groupId)
-        _groups = self.get_groups_of(memberId)
-        if ((memberId in _members) and (groupId in _groups)):
-            return None
 
         if (not _memberPath.exists()):
             _memberPath.mkdir()
