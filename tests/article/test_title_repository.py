@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from dataclasses import dataclass
 import pytest
 
 # from sigili.title.repository import TitleDetails
@@ -8,15 +9,24 @@ import pytest
 # CAR needs to provide CAs or information about them.
 
 # Titles is the choice of phrase for current titles
+@dataclass
+class TitleDetails:
+    title: str
+    articleId: str
+
 
 class MemoryTitleRepository():
     def __init__(self) -> None:
         self.titles: dict[str, TitleDetails] = dict()
         self.store: dict[str, list[TitleDetails]] = dict()
-        pass
 
-    def set_title(self, title, articleId) -> TitleDetails:
+    def set_title(self, title: str, articleId: str | None) -> TitleDetails | None:
+        if (articleId is None):
+            del self.titles[title]
+            return None
+
         _title_detail = TitleDetails(
+            title,
             articleId
         )
 
@@ -59,16 +69,38 @@ styles = {
 
 
 @pytest.mark.parametrize('style', styles)
-def test_should_set_current_title():
+def test_should_set_current_title(style):
     with getTitleRepository(style) as repo:
         # titles only have one title, but one title can have multiple titles
         # should handle ignoring a no-op
+        title = "Chegg"
+        articleId = "12345"
         current_title_details = repo.set_title(title, articleId)
-        assert current_title_details == TitleDetails()
+        assert current_title_details == TitleDetails(title, articleId)
 
         # should handle a new set
-        current_title_details = repo.set_title(title, new_articleId)
-        assert current_title_details == TitleDetails()
+        title = "Crugg"
+        articleId = "2345"
+        current_title_details = repo.set_title(title, articleId)
+        assert current_title_details == TitleDetails(title, articleId)
+
+        # should handle a an existing id
+        title = "Grugg"
+        articleId = "12345"
+        current_title_details = repo.set_title(title, articleId)
+        assert current_title_details == TitleDetails(title, articleId)
+
+        # should handle a an existing id
+        title = "Grugg"
+        articleId = "798"
+        current_title_details = repo.set_title(title, articleId)
+        assert current_title_details == TitleDetails(title, articleId)
+
+        # should handle a an existing title and id
+        title = "Crugg"
+        articleId = "12345"
+        current_title_details = repo.set_title(title, articleId)
+        assert current_title_details == TitleDetails(title, articleId)
 
         # should unset a title
         current_title_details = repo.set_title(title, None)
@@ -76,7 +108,7 @@ def test_should_set_current_title():
 
 
 @pytest.mark.parametrize('style', styles)
-def test_should_get_options():
+def test_should_get_options(style):
     with getTitleRepository(style) as repo:
         # return a list of titles with title
         options = repo.get_options(title)
@@ -85,7 +117,7 @@ def test_should_get_options():
 
 
 @pytest.mark.parametrize('style', styles)
-def test_should_get_current_title():
+def test_should_get_current_title(style):
     with getTitleRepository(style) as repo:
         current_title_details = repo.get_title(title)
         assert current_title_details == TitleDetails()
@@ -93,7 +125,7 @@ def test_should_get_current_title():
 
 
 @pytest.mark.parametrize('style', styles)
-def test_should_list_current_titles():
+def test_should_list_current_titles(style):
     with getTitleRepository(style) as repo:
         current_titles_details = repo.get_titles()
         assert current_titles_details == [TitleDetails()]
