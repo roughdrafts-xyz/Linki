@@ -25,9 +25,6 @@ class GroupRepository(ABC):
     def _validate_ids(self, memberId: str, groupId: str) -> list[str]:
 
         badCharacters = '/\\'
-        badEdgeCharacters = string.whitespace + badCharacters
-        memberId = memberId.strip(badEdgeCharacters)
-        groupId = groupId.strip(badEdgeCharacters)
 
         for character in string.whitespace:
             memberId.replace(character, ' ')
@@ -35,6 +32,9 @@ class GroupRepository(ABC):
 
         for character in badCharacters:
             memberId.replace(character, '.')
+
+        memberId = memberId.strip()
+        groupId = groupId.strip()
 
         assert memberId and memberId.isprintable()
         assert groupId and groupId.isprintable()
