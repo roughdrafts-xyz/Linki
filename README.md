@@ -8,11 +8,19 @@ pip install sigili
 
 ## What is Sigili?
 
-A distributed wiki concept, library, and set of tools. By replicating files using deterministic identifiers, we can have all the benefits of a wiki and a distributed repository. This means no central host. This means peer-to-peer replication.
+A distributed wiki concept and a library implementing them. By replicating files using deterministic identifiers, we can have all the benefits of a wiki and a distributed repository. This means no central host. This means peer-to-peer replication.
 
 ## Who is this for?
 
-Anyone who would benefit from distributed documentation. While making this I had Activists, Collaborative Fiction Authors, Developers, and Fandoms in mind. People who are either already familiar with distributed concepts, or those who have been burned from centralized document storage.
+Anyone who would benefit from distributed documentation. While making this I had Activists, Collaborative Fiction Authors, Developers, and Fandoms in mind. People who are either already familiar with distributed concepts or those who have been burned from centralized document storage.
+
+## How do I use this?
+
+Sigili is more of a set of concepts to allow for consistent data replication and history of data. This repository offers a library to help build tools with that concept. If you want to develop on top of it, install this library. If you want to use it, install sigili-cli.
+
+```
+pip install sigili-cli
+```
 
 # How does this work?
 
