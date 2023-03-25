@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from unittest import TestCase
 import pytest
 
-from sigili.article.title.repository import MemoryTitleRepository, TitleDetails
+from sigili.title.repository import MemoryTitleRepository, TitleDetails
 
 # from sigili.title.repository import TitleDetails
 
