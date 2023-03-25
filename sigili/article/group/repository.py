@@ -24,7 +24,7 @@ class GroupRepository(ABC):
 
     def _validate_ids(self, memberId: str, groupId: str) -> list[str]:
 
-        badCharacters = '/\\'
+        badCharacters = '\\/:*?"<>|'
 
         for character in string.whitespace:
             memberId.replace(character, ' ')
