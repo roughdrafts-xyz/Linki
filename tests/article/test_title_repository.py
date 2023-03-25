@@ -9,7 +9,7 @@ import pytest
 
 # Titles is the choice of phrase for current titles
 
-class TestTitleRepository():
+class MemoryTitleRepository():
     def __init__(self) -> None:
         self.titles: dict[str, TitleDetails] = dict()
         self.store: dict[str, list[TitleDetails]] = dict()
@@ -39,10 +39,8 @@ class TestTitleRepository():
 @contextmanager
 def getTitleRepository(style: str):
     match style:
-        case TestTitleRepository.__name__:
-            yield TestTitleRepository()
-#       case MemoryTitleRepository.__name__:
-#           yield MemoryTitleRepository()
+        case MemoryTitleRepository.__name__:
+            yield MemoryTitleRepository()
 #       case FileSystemTitleRepository.__name__:
 #           _dir = TemporaryDirectory()
 #           _dirPath = Path(_dir.name)
@@ -55,8 +53,7 @@ def getTitleRepository(style: str):
 
 
 styles = {
-    TestTitleRepository.__name__,
-    #   MemoryTitleRepository.__name__,
+    MemoryTitleRepository.__name__,
     #   FileSystemTitleRepository.__name__,
 }
 
