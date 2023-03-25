@@ -32,6 +32,7 @@ class GroupRepository(ABC):
 
         for character in badCharacters:
             memberId.replace(character, '.')
+            groupId.replace(character, ' ')
 
         memberId = memberId.strip()
         groupId = groupId.strip()
