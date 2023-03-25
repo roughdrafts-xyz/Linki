@@ -10,11 +10,10 @@ If you wanna use it for your own project, install it with `pip install sigili`
 
 ```mermaid
 erDiagram
-    USER}|--|{EDITOR: uses
-    EDITOR}|--|{WIKI: edits
-    EDITOR||..||COMMAND-LINE: can-be
-    EDITOR||..||WEB-INTERFACE:can-be
-    EDITOR||..||PHONE-APP: can-be
+EDITOR}|--|{WIKI: edits
+COMMAND-LINE}|..|{EDITOR: is
+WEB-INTERFACE}|..|{EDITOR: is
+PHONE-APP}|..|{EDITOR: is
 ```
 
 High-level view, a User uses an editor to manage a wiki. The editor includes drafting tools, wiki management tools, and the things necessary for a distributed service to work like remote repository management.
@@ -25,12 +24,12 @@ An editor can be anything that can talk to a wiki. Check out sigili-cli if you'd
 
 ```mermaid
 erDiagram
-    WIKI ||--|{ ARTICLE-REPOSITORIES: collates
-    WIKI ||--|{ ARTICLE-REPOSITORIES: manages
-    WIKI ||--|{ ARTICLE-REPOSITORIES: clones
-    ARTICLE-REPOSITORIES||..||LOCALLY: located
-    ARTICLE-REPOSITORIES||..||REMOTELY: located
-    ARTICLE-REPOSITORIES}|--o{ARTICLES: contain
+WIKI ||--|{ ARTICLE-REPOSITORIES: collates
+WIKI ||--|{ ARTICLE-REPOSITORIES: manages
+WIKI ||--|{ ARTICLE-REPOSITORIES: clones
+ARTICLE-REPOSITORIES||..||LOCALLY: located
+ARTICLE-REPOSITORIES||..||REMOTELY: located
+ARTICLE-REPOSITORIES}|--o{ARTICLES: contain
 ```
 
 A wiki is just a library that manages and collates article repositories. You can find this in sigili/wiki.py
@@ -39,14 +38,12 @@ A wiki is just a library that manages and collates article repositories. You can
 
 ```mermaid
 erDiagram
-    CONTENT||--||ARTICLES: comprise
-    HISTORY||--||ARTICLES: comprise
-    GROUPS||--||ARTICLES: comprise
-    ARTICLE-DATA||--||ARTICLES: comprise
-    STORAGE-INTERFACE}o--|{ARTICLE-DATA: store
-    STORAGE-INTERFACE}o--|{HISTORY: store
-    STORAGE-INTERFACE}o--|{GROUPS: store
-    STORAGE-INTERFACE}o--|{CONTENT: store
+CONTENT||--||ARTICLES: comprise
+HISTORY||--||ARTICLES: comprise
+GROUPS||--||ARTICLES: comprise
+STORAGE-INTERFACE}o--|{HISTORY: store
+STORAGE-INTERFACE}o--|{GROUPS: store
+STORAGE-INTERFACE}o--|{CONTENT: store
 ```
 
 An article repository receives commands from a wiki, and then manages everything from there. This is just instructing different services on top of storage interfaces. You can see the repository types and their services in sigili/article/
@@ -55,16 +52,43 @@ An article repository receives commands from a wiki, and then manages everything
 
 ```mermaid
 erDiagram
-    STORAGE-INTERFACE||..||FILE-SYSTEM:can-be
-    STORAGE-INTERFACE||..||MEMORY:can-be
-    STORAGE-INTERFACE||..||SSH-CONNECTION:can-be
-    STORAGE-INTERFACE||..||API-CONNECTION:can-be
-    STORAGE-INTERFACE||..||PLUGINS:can-be
+STORAGE-INTERFACE||..||FILE-SYSTEM:can-be
+STORAGE-INTERFACE||..||MEMORY:can-be
+STORAGE-INTERFACE||..||SSH-CONNECTION:can-be
+STORAGE-INTERFACE||..||API-CONNECTION:can-be
+STORAGE-INTERFACE||..||PLUGINS:can-be
 ```
 
 A storage interface can be a large number of things - If it can be written and read from, it can be used as a storage interface. An Article Repository's services can all be connected to different storage interfaces as well.
 
 Interaction with a storage interface is implemented via the services located in sigili/article.
+
+## Titles
+
+A Wiki knows what articles it has on display! It calls these titles. Every title has many articles, but an article can only belong to a single title.
+
+```mermaid
+erDiagram
+WIKI}|--|{TITLE: displays
+ARTICLE-REPOSITORY}|--|{ARTICLE: track
+TITLE-REPOSITORY}|--|{TITLE: track
+TITLE||--|{ARTICLE: represent
+```
+
+Since articles and content get their ids deterministically, multiple wikis can display the same titles without a central service tracking them.
+
+### Article ID
+
+```mermaid
+erDiagram
+CONTENT||--||ARTICLE: form
+TITLE||--||ARTICLE: form
+EDIT-OF||--||ARTICLE: form
+```
+
+Articles have an identification code. Content does as well, to help cut down on storage used. An Article's ID is created from the title's name, the content's id, and the id of the article that the article is an edit of.
+
+This helps to provide an edit history that can account for changes in title or content.
 
 ## What does Sigili mean?
 
