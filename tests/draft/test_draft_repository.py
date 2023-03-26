@@ -1,7 +1,9 @@
 from sigili.draft.repository import Draft, DraftUpdate, MemoryDraftRepository
 from hypothesis import given, strategies as st
 
-st_id = st.from_regex("[a-f0-9]{56}")
+from sigili.type.id import SHA224
+
+st_id = st.from_regex(SHA224)
 
 
 @given(st_id, st_id)
