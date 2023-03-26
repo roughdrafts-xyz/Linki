@@ -7,21 +7,22 @@ from pathlib import Path
 from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
 from sigili.article.group.repository import FileSystemGroupRepository, GroupRepository, MemoryGroupRepository
 from sigili.article.history.repository import FileSystemHistoryRepository, HistoryRepository, MemoryHistoryRepository
+from sigili.type.id import ArticleID, ContentID
 
 
 @dataclass
 class ArticleUpdate():
     content: bytes
     groups: list[str]
-    editOf: str | None = None
+    editOf: ArticleID | None = None
 
 
 @dataclass
 class ArticleDetails():
-    articleId: str
-    contentId: str
+    articleId: ArticleID
+    contentId: ContentID
     groups: list[str]
-    editOf: str | None = None
+    editOf: ArticleID | None = None
 
 
 class ArticleRepository(ABC):
@@ -42,19 +43,19 @@ class ArticleRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_article(self, articleId: str) -> ArticleDetails:
+    def get_article(self, articleId: ArticleID) -> ArticleDetails:
         raise NotImplementedError
 
     @abstractmethod
-    def has_article(self, articleId: str | None) -> bool:
+    def has_article(self, articleId: ArticleID | None) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def get_articleIds(self) -> set[str]:
+    def get_articleIds(self) -> set[ArticleID]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_update(self, articleId: str) -> ArticleUpdate:
+    def get_update(self, articleId: ArticleID) -> ArticleUpdate:
         raise NotImplementedError
 
     def merge_article(self, update: ArticleUpdate) -> ArticleDetails:
@@ -63,21 +64,21 @@ class ArticleRepository(ABC):
         return self.add_article(update)
 
     @staticmethod
-    def getArticleID(update: ArticleUpdate) -> str:
+    def getArticleID(update: ArticleUpdate) -> ArticleID:
         _groups = map(str.encode, update.groups)
         _editOf = str.encode(update.editOf or '')
-        return sha224(
+        return ArticleID(sha224(
             b''.join([
                 _editOf,
                 *_groups,
                 update.content
             ])
-        ).hexdigest()
+        ).hexdigest())
 
 
 class MemoryArticleRepository(ArticleRepository):
     def __init__(self) -> None:
-        self._articles: dict[str, ArticleDetails] = {}
+        self._articles: dict[ArticleID, ArticleDetails] = {}
         self._content = MemoryContentRepository()
         self._history = MemoryHistoryRepository()
         self._groups = MemoryGroupRepository()
@@ -101,13 +102,13 @@ class MemoryArticleRepository(ArticleRepository):
         self._articles[newArticle.articleId] = newArticle
         return newArticle
 
-    def get_article(self, articleId: str) -> ArticleDetails:
+    def get_article(self, articleId: ArticleID) -> ArticleDetails:
         if (self.has_article(articleId)):
             return self._articles[articleId]
         raise KeyError(
             'Article not found. Try using merge_article or add_article first.')
 
-    def has_article(self, articleId: str | None) -> bool:
+    def has_article(self, articleId: ArticleID | None) -> bool:
         return articleId in self._articles
 
     def update_article(self, update: ArticleUpdate) -> ArticleDetails:
@@ -122,10 +123,10 @@ class MemoryArticleRepository(ArticleRepository):
 
         return newArticle
 
-    def get_articleIds(self) -> set[str]:
+    def get_articleIds(self) -> set[ArticleID]:
         return set(self._articles)
 
-    def get_update(self, articleId: str) -> ArticleUpdate:
+    def get_update(self, articleId: ArticleID) -> ArticleUpdate:
         _article = self._articles[articleId]
         _content = self._content.get_content(_article.contentId)
         return ArticleUpdate(
@@ -188,7 +189,7 @@ class FileSystemArticleRepository(ArticleRepository):
         with self._articles.joinpath(article.articleId).open('w') as _jsonPath:
             json.dump(asdict(article), _jsonPath)
 
-    def _get_article(self, articleId: str) -> ArticleDetails:
+    def _get_article(self, articleId: ArticleID) -> ArticleDetails:
         with self._articles.joinpath(articleId).open() as _jsonPath:
             _json = json.load(_jsonPath)
             return ArticleDetails(
@@ -203,13 +204,13 @@ class FileSystemArticleRepository(ArticleRepository):
         self._write_article(newArticle)
         return newArticle
 
-    def get_article(self, articleId: str) -> ArticleDetails:
+    def get_article(self, articleId: ArticleID) -> ArticleDetails:
         if (self.has_article(articleId)):
             return self._get_article(articleId)
         raise KeyError(
             'Article not found. Try using merge_article or add_article first.')
 
-    def has_article(self, articleId: str | None) -> bool:
+    def has_article(self, articleId: ArticleID | None) -> bool:
         if (articleId is None):
             return False
         return self._articles.joinpath(articleId).exists()
@@ -226,10 +227,10 @@ class FileSystemArticleRepository(ArticleRepository):
 
         return newArticle
 
-    def get_articleIds(self) -> set[str]:
-        return {_articles.name for _articles in self._articles.iterdir()}
+    def get_articleIds(self) -> set[ArticleID]:
+        return {ArticleID(_article.name) for _article in self._articles.iterdir() if ArticleID.isValidID(_article.name)}
 
-    def get_update(self, articleId: str) -> ArticleUpdate:
+    def get_update(self, articleId: ArticleID) -> ArticleUpdate:
         _article = self.get_article(articleId)
         _content = self._content.get_content(_article.contentId)
         return ArticleUpdate(

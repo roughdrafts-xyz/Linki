@@ -9,7 +9,7 @@ from sigili.article.repository import MemoryArticleRepository
 from sigili.article.repository import FileSystemArticleRepository
 
 
-class TestArticleRepository(ArticleRepository):
+class ControlArticleRepository(ArticleRepository):
     def __init__(self) -> None:
         self.articles = {}
         self.updates = {}
@@ -62,14 +62,14 @@ def memoryRepo():
 
 @pytest.fixture
 def simpleRepo():
-    yield TestArticleRepository()
+    yield ControlArticleRepository()
 
 
 @contextmanager
 def getArticleRepository(style: str):
     match style:
-        case TestArticleRepository.__name__:
-            yield TestArticleRepository()
+        case ControlArticleRepository.__name__:
+            yield ControlArticleRepository()
         case MemoryArticleRepository.__name__:
             yield MemoryArticleRepository()
         case FileSystemArticleRepository.__name__:
@@ -85,13 +85,13 @@ def getArticleRepository(style: str):
 styles = {
     MemoryArticleRepository.__name__,
     FileSystemArticleRepository.__name__,
-    TestArticleRepository.__name__,
+    ControlArticleRepository.__name__,
 }
 
 
 @pytest.fixture
 def testRepo():
-    return TestArticleRepository()
+    return ControlArticleRepository()
 
 
 @pytest.fixture

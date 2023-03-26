@@ -1,9 +1,9 @@
 from sigili.draft.repository import Draft, DraftUpdate, MemoryDraftRepository
 from hypothesis import given, strategies as st
-
 from sigili.type.id import SHA224
 
-st_id = st.from_regex(SHA224)
+
+st_id = st.from_regex(SHA224, fullmatch=True)
 
 
 @given(st_id, st_id)

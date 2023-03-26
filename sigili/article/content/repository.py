@@ -2,14 +2,16 @@ from abc import ABC, abstractmethod
 from hashlib import sha224
 from pathlib import Path
 
+from sigili.type.id import ContentID
+
 
 class ContentRepository(ABC):
     @staticmethod
-    def getContentID(content: bytes):
-        return sha224(content).hexdigest()
+    def getContentID(content: bytes) -> ContentID:
+        return ContentID(sha224(content).hexdigest())
 
     @abstractmethod
-    def add_content(self, content: bytes) -> str:
+    def add_content(self, content: bytes) -> ContentID:
         raise NotImplementedError
 
     @abstractmethod
@@ -21,7 +23,7 @@ class MemoryContentRepository(ContentRepository):
     def __init__(self):
         self._data = {}
 
-    def add_content(self, content: bytes) -> str:
+    def add_content(self, content: bytes) -> ContentID:
         contentId = self.getContentID(content)
         self._data[contentId] = content
         return contentId
@@ -45,7 +47,7 @@ class FileSystemContentRepository(ContentRepository):
         _contentPath.mkdir()
         return _contentPath.resolve()
 
-    def add_content(self, content: bytes) -> str:
+    def add_content(self, content: bytes) -> ContentID:
         contentId = self.getContentID(content)
         self._content.joinpath(contentId).write_bytes(content)
         return contentId
