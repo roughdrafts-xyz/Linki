@@ -20,11 +20,11 @@ class DraftUpdate:
 
 class DraftRepository(ABC):
     @abstractmethod
-    def get_draft(self, draftId: DraftID) -> Draft:
+    def add_draft(self, draft: Draft) -> Draft:
         raise NotImplementedError
 
     @abstractmethod
-    def add_draft(self, draft: Draft) -> Draft:
+    def get_draft(self, draftId: DraftID) -> Draft | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -33,13 +33,20 @@ class DraftRepository(ABC):
 
 
 class MemoryDraftRepository(DraftRepository):
-    def get_draft(self, draftId: DraftID) -> Draft:
-        source = SourceID(0)
-        draftId = DraftID(0)
-        return Draft(draftId, source)
+    def __init__(self) -> None:
+        self.drafts: dict[DraftID, Draft] = dict()
 
     def add_draft(self, draft: Draft) -> Draft:
+        sourceId = draft.sourceId
+        draftId = draft.draftId
+        self.drafts[draftId] = Draft(draftId, sourceId)
         return draft
 
+    def get_draft(self, draftId: DraftID) -> Draft | None:
+        return self.drafts.get(draftId, None)
+
     def update_draft(self, draftId: DraftID, update: DraftUpdate) -> Draft:
-        return self.get_draft(draftId)
+        return self.add_draft(Draft(
+            draftId,
+            update.sourceId
+        ))
