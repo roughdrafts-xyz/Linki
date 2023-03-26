@@ -10,8 +10,9 @@ class InvalidIDError(Exception):
 class _ID(str):
     def __new__(cls, content):
         if (not cls.isValidID(content)):
-            raise InvalidIDError()
-        return str(content)
+            raise InvalidIDError(
+                f'{content} is not a Valid ID.\nValid IDs are SSH224 Hashes. Please use the id generator attached to the ID Class you are trying to use.')
+        return super().__new__(cls, content)
 
     @staticmethod
     def isValidID(id: str) -> bool:

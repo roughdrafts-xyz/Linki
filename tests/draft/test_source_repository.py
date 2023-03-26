@@ -40,52 +40,54 @@ def an_article(draw: st.DrawFn):
     return article
 
 
-@st.composite
-def an_article_update(draw: st.DrawFn):
-    content = draw(st.binary())
-    groups = draw(st.lists(st.text()))
-    editOf = draw(st.one_of(an_id(), st.none()))
-    article = ArticleUpdate(
-        content,
-        groups,
-    )
-    if (editOf is not None):
-        article.editOf = ArticleID(editOf)
-    return article
-
-
 @given(a_source_id(), an_article())
 def test_should_add_source(sourceId: SourceID, article: ArticleDetails):
     repo = MemorySourceRepository()
-    source = Source(sourceId, article.articleId)
-    assert repo.add_source(sourceId, article) == source
+    source = Source(sourceId, article.articleId,
+                    article.contentId, article.groups)
+    assert repo.set_source(sourceId, article) == source
 
 
 @given(a_source_id(), an_article())
 def test_should_get_source(sourceId: SourceID, article: ArticleDetails):
     repo = MemorySourceRepository()
-    source = Source(sourceId, article.articleId)
-    repo.add_source(sourceId, article)
+    source = Source(sourceId, article.articleId,
+                    article.contentId, article.groups)
+    repo.set_source(sourceId, article)
     assert repo.get_source(sourceId) == source
 
 
 @given(a_source_id(), an_article(), an_article())
-def test_should_do_update_source(sourceId: SourceID, base_article: ArticleDetails, update_article: ArticleDetails):
-    repo = MemorySourceRepository()
-    repo.add_source(sourceId, base_article)
-    source = Source(sourceId, update_article.articleId)
-    assert repo.update_source(sourceId, update_article) == source
-
-
-@given(a_draft_id(), a_source_id(), an_article_update(), an_article_update())
-def test_should_do_should_update(draftId: DraftID, sourceId: SourceID, first_update: ArticleUpdate, second_update: ArticleUpdate):
+def test_should_flag_update(sourceId: SourceID, source_article: ArticleDetails, draft_article: ArticleDetails):
     source_repo = MemorySourceRepository()
-    article_repo = MemoryArticleRepository()
-    article = article_repo.add_article(first_update)
-    source_repo.add_source(sourceId, article)
-    draft = Draft(draftId, sourceId)
-    article = article_repo.add_article(second_update)
-    source_repo.add_source(sourceId, article)
+    source = source_repo.set_source(sourceId, source_article)
+    draft = Draft(sourceId, draft_article.contentId, draft_article.groups)
 
     should_update = source_repo.should_update(draft)
-    assert should_update == True
+    expected = ((draft.groups != source.groups) or (
+        draft.contentId != source.contentId))
+
+    assert should_update == expected
+
+
+@given(a_source_id(), an_article())
+def test_should_flag_update_for_new_file(sourceId: SourceID, draft_article: ArticleDetails):
+    source_repo = MemorySourceRepository()
+    draft = Draft(sourceId, draft_article.contentId, draft_article.groups)
+
+    should_update = source_repo.should_update(draft)
+    expected = True
+
+    assert should_update == expected
+
+
+@given(a_source_id(), an_article())
+def test_should_not_flag_non_update(sourceId: SourceID, article: ArticleDetails):
+    source_repo = MemorySourceRepository()
+    source_repo.set_source(sourceId, article)
+    draft = Draft(sourceId, article.contentId, article.groups)
+
+    should_update = source_repo.should_update(draft)
+    expected = False
+
+    assert should_update == expected

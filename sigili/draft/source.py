@@ -4,26 +4,24 @@ from dataclasses import dataclass
 
 from sigili.article.repository import ArticleDetails
 from sigili.draft.repository import Draft
-from sigili.type.id import ArticleID, SourceID
+from sigili.type.id import ArticleID, ContentID, SourceID
 
 
 @dataclass
 class Source:
     sourceId: SourceID
     articleId: ArticleID
+    contentId: ContentID
+    groups: list[str]
 
 
 class SourceRepository(ABC):
     @abstractmethod
-    def add_source(self, sourceId: SourceID, article: ArticleDetails) -> Source:
+    def set_source(self, sourceId: SourceID, article: ArticleDetails) -> Source:
         pass
 
     @abstractmethod
     def get_source(self, sourceId: SourceID) -> Source | None:
-        pass
-
-    @abstractmethod
-    def update_source(self, sourceId: SourceID, article: ArticleDetails) -> Source:
         pass
 
     @abstractmethod
@@ -35,16 +33,20 @@ class MemorySourceRepository(SourceRepository):
     def __init__(self) -> None:
         self.sources: dict[SourceID, Source] = dict()
 
-    def add_source(self, sourceId: SourceID, article: ArticleDetails) -> Source:
-        source = Source(sourceId, article.articleId)
+    def set_source(self, sourceId: SourceID, article: ArticleDetails) -> Source:
+        source = Source(sourceId, article.articleId,
+                        article.contentId, article.groups)
         self.sources[sourceId] = source
         return source
 
     def get_source(self, sourceId: SourceID) -> Source | None:
         return self.sources.get(sourceId, None)
 
-    def update_source(self, sourceId: SourceID, article: ArticleDetails) -> Source:
-        return self.add_source(sourceId, article)
-
     def should_update(self, draft: Draft) -> bool:
-        return False
+        source = self.get_source(draft.sourceId)
+        if (source is None):
+            return True
+
+        groups_differ = (draft.groups != source.groups)
+        content_differs = (draft.contentId != source.contentId)
+        return groups_differ or content_differs
