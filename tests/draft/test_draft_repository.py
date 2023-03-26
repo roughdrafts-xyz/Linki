@@ -1,7 +1,5 @@
-
-from sigili.draft import SourceID
-from sigili.draft.repository import Draft, DraftID, DraftUpdate, MemoryDraftRepository
-from hypothesis import given, strategies as st, example
+from sigili.draft.repository import Draft, DraftUpdate, MemoryDraftRepository
+from hypothesis import given, strategies as st
 
 st_id = st.from_regex("[a-f0-9]{56}")
 
@@ -28,7 +26,7 @@ def test_should_update_draft(draftId, sourceId,  newSourceId):
     repo.add_draft(draft)
     update = DraftUpdate(newSourceId)
 
-    expected_draft = Draft(draftId, SourceID(newSourceId))
+    expected_draft = Draft(draftId, newSourceId)
 
     new_draft = repo.update_draft(draftId, update)
     assert new_draft == expected_draft

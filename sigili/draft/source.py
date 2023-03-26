@@ -1,11 +1,10 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from sigili.article import ArticleID
-from sigili.article.repository import ArticleDetails
 
-from sigili.draft import SourceID
+from sigili.article.repository import ArticleDetails
 from sigili.draft.repository import Draft
+from sigili.type.id import ArticleID, SourceID
 
 
 @dataclass

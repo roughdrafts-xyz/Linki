@@ -2,9 +2,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from sigili.draft import SourceID
-
-DraftID = str
+from sigili.type.id import DraftID, SourceID
 
 
 @dataclass
