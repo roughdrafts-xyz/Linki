@@ -1,3 +1,4 @@
+from abc import ABC
 import re
 
 SHA224 = re.compile(r'[a-f0-9]{56}')
