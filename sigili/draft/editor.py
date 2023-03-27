@@ -16,15 +16,13 @@ class Editor():
 
     def publish_drafts(self) -> None:
         for title in self._titles.get_titles():
-            hasDraft = self._drafts.get_draft(title.articleId) != None
+            hasDraft = self._drafts.get_draft(title.title) != None
             if not hasDraft:
                 self._titles.clear_title(title.title)
 
         for draft in self.get_updates():
             update = draft.asArticleUpdate()
             self._titles.set_title(update.title, update)
-
-        self.load_titles()
 
     def load_titles(self) -> None:
         for title in self._titles.get_titles():
