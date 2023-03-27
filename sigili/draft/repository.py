@@ -1,10 +1,10 @@
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Iterator
 from sigili.article.repository import Article, ArticleUpdate
 
-from sigili.type.id import ArticleID, BlankArticleID, ContentID, Title
+from sigili.type.id import ArticleID, ContentID, Title
 
 
 @dataclass
@@ -13,12 +13,17 @@ class Draft:
     content: bytes
     groups: list[str]
     editOf: Article | None = None
+    _contentId: ContentID | None = field(init=False, repr=False, default=None)
+
+    @property
+    def contentId(self):
+        if (self._contentId is None):
+            self._contentId = ContentID.getContentID(self.content)
+        return self._contentId
 
     def should_update(self) -> bool:
         if (self.editOf is None):
             return True
-        if (self.contentId is None):
-            self.contentId = ContentID.getContentID(self.content)
         groups_different = self.groups != self.editOf.groups
         content_different = self.contentId != self.editOf.contentId
         return groups_different or content_different
@@ -44,7 +49,7 @@ class DraftRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_draft(self, articleId: ArticleID) -> Draft | None:
+    def get_draft(self, title: Title) -> Draft | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -64,8 +69,8 @@ class MemoryDraftRepository(DraftRepository):
         self.drafts[draft.title] = draft
         return draft
 
-    def get_draft(self, articleId: ArticleID) -> Draft | None:
-        return self.drafts.get(articleId, None)
+    def get_draft(self, title: Title) -> Draft | None:
+        return self.drafts.get(title, None)
 
     def get_drafts(self) -> Iterator[Draft]:
         return self.drafts.values().__iter__()
