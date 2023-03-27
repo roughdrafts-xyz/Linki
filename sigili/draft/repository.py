@@ -4,28 +4,38 @@ from dataclasses import dataclass
 from typing import Iterator
 from sigili.article.repository import Article, ArticleUpdate
 
-from sigili.type.id import ArticleID, ContentID
+from sigili.type.id import ArticleID, BlankArticleID, ContentID, Title
 
 
 @dataclass
 class Draft:
-    source: Article
+    title: Title
     content: bytes
-    contentId: ContentID
     groups: list[str]
-
-    def asArticleUpdate(self) -> ArticleUpdate:
-        return ArticleUpdate(
-            self.source.title,
-            self.content,
-            self.groups,
-            self.source.articleId
-        )
+    editOf: Article | None = None
 
     def should_update(self) -> bool:
-        groups_different = self.groups != self.source.groups
-        content_different = self.contentId != self.source.contentId
+        if (self.editOf is None):
+            return True
+        if (self.contentId is None):
+            self.contentId = ContentID.getContentID(self.content)
+        groups_different = self.groups != self.editOf.groups
+        content_different = self.contentId != self.editOf.contentId
         return groups_different or content_different
+
+    def asArticleUpdate(self):
+        if (self.editOf is None):
+            return ArticleUpdate(
+                self.title,
+                self.content,
+                self.groups,
+            )
+        return ArticleUpdate(
+            self.title,
+            self.content,
+            self.groups,
+            self.editOf.articleId
+        )
 
 
 class DraftRepository(ABC):
@@ -48,11 +58,10 @@ class DraftRepository(ABC):
 
 class MemoryDraftRepository(DraftRepository):
     def __init__(self) -> None:
-        self.drafts: dict[ArticleID, Draft] = dict()
+        self.drafts: dict[Title, Draft] = dict()
 
     def set_draft(self, draft: Draft) -> Draft:
-        articleId = draft.source.articleId
-        self.drafts[articleId] = draft
+        self.drafts[draft.title] = draft
         return draft
 
     def get_draft(self, articleId: ArticleID) -> Draft | None:

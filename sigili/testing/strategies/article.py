@@ -6,7 +6,7 @@ from sigili.type.id import ArticleID, ContentID
 
 
 @strategies.composite
-def an_article(draw: strategies.DrawFn, data: bytes | None = None):
+def an_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
     if (data is None):
         data = draw(strategies.binary())
     groups = draw(strategies.lists(strategies.text()))

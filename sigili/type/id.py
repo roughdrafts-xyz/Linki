@@ -22,9 +22,12 @@ class _ID(str):
 
 class ArticleID(_ID):
     @classmethod
-    def getArticleID(cls, update: 'ArticleUpdate') -> 'ArticleID':
+    def getArticleID(cls, update) -> 'ArticleID':
         _groups = map(str.encode, update.groups)
-        _editOf = str.encode(update.editOf or '')
+        if (update.editOf is None):
+            _editOf = str.encode(BlankArticleID)
+        else:
+            _editOf = str.encode(update.editOf)
         return cls(sha224(
             b''.join([
                 _editOf,
@@ -33,6 +36,9 @@ class ArticleID(_ID):
             ])
         ).hexdigest())
     pass
+
+
+BlankArticleID = ArticleID(sha224(b'BlankArticleID').hexdigest())
 
 
 class ContentID(_ID):

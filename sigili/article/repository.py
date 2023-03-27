@@ -6,7 +6,7 @@ from pathlib import Path
 from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
 from sigili.article.group.repository import FileSystemGroupRepository, GroupRepository, MemoryGroupRepository
 from sigili.article.history.repository import FileSystemHistoryRepository, HistoryRepository, MemoryHistoryRepository
-from sigili.type.id import ArticleID, ContentID, Title
+from sigili.type.id import ArticleID, BlankArticleID, ContentID, Title
 
 
 @dataclass
@@ -14,7 +14,7 @@ class ArticleUpdate():
     title: Title
     content: bytes
     groups: list[str]
-    editOf: ArticleID | None = None
+    editOf: ArticleID = BlankArticleID
 
 
 @dataclass
@@ -23,7 +23,21 @@ class Article():
     articleId: ArticleID
     contentId: ContentID
     groups: list[str]
-    editOf: ArticleID | None = None
+    editOf: ArticleID = BlankArticleID
+
+    @staticmethod
+    def fromArticleUpdate(update: ArticleUpdate) -> 'Article':
+        _content = update.content
+        _groups = update.groups
+        _contentId = ContentID.getContentID(_content)
+        _articleId = ArticleID.getArticleID(update)
+
+        return Article(
+            update.title,
+            _articleId,
+            _contentId,
+            _groups,
+        )
 
 
 class ArticleRepository(ABC):

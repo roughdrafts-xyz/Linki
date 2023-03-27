@@ -1,9 +1,11 @@
 from contextlib import contextmanager
 from unittest import TestCase
-from hypothesis import given, strategies
+from hypothesis import given
 import pytest
 from sigili.article.repository import Article, MemoryArticleRepository
+from sigili.draft.repository import Draft
 from sigili.testing.strategies.article import some_articles
+from sigili.testing.strategies.draft import some_drafts
 
 from sigili.title.repository import MemoryTitleRepository
 
@@ -40,43 +42,48 @@ styles = {
 
 
 @pytest.mark.parametrize('style', styles)
-@given(some_articles(4))
-def test_should_set_current_title(style, articles: list[Article]):
+@given(some_drafts(4))
+def test_should_set_current_title(style, drafts: list[Draft]):
     with getTitleRepository(style) as repo:
         # titles only have one title, but one title can have multiple titles
         # should handle ignoring a no-op
-        article = articles[0]
-        current_title = repo.set_title(article.title, article)
+        draft = drafts[0].asArticleUpdate()
+        article = Article.fromArticleUpdate(draft)
+        current_title = repo.set_title(draft.title, draft)
         assert current_title == article
 
         # should handle a new set
-        article = articles[1]
-        current_title = repo.set_title(article.title, article)
+        draft = drafts[1].asArticleUpdate()
+        article = Article.fromArticleUpdate(draft)
+        current_title = repo.set_title(draft.title, draft)
         assert current_title == article
         assert current_title != None
 
         # should handle a an existing title
-        article = articles[2]
-        article.title = current_title.title
-        current_title = repo.set_title(article.title, article)
+        draft = drafts[2].asArticleUpdate()
+        draft.title = current_title.title
+        article = Article.fromArticleUpdate(draft)
+        current_title = repo.set_title(draft.title, draft)
         assert current_title == article
         assert current_title != None
 
         # should handle a an existing id
-        article = articles[2]
-        article.title = current_title.articleId
-        current_title = repo.set_title(article.title, article)
+        draft = drafts[2].asArticleUpdate()
+        draft.title = current_title.title
+        current_title = repo.set_title(draft.title, draft)
+        article = Article.fromArticleUpdate(draft)
         assert current_title == article
         assert current_title != None
 
         # should handle a an existing title and id
-        article = articles[2]
-        current_title = repo.set_title(article.title, article)
+        draft = drafts[2].asArticleUpdate()
+        article = Article.fromArticleUpdate(draft)
+        current_title = repo.set_title(draft.title, draft)
         assert current_title == article
         assert current_title != None
 
         # should unset a title
-        current_title = repo.set_title(current_title.title, None)
+        current_title = repo.clear_title(current_title.title)
         assert current_title == None
 
 

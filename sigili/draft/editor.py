@@ -7,8 +7,7 @@ from sigili.title.repository import TitleRepository
 
 class Editor():
 
-    def __init__(self, repo: ArticleRepository, titles: TitleRepository, drafts: DraftRepository) -> None:
-        self._repo = repo
+    def __init__(self, titles: TitleRepository, drafts: DraftRepository) -> None:
         self._titles = titles
         self._drafts = drafts
 
@@ -16,19 +15,25 @@ class Editor():
         return (_draft for _draft in self._drafts.get_drafts() if _draft.should_update())
 
     def publish_drafts(self) -> None:
+        for title in self._titles.get_titles():
+            hasDraft = self._drafts.get_draft(title.articleId) != None
+            if not hasDraft:
+                self._titles.clear_title(title.title)
+
         for draft in self.get_updates():
             update = draft.asArticleUpdate()
-            update = self._repo.merge_article(update)
             self._titles.set_title(update.title, update)
+
+        self.load_titles()
 
     def load_titles(self) -> None:
         for title in self._titles.get_titles():
-            article = self._repo.get_article(title.articleId)
-            content = self._repo.content.get_content(article.contentId)
+            content = self._titles.articles.content.get_content(
+                title.contentId)
             draft = Draft(
-                title,
+                title.title,
                 content,
-                article.contentId,
-                article.groups
+                title.groups,
+                title
             )
             self._drafts.set_draft(draft)

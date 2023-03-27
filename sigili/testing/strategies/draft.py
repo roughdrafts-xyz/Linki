@@ -9,5 +9,9 @@ def a_draft(draw: strategies.DrawFn):
     base_article = draw(an_article(base_data))
     new_data = draw(strategies.binary())
     new_article = draw(an_article(new_data))
-    new_article.editOf = base_article.articleId
-    return Draft(base_article, new_data, new_article.contentId, new_article.groups)
+    return Draft(new_article.title, new_data, new_article.groups, base_article)
+
+
+@strategies.composite
+def some_drafts(draw: strategies.DrawFn, amount: int):
+    return draw(strategies.lists(a_draft(), min_size=amount, max_size=amount))
