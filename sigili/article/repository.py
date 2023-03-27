@@ -31,12 +31,19 @@ class Article():
         _groups = update.groups
         _contentId = ContentID.getContentID(_content)
         _articleId = ArticleID.getArticleID(update)
-
+        if (update.editOf is None):
+            return Article(
+                update.title,
+                _articleId,
+                _contentId,
+                _groups,
+            )
         return Article(
             update.title,
             _articleId,
             _contentId,
             _groups,
+            update.editOf
         )
 
 
@@ -90,23 +97,11 @@ class MemoryArticleRepository(ArticleRepository):
         self._history = MemoryHistoryRepository()
         self._groups = MemoryGroupRepository()
 
-    def _add_article(self, update: ArticleUpdate) -> Article:
-        _content = update.content
-        _groups = update.groups
-        _contentId = self._content.add_content(_content)
-        _articleId = ArticleID.getArticleID(update)
-        for group in _groups:
-            self._groups.add_to_group(_contentId, group)
-
-        return Article(
-            update.title,
-            _articleId,
-            _contentId,
-            _groups,
-        )
-
     def add_article(self, update: ArticleUpdate) -> Article:
-        newArticle = self._add_article(update)
+        newArticle = Article.fromArticleUpdate(update)
+        self._content.add_content(update.content)
+        for group in update.groups:
+            self._groups.add_to_group(newArticle.articleId, group)
         self._articles[newArticle.articleId] = newArticle
         return newArticle
 
@@ -124,10 +119,8 @@ class MemoryArticleRepository(ArticleRepository):
             raise KeyError(
                 'Article must be an edit of another Article already in the Repository. Try using merge_article or add_article instead.')
 
-        newArticle = self._add_article(update)
-        newArticle.editOf = update.editOf
+        newArticle = self.add_article(update)
         self._history.add_edit(newArticle.editOf, newArticle.articleId)
-        self._articles[newArticle.articleId] = newArticle
 
         return newArticle
 

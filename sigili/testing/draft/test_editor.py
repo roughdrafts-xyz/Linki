@@ -37,7 +37,7 @@ def test_loads_titles(draft: Draft):
     editor.load_titles()
 
     draft_count = list(drafts.get_drafts())
-    print(draft_count)
+
     test = TestCase()
     test.assertCountEqual([draft], draft_count)
 

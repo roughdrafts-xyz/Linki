@@ -1,11 +1,12 @@
 from contextlib import contextmanager
+from typing import Iterable, List
 from unittest import TestCase
-from hypothesis import given
+from hypothesis import given, strategies
 import pytest
-from sigili.article.repository import Article, MemoryArticleRepository
+from sigili.article.repository import Article, ArticleUpdate, MemoryArticleRepository
 from sigili.draft.repository import Draft
 from sigili.testing.strategies.article import some_articles
-from sigili.testing.strategies.draft import some_drafts
+from sigili.testing.strategies.draft import a_draft, a_drafted_article_update, some_drafts
 
 from sigili.title.repository import MemoryTitleRepository
 
@@ -42,41 +43,26 @@ styles = {
 
 
 @pytest.mark.parametrize('style', styles)
-@given(some_drafts(4))
-def test_should_set_current_title(style, drafts: list[Draft]):
+@given(strategies.data())
+def test_should_set_current_title(style, data):
     with getTitleRepository(style) as repo:
         # titles only have one title, but one title can have multiple titles
         # should handle ignoring a no-op
-        draft = drafts[0].asArticleUpdate()
+        draft: ArticleUpdate = data.draw(a_drafted_article_update())
         article = Article.fromArticleUpdate(draft)
         current_title = repo.set_title(draft.title, draft)
         assert current_title == article
 
         # should handle a new set
-        draft = drafts[1].asArticleUpdate()
+        draft: ArticleUpdate = data.draw(a_drafted_article_update())
         article = Article.fromArticleUpdate(draft)
         current_title = repo.set_title(draft.title, draft)
         assert current_title == article
         assert current_title != None
 
         # should handle a an existing title
-        draft = drafts[2].asArticleUpdate()
+        draft: ArticleUpdate = data.draw(a_drafted_article_update())
         draft.title = current_title.title
-        article = Article.fromArticleUpdate(draft)
-        current_title = repo.set_title(draft.title, draft)
-        assert current_title == article
-        assert current_title != None
-
-        # should handle a an existing id
-        draft = drafts[2].asArticleUpdate()
-        draft.title = current_title.title
-        current_title = repo.set_title(draft.title, draft)
-        article = Article.fromArticleUpdate(draft)
-        assert current_title == article
-        assert current_title != None
-
-        # should handle a an existing title and id
-        draft = drafts[2].asArticleUpdate()
         article = Article.fromArticleUpdate(draft)
         current_title = repo.set_title(draft.title, draft)
         assert current_title == article
@@ -87,34 +73,35 @@ def test_should_set_current_title(style, drafts: list[Draft]):
         assert current_title == None
 
 
-#   @pytest.mark.parametrize('style', styles)
-#   def test_should_get_options(style):
-#       with getTitleRepository(style) as repo:
-#           # return a list of titles with title
-#           title = "Chegg"
-#           articleId = "12345"
-#           repo.set_title(title, articleId)
-#           title = "Clorg"
-#           articleId = "12345"
-#           repo.set_title(title, articleId)
-
-#           options = repo.get_options(title)
-#           assert options == [Title(title, articleId)]
+@pytest.mark.parametrize('style', styles)
+@given(a_draft())
+def test_should_get_options(style, draft: Draft):
+    with getTitleRepository(style) as repo:
+        repo.set_title(draft.title, draft.asArticleUpdate())
+        options = repo.get_options(draft.title)
+        article = Article.fromArticleUpdate(draft.asArticleUpdate())
+        assert article in options
 
 
-#   @pytest.mark.parametrize('style', styles)
-#   def test_should_get_current_title(style):
-#       with getTitleRepository(style) as repo:
-#           title = "Chegg"
-#           articleId = "12345"
-#           repo.set_title(title, articleId)
-#           title = "Clorg"
-#           articleId = "12345"
-#           repo.set_title(title, articleId)
+@pytest.mark.parametrize('style', styles)
+@given(a_draft())
+def test_should_get_title(style, draft: Draft):
+    with getTitleRepository(style) as repo:
+        repo.set_title(draft.title, draft.asArticleUpdate())
+        expected = Article.fromArticleUpdate(draft.asArticleUpdate())
+        actual = repo.get_title(draft.title)
+        assert expected == actual
 
-#           current_title_details = repo.get_title(title)
-#           assert current_title_details == Title(title, articleId)
 
+@pytest.mark.parametrize('style', styles)
+@given(a_draft())
+def test_should_list_titles(style, draft: Draft):
+    with getTitleRepository(style) as repo:
+        repo.set_title(draft.title, draft.asArticleUpdate())
+        article = Article.fromArticleUpdate(draft.asArticleUpdate())
+        titles = repo.get_titles()
+
+        assert article in titles
 
 #   @pytest.mark.parametrize('style', styles)
 #   def test_should_list_current_titles(style):
