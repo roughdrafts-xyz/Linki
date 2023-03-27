@@ -3,7 +3,7 @@ import string
 from hypothesis import assume, strategies
 from sigili.article.repository import Article, ArticleUpdate
 
-from sigili.type.id import ArticleID, ContentID, Title
+from sigili.type.id import ArticleID, ContentID, Label
 
 
 @strategies.composite
@@ -17,8 +17,8 @@ def an_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
     if (data is None):
         data = draw(strategies.binary())
     groups = draw(strategies.lists(a_group(), unique=True))
-    _title = draw(strategies.text(min_size=1))
-    title = Title.from_string(_title)
+    _title = draw(strategies.text())
+    title = Label(_title)
     article_update = ArticleUpdate(
         title,
         data,

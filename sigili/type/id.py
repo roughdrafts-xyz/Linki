@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from hashlib import sha224
 import re
 import string
@@ -36,7 +37,6 @@ class ArticleID(_ID):
                 update.content
             ])
         ).hexdigest())
-    pass
 
 
 BlankArticleID = ArticleID(sha224(b'BlankArticleID').hexdigest())
@@ -46,23 +46,42 @@ class ContentID(_ID):
     @classmethod
     def getContentID(cls, content: bytes) -> 'ContentID':
         return cls(sha224(content).hexdigest())
-    pass
 
 
-class Title(str):
+class LabelID(_ID):
     @classmethod
-    def from_string(cls, title: str) -> 'Title':
-        badCharacters = r'\/:*?"<>|'
-        badCharacters += r"'"
+    def getLabelID(cls, name: str) -> 'LabelID':
+        return cls(sha224(str.encode(name)).hexdigest())
 
-        _title = str(title)
-        _title = _title.strip()
-        _title = _title.strip(badCharacters + r".")
-        for character in title:
-            if ((character in string.whitespace) or
-                (character in badCharacters) or
-                    (not character.isprintable())):
-                _title = _title.replace(character, '_')
-        if not _title:
-            _title = '_'
-        return cls(_title)
+
+@dataclass
+class Label():
+    _label: str | None = field(init=False, repr=False, default=None)
+    _name: str | None = field(init=False, repr=False, default=None)
+
+    def __init__(self, name: str) -> None:
+        self._label = name
+        self.labelId = LabelID.getLabelID(self.name)
+
+    @property
+    def name(self):
+        if (self._label is None):
+            raise ValueError
+        if (self._name is None):
+            self._name = self.as_safe_string(self._label)
+        return self._name
+
+    @property
+    def unsafe_raw_name(self):
+        return self._label
+
+    @staticmethod
+    def as_safe_string(string: str) -> str:
+        _str = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", "-", string)
+        _str = _str.strip()
+        if (_str is None):
+            _str = "-"
+        return _str
+
+    def __hash__(self) -> int:
+        return hash(self.labelId)

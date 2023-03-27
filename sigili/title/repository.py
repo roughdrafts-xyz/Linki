@@ -6,14 +6,18 @@ import string
 from typing import Iterator
 from sigili.article.repository import Article, ArticleRepository, ArticleUpdate
 
-from sigili.type.id import ArticleID, Title
+from sigili.type.id import ArticleID, Label, LabelID
+
+
+class Title(Article):
+    pass
 
 
 class TitleRepository(ABC):
     articles: ArticleRepository
 
     @abstractmethod
-    def set_title(self, title: Title, update: ArticleUpdate) -> Article | None:
+    def set_title(self, title: Label, update: ArticleUpdate) -> Article | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -21,14 +25,14 @@ class TitleRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def clear_title(self, title: Title) -> None:
+    def clear_title(self, title: Label) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def get_titles(self) -> Iterator[Article]:
         raise NotImplementedError
 
-    def get_options(self, title: Title) -> Iterator[Article]:
+    def get_options(self, title: Label) -> Iterator[Article]:
         for articleId in self.articles.get_articleIds():
             article = self.articles.get_article(articleId)
             if (article.title == title):
@@ -37,23 +41,22 @@ class TitleRepository(ABC):
 
 class MemoryTitleRepository(TitleRepository):
     def __init__(self, articles: ArticleRepository) -> None:
-        self.titles: dict[Title, Article] = dict()
+        self.titles: dict[LabelID, Article] = dict()
         self.articles = articles
 
-    def set_title(self, title: Title, update: ArticleUpdate) -> Article | None:
-        title = Title.from_string(title)
+    def set_title(self, title: Label, update: ArticleUpdate) -> Article | None:
         article = self.articles.add_article(update)
-        self.titles[title] = article
+        self.titles[title.labelId] = article
         return article
 
-    def get_title(self, title) -> Article | None:
-        if (title not in self.titles):
+    def get_title(self, title: Label) -> Article | None:
+        if (title.labelId not in self.titles):
             return None
-        return self.titles[title]
+        return self.titles[title.labelId]
 
-    def clear_title(self, title: Title) -> None:
-        if (title in self.titles):
-            del self.titles[title]
+    def clear_title(self, title: Label) -> None:
+        if (title.labelId in self.titles):
+            del self.titles[title.labelId]
 
     def get_titles(self) -> Iterator[Article]:
         return self.titles.values().__iter__()
@@ -72,22 +75,21 @@ class FileSystemTitleRepository(TitleRepository):
         _titlePath.mkdir()
         return _titlePath.resolve()
 
-    def set_title(self, title: Title, update: ArticleUpdate) -> Article | None:
-        title = Title.from_string(title)
+    def set_title(self, title: Label, update: ArticleUpdate) -> Article | None:
         article = self.articles.add_article(update)
-        self._titles.joinpath(title).write_text(article.articleId)
+        self._titles.joinpath(title.labelId).write_text(article.articleId)
         return article
 
-    def get_title(self, title) -> Article | None:
-        _title = self._titles.joinpath(title)
+    def get_title(self, title: Label) -> Article | None:
+        _title = self._titles.joinpath(title.labelId)
         if (not _title.exists()):
             return None
         _article = _title.read_text()
         article = self.articles.get_article(ArticleID(_article))
         return article
 
-    def clear_title(self, title: Title) -> None:
-        _title = self._titles.joinpath(title)
+    def clear_title(self, title: Label) -> None:
+        _title = self._titles.joinpath(title.labelId)
         if (not _title.exists()):
             return None
         _title.unlink()

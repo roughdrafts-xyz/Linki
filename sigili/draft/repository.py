@@ -4,12 +4,12 @@ from dataclasses import dataclass, field
 from typing import Iterator
 from sigili.article.repository import Article, ArticleUpdate
 
-from sigili.type.id import ArticleID, ContentID, Title
+from sigili.type.id import ArticleID, ContentID, Label
 
 
 @dataclass
 class Draft:
-    title: Title
+    title: Label
     content: bytes
     groups: list[str]
     editOf: Article | None = None
@@ -49,7 +49,7 @@ class DraftRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_draft(self, title: Title) -> Draft | None:
+    def get_draft(self, title: Label) -> Draft | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -63,13 +63,13 @@ class DraftRepository(ABC):
 
 class MemoryDraftRepository(DraftRepository):
     def __init__(self) -> None:
-        self.drafts: dict[Title, Draft] = dict()
+        self.drafts: dict[Label, Draft] = dict()
 
     def set_draft(self, draft: Draft) -> Draft:
         self.drafts[draft.title] = draft
         return draft
 
-    def get_draft(self, title: Title) -> Draft | None:
+    def get_draft(self, title: Label) -> Draft | None:
         return self.drafts.get(title, None)
 
     def get_drafts(self) -> Iterator[Draft]:
