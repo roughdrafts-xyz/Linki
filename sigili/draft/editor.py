@@ -1,5 +1,3 @@
-
-from abc import ABC, abstractmethod
 from typing import Iterable
 from sigili.article.repository import ArticleRepository
 
@@ -23,7 +21,6 @@ class Editor():
             update = self._repo.merge_article(update)
             self._titles.set_title(update.title, update)
 
-    @abstractmethod
     def load_titles(self) -> None:
         for title in self._titles.get_titles():
             article = self._repo.get_article(title.articleId)

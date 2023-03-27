@@ -44,7 +44,7 @@ class FileSystemContentRepository(ContentRepository):
         return _contentPath.resolve()
 
     def add_content(self, content: bytes) -> ContentID:
-        contentId = self.getContentID(content)
+        contentId = ContentID.getContentID(content)
         self._content.joinpath(contentId).write_bytes(content)
         return contentId
 

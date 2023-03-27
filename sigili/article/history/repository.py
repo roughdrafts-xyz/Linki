@@ -35,21 +35,6 @@ class MemoryHistoryRepository(HistoryRepository):
         return self._childrenOf[parentId]
 
 
-class BadHistoryRepository(HistoryRepository):
-    def add_edit(self, parentId: str, childId: str) -> None:
-        del parentId
-        del childId
-        return None
-
-    def get_parent(self, childId: str) -> str:
-        del childId
-        return ''
-
-    def get_children(self, parentId: str) -> list[str]:
-        del parentId
-        return ['']
-
-
 class FileSystemHistoryRepository(HistoryRepository):
     def __init__(self, path: Path):
         self._history = path

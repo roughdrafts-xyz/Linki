@@ -25,20 +25,20 @@ def getContentRepository(style: str):
             yield MemoryContentRepository()
         case TestContentRepository.__name__:
             yield TestContentRepository()
-#       case FileSystemContentRepository.__name__:
-#           _dir = TemporaryDirectory()
-#           _dirPath = Path(_dir.name)
-#           _contentPath = FileSystemContentRepository.initialize_directory(
-#               _dirPath)
-#           try:
-#               yield FileSystemContentRepository(path=_contentPath)
-#           finally:
-#               _dir.cleanup()
+        case FileSystemContentRepository.__name__:
+            _dir = TemporaryDirectory()
+            _dirPath = Path(_dir.name)
+            _contentPath = FileSystemContentRepository.initialize_directory(
+                _dirPath)
+            try:
+                yield FileSystemContentRepository(path=_contentPath)
+            finally:
+                _dir.cleanup()
 
 
 styles = {
     MemoryContentRepository.__name__,
-    # FileSystemContentRepository.__name__,
+    FileSystemContentRepository.__name__,
     TestContentRepository.__name__,
 }
 
