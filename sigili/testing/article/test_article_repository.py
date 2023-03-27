@@ -7,7 +7,6 @@ import pytest
 from sigili.article.repository import ArticleRepository, ArticleUpdate, Article
 from sigili.article.repository import MemoryArticleRepository
 from sigili.article.repository import FileSystemArticleRepository
-from sigili.testing.article.strategies import an_article
 from sigili.type.id import ArticleID, ContentID
 
 

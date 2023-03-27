@@ -3,7 +3,7 @@ from unittest import TestCase
 from hypothesis import given, strategies
 import pytest
 from sigili.article.repository import Article, MemoryArticleRepository
-from sigili.testing.article.strategies import an_article, some_articles
+from sigili.testing.strategies.article import some_articles
 
 from sigili.title.repository import MemoryTitleRepository
 

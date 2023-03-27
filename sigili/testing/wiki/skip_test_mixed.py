@@ -13,9 +13,9 @@ def wiki(memoryRepo, fileRepo):
 
 def test_does_sync_with_same_history(memoryRepo, fileRepo, wiki):
     expectedLocal = memoryRepo.add_article(
-        ArticleUpdate(b'Hello World', []))
+        ArticleUpdate('Hello World', b'Hello World', []))
     expectedRemote = fileRepo.add_article(
-        ArticleUpdate(b'Hello World', []))
+        ArticleUpdate('Hello World', b'Hello World', []))
 
     wiki.sync()
 
@@ -29,9 +29,9 @@ def test_does_sync_with_same_history(memoryRepo, fileRepo, wiki):
 
 def test_does_sync_with_different_history(memoryRepo, fileRepo, wiki):
     expectedLocal = fileRepo.add_article(
-        ArticleUpdate(b'Hello Moon', []))
+        ArticleUpdate('Hello Moon', b'Hello Moon', []))
     expectedRemote = memoryRepo.add_article(
-        ArticleUpdate(b'Hello Sun', []))
+        ArticleUpdate('Hello Sun', b'Hello Sun', []))
 
     wiki.sync()
 
@@ -44,10 +44,10 @@ def test_does_sync_with_different_history(memoryRepo, fileRepo, wiki):
 
 
 def test_does_sync_with_same_long_history(memoryRepo, fileRepo, wiki):
-    helloMoon = ArticleUpdate(b'Hello Moon', [])
+    helloMoon = ArticleUpdate('Hello Moon', b'Hello Moon', [])
     remoteArticleDetails = fileRepo.add_article(helloMoon)
     goodNightMoon = ArticleUpdate(
-        b'Goodnight Moon', [], remoteArticleDetails.articleId)
+        'Goodnight Moon', b'Goodnight Moon', [], remoteArticleDetails.articleId)
     memoryRepo.add_article(helloMoon)
 
     fileRepo.update_article(goodNightMoon)
@@ -61,12 +61,12 @@ def test_does_sync_with_same_long_history(memoryRepo, fileRepo, wiki):
 
 
 def test_does_sync_with_different_long_history(memoryRepo, fileRepo, wiki):
-    helloMoon = ArticleUpdate(b'Hello Moon', [])
+    helloMoon = ArticleUpdate('Hello Moon', b'Hello Moon', [])
     remoteArticleDetails = fileRepo.add_article(helloMoon)
     goodNightMoon = ArticleUpdate(
-        b'Goodnight Moon', [], remoteArticleDetails.articleId)
+        'Goodnight Moon', b'Goodnight Moon', [], remoteArticleDetails.articleId)
     helloSun = ArticleUpdate(
-        b'Hello Sun', [], remoteArticleDetails.articleId
+        'Hello Sun', b'Hello Sun', [], remoteArticleDetails.articleId
     )
     memoryRepo.add_article(helloMoon)
 

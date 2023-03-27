@@ -10,11 +10,12 @@ def an_article(draw: strategies.DrawFn, data: bytes | None = None):
     if (data is None):
         data = draw(strategies.binary())
     groups = draw(strategies.lists(strategies.text()))
+    title = draw(strategies.text())
     article_update = ArticleUpdate(
+        title,
         data,
         groups
     )
-    title = draw(strategies.text())
     contentID = ContentID.getContentID(data)
     articleID = ArticleID.getArticleID(article_update)
     article = Article(
@@ -28,4 +29,4 @@ def an_article(draw: strategies.DrawFn, data: bytes | None = None):
 
 @strategies.composite
 def some_articles(draw: strategies.DrawFn, amount: int):
-    return strategies.lists(an_article(), min_size=amount, max_size=amount)
+    return draw(strategies.lists(an_article(), min_size=amount, max_size=amount))

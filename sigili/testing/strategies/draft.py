@@ -1,7 +1,6 @@
 from hypothesis import strategies
 from sigili.draft.repository import Draft
-
-from sigili.testing.article.strategies import an_article
+from sigili.testing.strategies.article import an_article
 
 
 @strategies.composite

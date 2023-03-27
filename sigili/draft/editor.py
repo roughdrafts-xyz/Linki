@@ -1,10 +1,9 @@
 
 from abc import ABC, abstractmethod
 from typing import Iterable
-from sigili.article.repository import ArticleRepository, ArticleUpdate
+from sigili.article.repository import ArticleRepository
 
 from sigili.draft.repository import Draft, DraftRepository
-from sigili.draft.source import Source, SourceRepository
 from sigili.title.repository import TitleRepository
 
 

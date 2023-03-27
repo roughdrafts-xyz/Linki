@@ -5,7 +5,7 @@ from hypothesis import given
 from sigili.article.repository import MemoryArticleRepository
 from sigili.draft.editor import Editor
 from sigili.draft.repository import Draft, MemoryDraftRepository
-from sigili.testing.draft.strategies import a_draft
+from sigili.testing.strategies.draft import a_draft
 from sigili.title.repository import MemoryTitleRepository
 
 

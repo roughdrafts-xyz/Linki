@@ -16,6 +16,7 @@ class Draft:
 
     def asArticleUpdate(self) -> ArticleUpdate:
         return ArticleUpdate(
+            self.source.title,
             self.content,
             self.groups,
             self.source.articleId
