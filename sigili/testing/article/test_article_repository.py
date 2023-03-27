@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 
 import pytest
 from sigili.article.content.repository import ContentRepository
-from sigili.article.repository import ArticleRepository, ArticleUpdate, ArticleDetails
+from sigili.article.repository import ArticleRepository, ArticleUpdate, Article
 from sigili.article.repository import MemoryArticleRepository
 from sigili.article.repository import FileSystemArticleRepository
 
@@ -14,10 +14,10 @@ class ControlArticleRepository(ArticleRepository):
         self.articles = {}
         self.updates = {}
 
-    def _add_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def _add_article(self, update: ArticleUpdate) -> Article:
         articleId = self.getArticleID(update)
         contentId = ContentRepository.getContentID(update.content)
-        newArticle = ArticleDetails(
+        newArticle = Article(
             articleId,
             contentId,
             update.groups,
@@ -25,18 +25,18 @@ class ControlArticleRepository(ArticleRepository):
         )
         return newArticle
 
-    def add_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def add_article(self, update: ArticleUpdate) -> Article:
         newArticle = self._add_article(update)
         self.articles[newArticle.articleId] = newArticle
         self.updates[newArticle.articleId] = update
         return newArticle
 
-    def update_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def update_article(self, update: ArticleUpdate) -> Article:
         if (update.editOf is None or not self.has_article(update.editOf)):
             raise KeyError
         return self.add_article(update)
 
-    def get_article(self, articleId: str) -> ArticleDetails:
+    def get_article(self, articleId: str) -> Article:
         return self.articles[articleId]
 
     def has_article(self, articleId: str) -> bool:

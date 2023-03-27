@@ -1,6 +1,6 @@
 [project]
 name = "sigili"
-version = '0.0.6'
+version = '0.0.7'
 description = 'Distributed wiki tools'
 authors = [
     {name = 'Zone Booth', email = 'kinostl@gmail.com' }

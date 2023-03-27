@@ -1,5 +1,5 @@
 from hypothesis import given, strategies as st
-from sigili.article.repository import ArticleDetails, ArticleUpdate, MemoryArticleRepository
+from sigili.article.repository import Article
 from sigili.draft.repository import Draft
 
 from sigili.draft.source import MemorySourceRepository, Source
@@ -30,7 +30,7 @@ def an_article(draw: st.DrawFn):
     contentId = draw(an_id())
     groups = draw(st.lists(st.text()))
     editOf = draw(st.one_of(an_id(), st.none()))
-    article = ArticleDetails(
+    article = Article(
         ArticleID(articleId),
         ContentID(contentId),
         groups,
@@ -41,7 +41,7 @@ def an_article(draw: st.DrawFn):
 
 
 @given(a_source_id(), an_article())
-def test_should_add_source(sourceId: SourceID, article: ArticleDetails):
+def test_should_add_source(sourceId: SourceID, article: Article):
     repo = MemorySourceRepository()
     source = Source(sourceId, article.articleId,
                     article.contentId, article.groups)
@@ -49,7 +49,7 @@ def test_should_add_source(sourceId: SourceID, article: ArticleDetails):
 
 
 @given(a_source_id(), an_article())
-def test_should_get_source(sourceId: SourceID, article: ArticleDetails):
+def test_should_get_source(sourceId: SourceID, article: Article):
     repo = MemorySourceRepository()
     source = Source(sourceId, article.articleId,
                     article.contentId, article.groups)
@@ -58,7 +58,7 @@ def test_should_get_source(sourceId: SourceID, article: ArticleDetails):
 
 
 @given(a_source_id(), an_article(), an_article())
-def test_should_flag_update(sourceId: SourceID, source_article: ArticleDetails, draft_article: ArticleDetails):
+def test_should_flag_update(sourceId: SourceID, source_article: Article, draft_article: Article):
     source_repo = MemorySourceRepository()
     source = source_repo.set_source(sourceId, source_article)
     draft = Draft(sourceId, draft_article.contentId, draft_article.groups)
@@ -71,7 +71,7 @@ def test_should_flag_update(sourceId: SourceID, source_article: ArticleDetails, 
 
 
 @given(a_source_id(), an_article())
-def test_should_flag_update_for_new_file(sourceId: SourceID, draft_article: ArticleDetails):
+def test_should_flag_update_for_new_file(sourceId: SourceID, draft_article: Article):
     source_repo = MemorySourceRepository()
     draft = Draft(sourceId, draft_article.contentId, draft_article.groups)
 
@@ -82,7 +82,7 @@ def test_should_flag_update_for_new_file(sourceId: SourceID, draft_article: Arti
 
 
 @given(a_source_id(), an_article())
-def test_should_not_flag_non_update(sourceId: SourceID, article: ArticleDetails):
+def test_should_not_flag_non_update(sourceId: SourceID, article: Article):
     source_repo = MemorySourceRepository()
     source_repo.set_source(sourceId, article)
     draft = Draft(sourceId, article.contentId, article.groups)

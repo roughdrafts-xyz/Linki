@@ -1,57 +1,47 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Iterator
+from sigili.article.repository import Article, ArticleRepository
 
-
-@dataclass
-class TitleDetails:
-    title: str
-    articleId: str
+from sigili.type.id import ArticleID
 
 
 class TitleRepository(ABC):
+    articles: ArticleRepository
+
     @abstractmethod
-    def set_title(self, title: str, articleId: str | None) -> TitleDetails | None:
+    def set_title(self, title: str, article: Article | None) -> Article | None:
         raise NotImplementedError
 
     @abstractmethod
-    def get_title(self, title) -> TitleDetails:
+    def get_title(self, title) -> Article:
         raise NotImplementedError
 
     @abstractmethod
-    def get_titles(self) -> list[TitleDetails]:
+    def get_titles(self) -> Iterator[Article]:
         raise NotImplementedError
 
-    @abstractmethod
-    def get_options(self, title) -> list[TitleDetails]:
-        raise NotImplementedError
+    def get_options(self, title) -> Iterator[Article]:
+        for articleId in self.articles.get_articleIds():
+            article = self.articles.get_article(articleId)
+            if (article.title == title):
+                yield article
 
 
-class MemoryTitleRepository():
-    def __init__(self) -> None:
-        self.titles: dict[str, TitleDetails] = dict()
-        self.store: dict[str, list[TitleDetails]] = dict()
+class MemoryTitleRepository(TitleRepository):
+    def __init__(self, articles: ArticleRepository) -> None:
+        self.titles: dict[str, Article] = dict()
+        self.articles = articles
 
-    def set_title(self, title: str, articleId: str | None) -> TitleDetails | None:
-        if (articleId is None):
+    def set_title(self, title: str, article: Article | None) -> Article | None:
+        if (article is None):
             del self.titles[title]
             return None
+        self.titles[title] = article
+        return article
 
-        _title_detail = TitleDetails(
-            title,
-            articleId
-        )
-
-        if (title not in self.store):
-            self.store[title] = []
-        self.store[title].append(_title_detail)
-        self.titles[title] = _title_detail
-        return _title_detail
-
-    def get_title(self, title) -> TitleDetails:
+    def get_title(self, title) -> Article:
         return self.titles[title]
 
-    def get_titles(self) -> list[TitleDetails]:
-        return list(self.titles.values())
-
-    def get_options(self, title) -> list[TitleDetails]:
-        return list(self.store[title])
+    def get_titles(self) -> Iterator[Article]:
+        return self.titles.values().__iter__()

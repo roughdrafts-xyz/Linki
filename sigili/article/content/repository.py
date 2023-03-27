@@ -7,9 +7,6 @@ from sigili.type.id import ContentID
 
 class ContentRepository(ABC):
     @staticmethod
-    def getContentID(content: bytes) -> ContentID:
-        return ContentID(sha224(content).hexdigest())
-
     @abstractmethod
     def add_content(self, content: bytes) -> ContentID:
         raise NotImplementedError

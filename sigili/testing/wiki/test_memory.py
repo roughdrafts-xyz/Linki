@@ -1,8 +1,8 @@
 import pytest
-from tests.article.test_article_repository import memoryRepo
 
 from sigili.article.repository import ArticleUpdate
 from sigili.article.repository import MemoryArticleRepository
+from sigili.testing.article.test_article_repository import memoryRepo
 from sigili.wiki import Wiki
 
 

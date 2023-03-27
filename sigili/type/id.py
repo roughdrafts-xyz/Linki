@@ -1,3 +1,4 @@
+from hashlib import sha224
 import re
 
 SHA224 = re.compile(r'[a-f0-9]{56}')
@@ -20,10 +21,24 @@ class _ID(str):
 
 
 class ArticleID(_ID):
+    @classmethod
+    def getArticleID(cls, update: 'ArticleUpdate') -> 'ArticleID':
+        _groups = map(str.encode, update.groups)
+        _editOf = str.encode(update.editOf or '')
+        return cls(sha224(
+            b''.join([
+                _editOf,
+                *_groups,
+                update.content
+            ])
+        ).hexdigest())
     pass
 
 
 class ContentID(_ID):
+    @classmethod
+    def getContentID(cls, content: bytes) -> 'ContentID':
+        return cls(sha224(content).hexdigest())
     pass
 
 
@@ -37,3 +52,6 @@ class TitleID(_ID):
 
 class SourceID(_ID):
     pass
+
+
+Title = str

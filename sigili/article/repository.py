@@ -7,7 +7,7 @@ from pathlib import Path
 from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
 from sigili.article.group.repository import FileSystemGroupRepository, GroupRepository, MemoryGroupRepository
 from sigili.article.history.repository import FileSystemHistoryRepository, HistoryRepository, MemoryHistoryRepository
-from sigili.type.id import ArticleID, ContentID
+from sigili.type.id import ArticleID, ContentID, Title
 
 
 @dataclass
@@ -18,7 +18,8 @@ class ArticleUpdate():
 
 
 @dataclass
-class ArticleDetails():
+class Article():
+    title: Title
     articleId: ArticleID
     contentId: ContentID
     groups: list[str]
@@ -34,16 +35,20 @@ class ArticleRepository(ABC):
     def groups(self) -> GroupRepository:
         return self._groups
 
+    @property
+    def content(self) -> ContentRepository:
+        return self._content
+
     @abstractmethod
-    def add_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def add_article(self, update: ArticleUpdate) -> Article:
         raise NotImplementedError
 
     @abstractmethod
-    def update_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def update_article(self, update: ArticleUpdate) -> Article:
         raise NotImplementedError
 
     @abstractmethod
-    def get_article(self, articleId: ArticleID) -> ArticleDetails:
+    def get_article(self, articleId: ArticleID) -> Article:
         raise NotImplementedError
 
     @abstractmethod
@@ -58,32 +63,20 @@ class ArticleRepository(ABC):
     def get_update(self, articleId: ArticleID) -> ArticleUpdate:
         raise NotImplementedError
 
-    def merge_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def merge_article(self, update: ArticleUpdate) -> Article:
         if (self.has_article(update.editOf)):
             return self.update_article(update)
         return self.add_article(update)
 
-    @staticmethod
-    def getArticleID(update: ArticleUpdate) -> ArticleID:
-        _groups = map(str.encode, update.groups)
-        _editOf = str.encode(update.editOf or '')
-        return ArticleID(sha224(
-            b''.join([
-                _editOf,
-                *_groups,
-                update.content
-            ])
-        ).hexdigest())
-
 
 class MemoryArticleRepository(ArticleRepository):
     def __init__(self) -> None:
-        self._articles: dict[ArticleID, ArticleDetails] = {}
+        self._articles: dict[ArticleID, Article] = {}
         self._content = MemoryContentRepository()
         self._history = MemoryHistoryRepository()
         self._groups = MemoryGroupRepository()
 
-    def _add_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def _add_article(self, update: ArticleUpdate) -> Article:
         _content = update.content
         _groups = update.groups
         _contentId = self._content.add_content(_content)
@@ -91,18 +84,18 @@ class MemoryArticleRepository(ArticleRepository):
         for group in _groups:
             self._groups.add_to_group(_contentId, group)
 
-        return ArticleDetails(
+        return Article(
             _articleId,
             _contentId,
             _groups,
         )
 
-    def add_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def add_article(self, update: ArticleUpdate) -> Article:
         newArticle = self._add_article(update)
         self._articles[newArticle.articleId] = newArticle
         return newArticle
 
-    def get_article(self, articleId: ArticleID) -> ArticleDetails:
+    def get_article(self, articleId: ArticleID) -> Article:
         if (self.has_article(articleId)):
             return self._articles[articleId]
         raise KeyError(
@@ -111,7 +104,7 @@ class MemoryArticleRepository(ArticleRepository):
     def has_article(self, articleId: ArticleID | None) -> bool:
         return articleId in self._articles
 
-    def update_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def update_article(self, update: ArticleUpdate) -> Article:
         if (update.editOf is None or not self.has_article(update.editOf)):
             raise KeyError(
                 'Article must be an edit of another Article already in the Repository. Try using merge_article or add_article instead.')
@@ -170,7 +163,7 @@ class FileSystemArticleRepository(ArticleRepository):
         FileSystemGroupRepository.initialize_directory(path)
         return cls.get_paths(path)
 
-    def _add_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def _add_article(self, update: ArticleUpdate) -> Article:
         _content = update.content
         _groups = update.groups
         _contentId = self._content.add_content(_content)
@@ -179,32 +172,32 @@ class FileSystemArticleRepository(ArticleRepository):
         for group in _groups:
             self._groups.add_to_group(_contentId, group)
 
-        return ArticleDetails(
+        return Article(
             _articleId,
             _contentId,
             _groups
         )
 
-    def _write_article(self, article: ArticleDetails) -> None:
+    def _write_article(self, article: Article) -> None:
         with self._articles.joinpath(article.articleId).open('w') as _jsonPath:
             json.dump(asdict(article), _jsonPath)
 
-    def _get_article(self, articleId: ArticleID) -> ArticleDetails:
+    def _get_article(self, articleId: ArticleID) -> Article:
         with self._articles.joinpath(articleId).open() as _jsonPath:
             _json = json.load(_jsonPath)
-            return ArticleDetails(
+            return Article(
                 _json['articleId'],
                 _json['contentId'],
                 _json['groups'],
                 _json['editOf']
             )
 
-    def add_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def add_article(self, update: ArticleUpdate) -> Article:
         newArticle = self._add_article(update)
         self._write_article(newArticle)
         return newArticle
 
-    def get_article(self, articleId: ArticleID) -> ArticleDetails:
+    def get_article(self, articleId: ArticleID) -> Article:
         if (self.has_article(articleId)):
             return self._get_article(articleId)
         raise KeyError(
@@ -215,7 +208,7 @@ class FileSystemArticleRepository(ArticleRepository):
             return False
         return self._articles.joinpath(articleId).exists()
 
-    def update_article(self, update: ArticleUpdate) -> ArticleDetails:
+    def update_article(self, update: ArticleUpdate) -> Article:
         if (update.editOf is None or not self.has_article(update.editOf)):
             raise KeyError(
                 'Article must be an edit of another Article already in the Repository. Try using merge_article or add_article instead.')

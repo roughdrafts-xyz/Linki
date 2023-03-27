@@ -1,7 +1,7 @@
 import pytest
 
-from tests.article.test_article_repository import fileRepo, memoryRepo
 from sigili.article.repository import ArticleUpdate
+from sigili.testing.article.test_article_repository import fileRepo, memoryRepo
 
 from sigili.wiki import Wiki
 
