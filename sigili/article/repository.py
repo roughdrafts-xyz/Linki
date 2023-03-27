@@ -189,6 +189,7 @@ class FileSystemArticleRepository(ArticleRepository):
         with self._articles.joinpath(articleId).open() as _jsonPath:
             _json = json.load(_jsonPath)
             return Article(
+                _json['title'],
                 _json['articleId'],
                 _json['contentId'],
                 _json['groups'],

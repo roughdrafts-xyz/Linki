@@ -75,19 +75,19 @@ def getArticleRepository(style: str):
             yield ControlArticleRepository()
         case MemoryArticleRepository.__name__:
             yield MemoryArticleRepository()
-#       case FileSystemArticleRepository.__name__:
-#           _dir = TemporaryDirectory()
-#           _dirPath = Path(_dir.name)
-#           _paths = FileSystemArticleRepository.initialize_directory(_dirPath)
-#           try:
-#               yield FileSystemArticleRepository(_paths)
-#           finally:
-#               _dir.cleanup()
+        case FileSystemArticleRepository.__name__:
+            _dir = TemporaryDirectory()
+            _dirPath = Path(_dir.name)
+            _paths = FileSystemArticleRepository.initialize_directory(_dirPath)
+            try:
+                yield FileSystemArticleRepository(_paths)
+            finally:
+                _dir.cleanup()
 
 
 styles = {
     MemoryArticleRepository.__name__,
-    #   FileSystemArticleRepository.__name__,
+    FileSystemArticleRepository.__name__,
     ControlArticleRepository.__name__,
 }
 
