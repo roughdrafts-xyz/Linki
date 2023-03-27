@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from hypothesis import given
 
 import pytest
 from sigili.article.repository import ArticleRepository, ArticleUpdate, Article

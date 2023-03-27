@@ -42,16 +42,4 @@ class ContentID(_ID):
     pass
 
 
-class DraftID(_ID):
-    pass
-
-
-class TitleID(_ID):
-    pass
-
-
-class SourceID(_ID):
-    pass
-
-
 Title = str
