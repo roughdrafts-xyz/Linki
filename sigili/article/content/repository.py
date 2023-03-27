@@ -6,7 +6,6 @@ from sigili.type.id import ContentID
 
 
 class ContentRepository(ABC):
-    @staticmethod
     @abstractmethod
     def add_content(self, content: bytes) -> ContentID:
         raise NotImplementedError
@@ -21,7 +20,7 @@ class MemoryContentRepository(ContentRepository):
         self._data = {}
 
     def add_content(self, content: bytes) -> ContentID:
-        contentId = self.getContentID(content)
+        contentId = ContentID.getContentID(content)
         self._data[contentId] = content
         return contentId
 

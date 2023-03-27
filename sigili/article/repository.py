@@ -12,6 +12,7 @@ from sigili.type.id import ArticleID, ContentID, Title
 
 @dataclass
 class ArticleUpdate():
+    title: Title
     content: bytes
     groups: list[str]
     editOf: ArticleID | None = None
@@ -80,11 +81,12 @@ class MemoryArticleRepository(ArticleRepository):
         _content = update.content
         _groups = update.groups
         _contentId = self._content.add_content(_content)
-        _articleId = self.getArticleID(update)
+        _articleId = ArticleID.getArticleID(update)
         for group in _groups:
             self._groups.add_to_group(_contentId, group)
 
         return Article(
+            update.title,
             _articleId,
             _contentId,
             _groups,
@@ -123,6 +125,7 @@ class MemoryArticleRepository(ArticleRepository):
         _article = self._articles[articleId]
         _content = self._content.get_content(_article.contentId)
         return ArticleUpdate(
+            _article.title,
             _content,
             _article.groups,
             _article.editOf
@@ -167,12 +170,13 @@ class FileSystemArticleRepository(ArticleRepository):
         _content = update.content
         _groups = update.groups
         _contentId = self._content.add_content(_content)
-        _articleId = self.getArticleID(update)
+        _articleId = ArticleID.getArticleID(update)
 
         for group in _groups:
             self._groups.add_to_group(_contentId, group)
 
         return Article(
+            update.title,
             _articleId,
             _contentId,
             _groups
@@ -227,6 +231,7 @@ class FileSystemArticleRepository(ArticleRepository):
         _article = self.get_article(articleId)
         _content = self._content.get_content(_article.contentId)
         return ArticleUpdate(
+            _article.title,
             _content,
             _article.groups,
             _article.editOf
