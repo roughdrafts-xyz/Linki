@@ -3,10 +3,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
-from sigili.article.content.repository import ContentRepository
 from sigili.article.repository import ArticleRepository, ArticleUpdate, Article
 from sigili.article.repository import MemoryArticleRepository
 from sigili.article.repository import FileSystemArticleRepository
+from sigili.type.id import ArticleID, ContentID
 
 
 class ControlArticleRepository(ArticleRepository):
@@ -15,9 +15,11 @@ class ControlArticleRepository(ArticleRepository):
         self.updates = {}
 
     def _add_article(self, update: ArticleUpdate) -> Article:
-        articleId = self.getArticleID(update)
-        contentId = ContentRepository.getContentID(update.content)
+        articleId = ArticleID.getArticleID(update)
+        contentId = ContentID.getContentID(update.content)
+        title = 'Title'
         newArticle = Article(
+            title,
             articleId,
             contentId,
             update.groups,
