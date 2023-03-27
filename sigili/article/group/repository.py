@@ -37,13 +37,17 @@ class GroupRepository(ABC):
         memberId = memberId.strip()
         groupId = groupId.strip()
 
-        assert memberId and memberId.isprintable()
-        assert groupId and groupId.isprintable()
-        assert memberId is not groupId
+        if (not (memberId and memberId.isprintable())):
+            raise ValueError
+        if (not (groupId and groupId.isprintable())):
+            raise ValueError
+        if (memberId is groupId):
+            raise ValueError
 
         _members = self.get_members_of(groupId)
         _groups = self.get_groups_of(memberId)
-        assert not ((memberId in _members) and (groupId in _groups))
+        if (((memberId in _members) and (groupId in _groups))):
+            raise ValueError
 
         return [memberId, groupId]
 
@@ -56,7 +60,7 @@ class MemoryGroupRepository(GroupRepository):
     def add_to_group(self, memberId: str, groupId: str) -> None:
         try:
             memberId, groupId = self._validate_ids(memberId, groupId)
-        except AssertionError:
+        except ValueError:
             return None
 
         if (groupId not in self._byGroup):
@@ -97,7 +101,7 @@ class FileSystemGroupRepository(GroupRepository):
     def add_to_group(self, memberId: str, groupId: str) -> None:
         try:
             memberId, groupId = self._validate_ids(memberId, groupId)
-        except AssertionError:
+        except ValueError:
             return None
 
         _memberPath = self._byMember.joinpath(memberId)

@@ -1,5 +1,6 @@
 from hashlib import sha224
 import re
+import string
 
 SHA224 = re.compile(r'[a-f0-9]{56}')
 
@@ -48,4 +49,20 @@ class ContentID(_ID):
     pass
 
 
-Title = str
+class Title(str):
+    @classmethod
+    def from_string(cls, title: str) -> 'Title':
+        badCharacters = r'\/:*?"<>|'
+        badCharacters += r"'"
+
+        _title = str(title)
+        _title = _title.strip()
+        _title = _title.strip(badCharacters + r".")
+        for character in title:
+            if ((character in string.whitespace) or
+                (character in badCharacters) or
+                    (not character.isprintable())):
+                _title = _title.replace(character, '_')
+        if not _title:
+            _title = '_'
+        return cls(_title)

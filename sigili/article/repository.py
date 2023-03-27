@@ -31,15 +31,16 @@ class Article():
         _groups = update.groups
         _contentId = ContentID.getContentID(_content)
         _articleId = ArticleID.getArticleID(update)
+        _title = Title.from_string(update.title)
         if (update.editOf is None):
             return Article(
-                update.title,
+                _title,
                 _articleId,
                 _contentId,
                 _groups,
             )
         return Article(
-            update.title,
+            _title,
             _articleId,
             _contentId,
             _groups,

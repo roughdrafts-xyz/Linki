@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+import json
+from pathlib import Path
+import string
 from typing import Iterator
 from sigili.article.repository import Article, ArticleRepository, ArticleUpdate
 
@@ -10,11 +13,11 @@ class TitleRepository(ABC):
     articles: ArticleRepository
 
     @abstractmethod
-    def set_title(self, title: str, update: ArticleUpdate) -> Article:
+    def set_title(self, title: Title, update: ArticleUpdate) -> Article | None:
         raise NotImplementedError
 
     @abstractmethod
-    def get_title(self, title) -> Article:
+    def get_title(self, title) -> Article | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -37,12 +40,15 @@ class MemoryTitleRepository(TitleRepository):
         self.titles: dict[Title, Article] = dict()
         self.articles = articles
 
-    def set_title(self, title: Title, update: ArticleUpdate) -> Article:
+    def set_title(self, title: Title, update: ArticleUpdate) -> Article | None:
+        title = Title.from_string(title)
         article = self.articles.add_article(update)
         self.titles[title] = article
         return article
 
-    def get_title(self, title) -> Article:
+    def get_title(self, title) -> Article | None:
+        if (title not in self.titles):
+            return None
         return self.titles[title]
 
     def clear_title(self, title: Title) -> None:
@@ -51,3 +57,42 @@ class MemoryTitleRepository(TitleRepository):
 
     def get_titles(self) -> Iterator[Article]:
         return self.titles.values().__iter__()
+
+
+class FileSystemTitleRepository(TitleRepository):
+    def __init__(self, articles: ArticleRepository, path: Path) -> None:
+        self._titles = path
+        self.articles = articles
+
+    @staticmethod
+    def initialize_directory(path: Path):
+        if (not path.exists()):
+            raise FileNotFoundError
+        _titlePath = path.joinpath('titles')
+        _titlePath.mkdir()
+        return _titlePath.resolve()
+
+    def set_title(self, title: Title, update: ArticleUpdate) -> Article | None:
+        title = Title.from_string(title)
+        article = self.articles.add_article(update)
+        self._titles.joinpath(title).write_text(article.articleId)
+        return article
+
+    def get_title(self, title) -> Article | None:
+        _title = self._titles.joinpath(title)
+        if (not _title.exists()):
+            return None
+        _article = _title.read_text()
+        article = self.articles.get_article(ArticleID(_article))
+        return article
+
+    def clear_title(self, title: Title) -> None:
+        _title = self._titles.joinpath(title)
+        if (not _title.exists()):
+            return None
+        _title.unlink()
+
+    def get_titles(self) -> Iterator[Article]:
+        for _title in self._titles.iterdir():
+            article_id = ArticleID(_title.read_text())
+            yield self.articles.get_article(article_id)
