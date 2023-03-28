@@ -8,13 +8,13 @@ from sigili.type.id import ArticleID, ContentID, Label
 
 @strategies.composite
 def a_group(draw: strategies.DrawFn):
-    group = draw(strategies.text(alphabet=string.printable, min_size=1))
+    group = draw(strategies.text(alphabet=string.printable, min_size=10))
     return group
 
 
 @strategies.composite
 def a_label(draw: strategies.DrawFn):
-    label = draw(strategies.text(alphabet=string.printable, min_size=1))
+    label = draw(strategies.text(alphabet=string.printable, min_size=10))
     return Label(label)
 
 
@@ -38,6 +38,26 @@ def an_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
         groups
     )
     return article
+
+
+@strategies.composite
+def an_edit_of(draw: strategies.DrawFn, base_article: Article, data: bytes | None = None):
+    if (data is None):
+        data = draw(strategies.binary())
+    article_update = ArticleUpdate(
+        base_article.title,
+        data,
+        base_article.groups
+    )
+    contentID = ContentID.getContentID(data)
+    articleID = ArticleID.getArticleID(article_update)
+    return Article(
+        base_article.title,
+        articleID,
+        contentID,
+        base_article.groups,
+        base_article.articleId
+    )
 
 
 @strategies.composite

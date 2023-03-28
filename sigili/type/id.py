@@ -81,7 +81,7 @@ class Label():
     def as_safe_string(string: str) -> str:
         _str = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", "-", string)
         _str = _str.strip()
-        if (_str is None):
+        if (not _str):
             _str = "-"
         return _str
 

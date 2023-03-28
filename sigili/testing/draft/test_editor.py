@@ -36,6 +36,7 @@ def test_loads_titles(draft: Draft):
 
     _title = titles.set_title(draft.title, draft.asArticleUpdate())
     editor.load_titles()
+    assert _title is not None
     _draft = drafts.get_draft(_title.title)
 
     assert _draft is not None

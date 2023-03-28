@@ -150,7 +150,9 @@ class FileSystemDraftRepository(DraftRepository):
 
     def clear_draft(self, title: Label) -> None:
         _draft = self._drafts.joinpath(title.name)
-        if (not _draft.exists()):
+        if (not _draft.exists() or
+                self._drafts == _draft
+                ):
             return None
         _draft.joinpath('data').unlink()
         _draft.joinpath('content').unlink()
