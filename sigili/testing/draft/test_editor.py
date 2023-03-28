@@ -1,11 +1,12 @@
 
+from typing import Iterator
 from unittest import TestCase
 
 from hypothesis import given, strategies
 from sigili.article.repository import Article, MemoryArticleRepository
 from sigili.draft.editor import Editor
 from sigili.draft.repository import Draft, MemoryDraftRepository
-from sigili.testing.strategies.draft import a_draft
+from sigili.testing.strategies.draft import a_draft, some_drafts
 from sigili.title.repository import MemoryTitleRepository
 
 
@@ -69,15 +70,14 @@ def test_does_publish_new_draft(draft: Draft):
         assert len(draft_count) != len(title_count)
 
 
-@given(strategies.data())
-def test_does_publish_some_drafts(data: strategies.DataObject):
+@given(some_drafts(3))
+def test_does_publish_some_drafts(some_drafts: Iterator[Draft]):
     repo = MemoryArticleRepository()
     titles = MemoryTitleRepository(repo)
     drafts = MemoryDraftRepository()
     editor = Editor(titles, drafts)
 
-    for x in range(3):
-        draft = data.draw(a_draft())
+    for draft in some_drafts:
         drafts.set_draft(draft)
 
     editor.publish_drafts()

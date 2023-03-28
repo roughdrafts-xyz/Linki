@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, asdict
 import json
 from pathlib import Path
+import pickle
 
 from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
 from sigili.article.group.repository import FileSystemGroupRepository, GroupRepository, MemoryGroupRepository
@@ -190,19 +191,13 @@ class FileSystemArticleRepository(ArticleRepository):
         )
 
     def _write_article(self, article: Article) -> None:
-        with self._articles.joinpath(article.articleId).open('w') as _jsonPath:
-            json.dump(asdict(article), _jsonPath)
+        with self._articles.joinpath(article.articleId).open('wb') as _path:
+            pickle.dump(article, _path)
 
-    def _get_article(self, articleId: ArticleID) -> Article:
-        with self._articles.joinpath(articleId).open() as _jsonPath:
-            _json = json.load(_jsonPath)
-            return Article(
-                _json['title'],
-                _json['articleId'],
-                _json['contentId'],
-                _json['groups'],
-                _json['editOf']
-            )
+    def _load_article(self, articleId: ArticleID) -> Article:
+        with self._articles.joinpath(articleId).open('rb') as _path:
+            _pickle = pickle.load(_path)
+            return _pickle
 
     def add_article(self, update: ArticleUpdate) -> Article:
         newArticle = self._add_article(update)
@@ -211,7 +206,7 @@ class FileSystemArticleRepository(ArticleRepository):
 
     def get_article(self, articleId: ArticleID) -> Article:
         if (self.has_article(articleId)):
-            return self._get_article(articleId)
+            return self._load_article(articleId)
         raise KeyError(
             'Article not found. Try using merge_article or add_article first.')
 

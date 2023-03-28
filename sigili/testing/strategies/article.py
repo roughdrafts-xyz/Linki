@@ -17,7 +17,7 @@ def an_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
     if (data is None):
         data = draw(strategies.binary())
     groups = draw(strategies.lists(a_group(), unique=True))
-    _title = draw(strategies.text())
+    _title = draw(strategies.text(min_size=1))
     title = Label(_title)
     article_update = ArticleUpdate(
         title,

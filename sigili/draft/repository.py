@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
 import json
 from pathlib import Path
+import pickle
 from typing import Iterator
 from sigili.article.repository import Article, ArticleUpdate
 
@@ -45,6 +46,21 @@ class Draft:
         )
 
 
+@dataclass
+class SparseDraft:
+    title: Label
+    groups: list[str]
+    editOf: Article | None = None
+
+    @classmethod
+    def fromDraft(cls, draft: Draft):
+        return cls(
+            draft.title,
+            draft.groups,
+            draft.editOf
+        )
+
+
 class DraftRepository(ABC):
     @abstractmethod
     def set_draft(self, draft: Draft) -> Draft:
@@ -84,30 +100,28 @@ class MemoryDraftRepository(DraftRepository):
 
 class FileSystemDraftRepository(DraftRepository):
     def __init__(self, path: Path) -> None:
-        self._folder = path
-        self._drafts = path.joinpath('drafts')
+        self._folder = path.resolve()
+        self._drafts = path.joinpath('drafts').resolve()
 
-    def _write_draft_data(self, draft: Draft):
-        with self._drafts.joinpath(draft.title.name, 'data').open('w') as _jsonPath:
-            _draft = asdict(draft)
-            del _draft['content']
-            json.dump(_draft, _jsonPath)
+    def _write_draft_data(self, draft: Draft) -> SparseDraft:
+        with self._drafts.joinpath(draft.title.name, 'data').open('wb') as _path:
+            _draft = SparseDraft.fromDraft(draft)
+            pickle.dump(_draft, _path)
+            return _draft
 
-    def _get_draft_data(self, title: Label):
-        with self._drafts.joinpath(title.name).open() as _jsonPath:
-            _json = json.load(_jsonPath)
-            return _json
+    def _get_draft_data(self, title: Label) -> SparseDraft:
+        with self._drafts.joinpath(title.name, 'data').open('rb') as _path:
+            _draft = pickle.load(_path)
+            return _draft
 
     def set_draft(self, draft: Draft) -> Draft:
         _draft = self._drafts.joinpath(draft.title.name)
         _draft.mkdir(exist_ok=True)
-        _draft.joinpath('content').write_bytes(draft.content)
+
+        _content = _draft.joinpath('content')
+        _content.write_bytes(draft.content)
+
         self._write_draft_data(draft)
-        last_path = self._drafts
-        for group in draft.groups:
-            last_path = self._folder.joinpath(group)
-            last_path.mkdir()
-        last_path.symlink_to(self._drafts.joinpath(draft.title.name))
         _draft = self.get_draft(draft.title)
         if (_draft is not None):
             return _draft
@@ -121,10 +135,10 @@ class FileSystemDraftRepository(DraftRepository):
         _content = _draft.joinpath('content').read_bytes()
         _data = self._get_draft_data(title)
         return Draft(
-            title,
+            _data.title,
             _content,
-            _data.get('groups', []),
-            _data.get('editOf', None)
+            _data.groups,
+            _data.editOf
         )
 
     def get_drafts(self) -> Iterator[Draft]:
@@ -148,4 +162,4 @@ class FileSystemDraftRepository(DraftRepository):
             raise FileNotFoundError
         _titlePath = path.joinpath('drafts')
         _titlePath.mkdir()
-        return _titlePath.resolve()
+        return path
