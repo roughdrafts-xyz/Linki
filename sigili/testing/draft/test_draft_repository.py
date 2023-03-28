@@ -6,44 +6,16 @@ from typing import Iterator, List
 from unittest import TestCase
 
 import pytest
-from sigili.draft.repository import Draft, FileSystemDraftRepository, MemoryDraftRepository
+from sigili.draft.repository import Draft
 from hypothesis import given
+from sigili.testing.contexts.draft import getDraftRepository, styles
 from sigili.testing.strategies.draft import a_draft, some_drafts
-
-
-@contextmanager
-def getTitleRepository(style: str):
-    match style:
-        case MemoryDraftRepository.__name__:
-            yield MemoryDraftRepository()
-        case FileSystemDraftRepository.__name__:
-            _dir = TemporaryDirectory()
-            _dirPath = Path(_dir.name)
-            _draftPath = FileSystemDraftRepository.initialize_directory(
-                _dirPath)
-            try:
-                yield FileSystemDraftRepository(_draftPath)
-            finally:
-                _dir.cleanup()
-
-
-styles = {
-    MemoryDraftRepository.__name__,
-    FileSystemDraftRepository.__name__,
-}
-
-
-@pytest.mark.parametrize('style', styles)
-@given(a_draft())
-def test_should_a_draft(style, draft):
-    with getTitleRepository(style) as repo:
-        assert repo.set_draft(draft) == draft
 
 
 @pytest.mark.parametrize('style', styles)
 @given(some_drafts(2))
-def test_should_a_draft(style, drafts):
-    with getTitleRepository(style) as repo:
+def test_should_set_a_draft(style, drafts):
+    with getDraftRepository(style) as repo:
         for draft in drafts:
             print(draft)
             assert repo.set_draft(draft) == draft
@@ -52,7 +24,7 @@ def test_should_a_draft(style, drafts):
 @pytest.mark.parametrize('style', styles)
 @given(a_draft())
 def test_should_get_draft(style, draft):
-    with getTitleRepository(style) as repo:
+    with getDraftRepository(style) as repo:
         draft = repo.set_draft(draft)
         assert repo.get_draft(draft.title) == draft
 
@@ -60,7 +32,7 @@ def test_should_get_draft(style, draft):
 @pytest.mark.parametrize('style', styles)
 @given(a_draft())
 def test_should_get_drafts(style, draft):
-    with getTitleRepository(style) as repo:
+    with getDraftRepository(style) as repo:
         draft = repo.set_draft(draft)
         test = TestCase()
         test.assertCountEqual(repo.get_drafts(), [draft])
@@ -69,7 +41,7 @@ def test_should_get_drafts(style, draft):
 @pytest.mark.parametrize('style', styles)
 @given(some_drafts(2))
 def test_should_get_some_drafts(style, drafts: List[Draft]):
-    with getTitleRepository(style) as repo:
+    with getDraftRepository(style) as repo:
         _drafts = []
         for draft in drafts:
             repo.set_draft(draft)
@@ -82,7 +54,7 @@ def test_should_get_some_drafts(style, drafts: List[Draft]):
 @pytest.mark.parametrize('style', styles)
 @given(a_draft())
 def test_should_clear_a_draft(style, draft):
-    with getTitleRepository(style) as repo:
+    with getDraftRepository(style) as repo:
         draft = repo.set_draft(draft)
         assert repo.get_draft(draft.title) == draft
 
@@ -93,7 +65,7 @@ def test_should_clear_a_draft(style, draft):
 @pytest.mark.parametrize('style', styles)
 @given(some_drafts(2))
 def test_should_clear_some_drafts(style, drafts: Iterator[Draft]):
-    with getTitleRepository(style) as repo:
+    with getDraftRepository(style) as repo:
         _drafts = []
         for draft in drafts:
             draft = repo.set_draft(draft)

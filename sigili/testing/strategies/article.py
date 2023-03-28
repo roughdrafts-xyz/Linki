@@ -13,12 +13,17 @@ def a_group(draw: strategies.DrawFn):
 
 
 @strategies.composite
+def a_label(draw: strategies.DrawFn):
+    label = draw(strategies.text(alphabet=string.printable, min_size=1))
+    return Label(label)
+
+
+@strategies.composite
 def an_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
     if (data is None):
         data = draw(strategies.binary())
     groups = draw(strategies.lists(a_group(), unique=True))
-    _title = draw(strategies.text(min_size=1))
-    title = Label(_title)
+    title = draw(a_label())
     article_update = ArticleUpdate(
         title,
         data,

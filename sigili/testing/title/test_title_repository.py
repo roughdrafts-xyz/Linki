@@ -1,16 +1,9 @@
-from contextlib import contextmanager
-from pathlib import Path
-from tempfile import TemporaryDirectory
-from typing import Iterable, List
-from unittest import TestCase
 from hypothesis import given, strategies
 import pytest
-from sigili.article.repository import Article, ArticleUpdate, MemoryArticleRepository
+from sigili.article.repository import Article, ArticleUpdate
 from sigili.draft.repository import Draft
-from sigili.testing.strategies.article import some_articles
-from sigili.testing.strategies.draft import a_draft, a_draft_as_an_article_update, some_drafts
-
-from sigili.title.repository import FileSystemTitleRepository, MemoryTitleRepository
+from sigili.testing.contexts.title import getTitleRepository, styles
+from sigili.testing.strategies.draft import a_draft, a_draft_as_an_article_update
 
 # from sigili.title.repository import TitleDetails
 
@@ -19,29 +12,6 @@ from sigili.title.repository import FileSystemTitleRepository, MemoryTitleReposi
 # CAR needs to provide CAs or information about them.
 
 # Titles is the choice of phrase for current titles
-
-
-@contextmanager
-def getTitleRepository(style: str):
-    articles = MemoryArticleRepository()
-    match style:
-        case MemoryTitleRepository.__name__:
-            yield MemoryTitleRepository(articles)
-        case FileSystemTitleRepository.__name__:
-            _dir = TemporaryDirectory()
-            _dirPath = Path(_dir.name)
-            _titlePath = FileSystemTitleRepository.initialize_directory(
-                _dirPath)
-            try:
-                yield FileSystemTitleRepository(articles, _titlePath)
-            finally:
-                _dir.cleanup()
-
-
-styles = {
-    MemoryTitleRepository.__name__,
-    FileSystemTitleRepository.__name__,
-}
 
 
 @pytest.mark.parametrize('style', styles)
