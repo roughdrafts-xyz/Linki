@@ -38,3 +38,8 @@ def a_draft(draw: strategies.DrawFn):
 @strategies.composite
 def some_drafts(draw: strategies.DrawFn, amount: int):
     return (draw(a_draft()) for _ in range(amount))
+
+
+@strategies.composite
+def some_new_drafts(draw: strategies.DrawFn, amount: int):
+    return (draw(a_new_draft()) for _ in range(amount))

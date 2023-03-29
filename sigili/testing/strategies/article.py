@@ -78,3 +78,16 @@ def an_article(draw: strategies.DrawFn, data: bytes | None = None):
 @strategies.composite
 def some_articles(draw: strategies.DrawFn, amount: int):
     return draw(strategies.lists(an_article(), min_size=amount, max_size=amount))
+
+
+@strategies.composite
+def an_article_update(draw: strategies.DrawFn, data: bytes | None = None):
+    if (data is None):
+        data = draw(strategies.binary())
+    article = draw(an_article(data))
+    return ArticleUpdate(
+        article.title,
+        data,
+        article.groups,
+        article.editOf
+    )

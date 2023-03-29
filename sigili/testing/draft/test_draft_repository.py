@@ -13,8 +13,16 @@ from sigili.testing.strategies.draft import a_draft, some_drafts
 
 
 @pytest.mark.parametrize('style', styles)
+@given(a_draft())
+def test_should_set_a_draft(style, draft):
+    with getDraftRepository(style) as repo:
+        print(draft)
+        assert repo.set_draft(draft) == draft
+
+
+@pytest.mark.parametrize('style', styles)
 @given(some_drafts(2))
-def test_should_set_a_draft(style, drafts):
+def test_should_set_some_drafts(style, drafts):
     with getDraftRepository(style) as repo:
         for draft in drafts:
             print(draft)
@@ -48,9 +56,12 @@ def test_should_get_some_drafts(style, drafts: List[Draft]):
         for draft in drafts:
             repo.set_draft(draft)
 
+        got_drafts = list(repo.get_drafts())
         assert len(drafts) > 0
+        assert len(got_drafts) > 0
+        assert len(got_drafts) <= len(drafts)
 
-        for draft in repo.get_drafts():
+        for draft in got_drafts:
             assert draft in drafts
 
 

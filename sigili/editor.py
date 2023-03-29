@@ -1,5 +1,5 @@
 from typing import Iterable
-from sigili.article.repository import ArticleRepository
+from sigili.article.repository import ArticleRepository, ArticleUpdate
 from sigili.draft.repository import Draft, DraftRepository
 from sigili.title.repository import TitleRepository
 
@@ -18,17 +18,17 @@ class Editor():
 
     def publish_drafts(self) -> None:
         for title in self._titles.get_titles():
-            hasDraft = self._drafts.get_draft(title.title) != None
-            if not hasDraft:
+            isClear = self._drafts.get_draft(title.title) is None
+            if isClear:
                 self._titles.clear_title(title.title)
 
         for draft in self.get_updates():
-            update = draft.asArticleUpdate()
-            self._titles.set_title(update.title, update)
+            article = self._articles.merge_article(draft.asArticleUpdate())
+            self._titles.set_title(article.title, article)
 
     def load_titles(self) -> None:
         for title in self._titles.get_titles():
-            content = self._titles.articles.content.get_content(
+            content = self._articles.content.get_content(
                 title.contentId)
             draft = Draft(
                 title.title,

@@ -1,14 +1,14 @@
 
-from typing import Iterator
+from typing import Iterator, List
 from unittest import TestCase
 
 from hypothesis import given, strategies
-from sigili.article.repository import Article, MemoryArticleRepository
+from sigili.article.repository import Article, ArticleUpdate, MemoryArticleRepository
 from sigili.editor import Editor
 from sigili.draft.repository import Draft, MemoryDraftRepository
-from sigili.testing.strategies.article import an_article
-from sigili.testing.strategies.draft import a_draft, a_new_draft, some_drafts
-from sigili.title.repository import MemoryTitleRepository
+from sigili.testing.strategies.article import an_article, an_article_update
+from sigili.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
+from sigili.title.repository import MemoryTitleRepository, Title
 
 
 @given(a_new_draft())
@@ -26,13 +26,14 @@ def test_get_updates(draft: Draft):
     test.assertCountEqual([draft], draft_count)
 
 
-@given(an_article())
-def test_loads_titles(article: Article):
+@given(an_article_update())
+def test_loads_titles(update: ArticleUpdate):
     articles = MemoryArticleRepository()
     titles = MemoryTitleRepository()
     drafts = MemoryDraftRepository()
     editor = Editor(titles, drafts, articles)
 
+    article = articles.add_article(update)
     _title = titles.set_title(article.title, article)
     assert _title is not None
 
@@ -40,55 +41,68 @@ def test_loads_titles(article: Article):
     _draft = drafts.get_draft(_title.title)
     assert _draft is not None
 
-    assert _title.title == _draft.title
+    assert _draft.title == _title.title
     assert _draft.content == articles.content.get_content(
         _title.contentId)
     assert sorted(_draft.groups) == sorted(_title.groups)
-    assert _draft.editOf == articles.get_article(_title.articleId)
+    assert _draft.editOf == _title
+    assert _draft.editOf == Title.fromArticle(article)
 
 
-@given(a_draft())
+@given(a_new_draft())
 def test_does_publish_new_draft(draft: Draft):
-    repo = MemoryArticleRepository()
-    titles = MemoryTitleRepository(repo)
+    articles = MemoryArticleRepository()
+    titles = MemoryTitleRepository()
     drafts = MemoryDraftRepository()
-    editor = Editor(titles, drafts)
+    editor = Editor(titles, drafts, articles)
 
     drafts.set_draft(draft)
 
     editor.publish_drafts()
 
-    draft_count = [draft for draft in drafts.get_drafts()]
-    title_count = [title for title in titles.get_titles()]
+    draft_count = [draft.title for draft in drafts.get_drafts()]
+    title_count = [title.title for title in titles.get_titles()]
 
-    if (draft.should_update()):
-        assert len(draft_count) == len(title_count)
-        test = TestCase()
-        articles = [Article.fromArticleUpdate(
-            draft.asArticleUpdate()) for draft in draft_count]
-        test.assertCountEqual(title_count, articles)
-    else:
-        assert len(draft_count) != len(title_count)
+    test = TestCase()
+    test.assertCountEqual(title_count, draft_count)
 
 
-@given(some_drafts(3))
-def test_does_publish_some_drafts(some_drafts: Iterator[Draft]):
-    repo = MemoryArticleRepository()
-    titles = MemoryTitleRepository(repo)
+@given(some_new_drafts(2))
+def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
+    some_drafts = list(some_drafts)
+    articles = MemoryArticleRepository()
+    titles = MemoryTitleRepository()
     drafts = MemoryDraftRepository()
-    editor = Editor(titles, drafts)
+    editor = Editor(titles, drafts, articles)
 
     for draft in some_drafts:
         drafts.set_draft(draft)
 
     editor.publish_drafts()
 
-    draft_count = [draft for draft in drafts.get_drafts()]
-    title_count = [title for title in titles.get_titles()]
+    draft_count = [draft.title for draft in drafts.get_drafts()]
+    title_count = [title.title for title in titles.get_titles()]
 
-    for draft in draft_count:
-        article = Article.fromArticleUpdate(draft.asArticleUpdate())
-        if (draft.should_update()):
-            assert article in title_count
-        else:
-            assert article not in title_count
+    test = TestCase()
+    test.assertCountEqual(title_count, draft_count)
+
+
+@given(some_drafts(2))
+def test_does_publish_some_drafts(some_drafts: List[Draft]):
+    some_drafts = list(some_drafts)
+    articles = MemoryArticleRepository()
+    titles = MemoryTitleRepository()
+    drafts = MemoryDraftRepository()
+    editor = Editor(titles, drafts, articles)
+
+    for draft in some_drafts:
+        drafts.set_draft(draft)
+
+    editor.publish_drafts()
+
+    draft_count = [draft.title for draft in drafts.get_drafts()]
+    title_count = [title.title for title in titles.get_titles()]
+    if (len(draft_count) > 0):
+        assert len(title_count) > 0
+        for title in title_count:
+            assert title in draft_count

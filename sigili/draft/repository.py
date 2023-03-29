@@ -31,6 +31,20 @@ class Draft:
         content_different = self.contentId != self.editOf.contentId
         return groups_different or content_different
 
+    def asArticleUpdate(self):
+        if (self.editOf is not None):
+            return ArticleUpdate(
+                self.title,
+                self.content,
+                self.groups,
+                self.editOf.articleId
+            )
+        return ArticleUpdate(
+            self.title,
+            self.content,
+            self.groups
+        )
+
 
 @dataclass
 class SparseDraft:
