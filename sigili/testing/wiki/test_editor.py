@@ -67,6 +67,24 @@ def test_does_publish_new_draft(draft: Draft):
     test.assertCountEqual(title_count, draft_count)
 
 
+@given(a_draft())
+def test_does_publish_draft(draft: Draft):
+    articles = MemoryArticleRepository()
+    titles = MemoryTitleRepository()
+    drafts = MemoryDraftRepository()
+    editor = Editor(titles, drafts, articles)
+
+    drafts.set_draft(draft)
+
+    editor.publish_drafts()
+
+    title_count = [title.title for title in titles.get_titles()]
+    update_count = [draft.title for draft in editor.get_updates()]
+
+    test = TestCase()
+    test.assertCountEqual(title_count, update_count)
+
+
 @given(some_new_drafts(2))
 def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
     some_drafts = list(some_drafts)
