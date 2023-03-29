@@ -7,15 +7,15 @@ from sigili.article.repository import Article, MemoryArticleRepository
 from sigili.editor import Editor
 from sigili.draft.repository import Draft, MemoryDraftRepository
 from sigili.testing.strategies.article import an_article
-from sigili.testing.strategies.draft import a_draft, some_drafts
+from sigili.testing.strategies.draft import a_draft, a_new_draft, some_drafts
 from sigili.title.repository import MemoryTitleRepository
 
 
-@given(a_draft())
+@given(a_new_draft())
 def test_get_updates(draft: Draft):
-    articles = MemoryArticleRepository()
     titles = MemoryTitleRepository()
     drafts = MemoryDraftRepository()
+    articles = MemoryArticleRepository()
     editor = Editor(titles, drafts, articles)
 
     drafts.set_draft(draft)
@@ -23,10 +23,7 @@ def test_get_updates(draft: Draft):
     assert len(draft_count) > 0
 
     test = TestCase()
-    if (draft.should_update()):
-        test.assertCountEqual([draft], draft_count)
-    else:
-        test.assertCountEqual([], draft_count)
+    test.assertCountEqual([draft], draft_count)
 
 
 @given(an_article())

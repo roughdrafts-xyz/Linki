@@ -19,7 +19,7 @@ def a_label(draw: strategies.DrawFn):
 
 
 @strategies.composite
-def an_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
+def a_new_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
     if (data is None):
         data = draw(strategies.binary())
     groups = draw(strategies.lists(a_group(), unique=True))
@@ -58,6 +58,21 @@ def an_edit_of(draw: strategies.DrawFn, base_article: Article, data: bytes | Non
         base_article.groups,
         base_article.articleId
     )
+
+
+@strategies.composite
+def an_article(draw: strategies.DrawFn, data: bytes | None = None):
+    if (data is not None):
+        article = a_new_article(data)
+        update = an_edit_of(draw(article), data)
+        article = strategies.one_of(article, update)
+    else:
+        article = a_new_article(data)
+        update = an_edit_of(draw(article), data)
+        new_update = an_edit_of(draw(article))
+        article = strategies.one_of(article, update, new_update)
+    article = draw(article)
+    return article
 
 
 @strategies.composite

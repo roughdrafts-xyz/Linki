@@ -12,7 +12,9 @@ class Editor():
         self._articles = articles
 
     def get_updates(self) -> Iterable[Draft]:
-        return (_draft for _draft in self._drafts.get_drafts() if _draft.should_update())
+        for _draft in self._drafts.get_drafts():
+            if (_draft.should_update()):
+                yield _draft
 
     def publish_drafts(self) -> None:
         for title in self._titles.get_titles():

@@ -1,10 +1,10 @@
 from hypothesis import strategies
 from sigili.draft.repository import Draft
-from sigili.testing.strategies.article import an_article, an_edit_of
+from sigili.testing.strategies.article import a_new_article, an_article, an_edit_of
 
 
 @strategies.composite
-def a_draft(draw: strategies.DrawFn):
+def an_update_draft(draw: strategies.DrawFn):
     base_data = draw(strategies.binary())
     base_article = draw(an_article(base_data))
     new_data = draw(strategies.binary())
@@ -15,6 +15,24 @@ def a_draft(draw: strategies.DrawFn):
         new_article.groups,
         base_article
     )
+
+
+@strategies.composite
+def a_new_draft(draw: strategies.DrawFn):
+    base_data = draw(strategies.binary())
+    base_article = draw(a_new_article(base_data))
+    return Draft(
+        base_article.title,
+        base_data,
+        base_article.groups,
+        None
+    )
+
+
+@strategies.composite
+def a_draft(draw: strategies.DrawFn):
+    draft = draw(strategies.one_of(a_new_draft(), an_update_draft()))
+    return draft
 
 
 @strategies.composite
