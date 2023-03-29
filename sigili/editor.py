@@ -1,15 +1,15 @@
 from typing import Iterable
 from sigili.article.repository import ArticleRepository
-
 from sigili.draft.repository import Draft, DraftRepository
 from sigili.title.repository import TitleRepository
 
 
 class Editor():
 
-    def __init__(self, titles: TitleRepository, drafts: DraftRepository) -> None:
+    def __init__(self, titles: TitleRepository, drafts: DraftRepository, articles: ArticleRepository) -> None:
         self._titles = titles
         self._drafts = drafts
+        self._articles = articles
 
     def get_updates(self) -> Iterable[Draft]:
         return (_draft for _draft in self._drafts.get_drafts() if _draft.should_update())

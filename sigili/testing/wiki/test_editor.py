@@ -4,21 +4,23 @@ from unittest import TestCase
 
 from hypothesis import given, strategies
 from sigili.article.repository import Article, MemoryArticleRepository
-from sigili.draft.editor import Editor
+from sigili.editor import Editor
 from sigili.draft.repository import Draft, MemoryDraftRepository
+from sigili.testing.strategies.article import an_article
 from sigili.testing.strategies.draft import a_draft, some_drafts
 from sigili.title.repository import MemoryTitleRepository
 
 
 @given(a_draft())
 def test_get_updates(draft: Draft):
-    repo = MemoryArticleRepository()
-    titles = MemoryTitleRepository(repo)
+    articles = MemoryArticleRepository()
+    titles = MemoryTitleRepository()
     drafts = MemoryDraftRepository()
-    editor = Editor(titles, drafts)
+    editor = Editor(titles, drafts, articles)
 
     drafts.set_draft(draft)
     draft_count = list(editor.get_updates())
+    assert len(draft_count) > 0
 
     test = TestCase()
     if (draft.should_update()):
@@ -27,24 +29,25 @@ def test_get_updates(draft: Draft):
         test.assertCountEqual([], draft_count)
 
 
-@given(a_draft())
-def test_loads_titles(draft: Draft):
-    repo = MemoryArticleRepository()
-    titles = MemoryTitleRepository(repo)
+@given(an_article())
+def test_loads_titles(article: Article):
+    articles = MemoryArticleRepository()
+    titles = MemoryTitleRepository()
     drafts = MemoryDraftRepository()
-    editor = Editor(titles, drafts)
+    editor = Editor(titles, drafts, articles)
 
-    _title = titles.set_title(draft.title, draft.asArticleUpdate())
-    editor.load_titles()
+    _title = titles.set_title(article.title, article)
     assert _title is not None
-    _draft = drafts.get_draft(_title.title)
 
+    editor.load_titles()
+    _draft = drafts.get_draft(_title.title)
     assert _draft is not None
+
     assert _title.title == _draft.title
-    assert _draft.content == titles.articles.content.get_content(
+    assert _draft.content == articles.content.get_content(
         _title.contentId)
     assert sorted(_draft.groups) == sorted(_title.groups)
-    assert _draft.editOf == _title
+    assert _draft.editOf == articles.get_article(_title.articleId)
 
 
 @given(a_draft())

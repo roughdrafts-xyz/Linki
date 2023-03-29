@@ -18,10 +18,5 @@ def a_draft(draw: strategies.DrawFn):
 
 
 @strategies.composite
-def a_draft_as_an_article_update(draw: strategies.DrawFn):
-    return draw(a_draft()).asArticleUpdate()
-
-
-@strategies.composite
 def some_drafts(draw: strategies.DrawFn, amount: int):
     return (draw(a_draft()) for _ in range(amount))

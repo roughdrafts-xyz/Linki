@@ -14,10 +14,12 @@ def getDraftRepository(style: str):
         case FileSystemDraftRepository.__name__:
             _dir = TemporaryDirectory()
             _dirPath = Path(_dir.name)
+            _sigiliPath = _dirPath.joinpath('.sigili')
+            _sigiliPath.mkdir()
             _draftPath = FileSystemDraftRepository.initialize_directory(
-                _dirPath)
+                _sigiliPath)
             try:
-                yield FileSystemDraftRepository(_draftPath)
+                yield FileSystemDraftRepository(_dirPath, _draftPath)
             finally:
                 _dir.cleanup()
 

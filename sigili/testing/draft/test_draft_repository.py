@@ -34,19 +34,22 @@ def test_should_get_draft(style, draft):
 def test_should_get_drafts(style, draft):
     with getDraftRepository(style) as repo:
         draft = repo.set_draft(draft)
+        drafts = list(repo.get_drafts())
+        assert len(drafts) > 0
         test = TestCase()
-        test.assertCountEqual(repo.get_drafts(), [draft])
+        test.assertCountEqual(drafts, [draft])
 
 
 @pytest.mark.parametrize('style', styles)
 @given(some_drafts(2))
 def test_should_get_some_drafts(style, drafts: List[Draft]):
     with getDraftRepository(style) as repo:
-        _drafts = []
+        drafts = list(drafts)
         for draft in drafts:
             repo.set_draft(draft)
-            _drafts.append(draft)
-        drafts = _drafts
+
+        assert len(drafts) > 0
+
         for draft in repo.get_drafts():
             assert draft in drafts
 
@@ -58,21 +61,20 @@ def test_should_clear_a_draft(style, draft):
         draft = repo.set_draft(draft)
         assert repo.get_draft(draft.title) == draft
 
-        repo.clear_draft(draft.title)
+        assert repo.clear_draft(draft.title)
         assert repo.get_draft(draft.title) == None
 
 
 @pytest.mark.parametrize('style', styles)
 @given(some_drafts(2))
-def test_should_clear_some_drafts(style, drafts: Iterator[Draft]):
+def test_should_clear_some_drafts(style, drafts: List[Draft]):
     with getDraftRepository(style) as repo:
-        _drafts = []
+        drafts = list(drafts)
         for draft in drafts:
             draft = repo.set_draft(draft)
             assert repo.get_draft(draft.title) == draft
-            _drafts.append(draft)
 
-        cleared_draft = choice(_drafts)
+        cleared_draft = choice(drafts)
         repo.clear_draft(cleared_draft.title)
         assert repo.get_draft(cleared_draft.title) == None
 

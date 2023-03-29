@@ -31,20 +31,6 @@ class Draft:
         content_different = self.contentId != self.editOf.contentId
         return groups_different or content_different
 
-    def asArticleUpdate(self):
-        if (self.editOf is None):
-            return ArticleUpdate(
-                self.title,
-                self.content,
-                self.groups,
-            )
-        return ArticleUpdate(
-            self.title,
-            self.content,
-            self.groups,
-            self.editOf.articleId
-        )
-
 
 @dataclass
 class SparseDraft:
@@ -75,7 +61,7 @@ class DraftRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def clear_draft(self, title: Label) -> None:
+    def clear_draft(self, title: Label) -> bool:
         raise NotImplementedError
 
 
@@ -93,47 +79,45 @@ class MemoryDraftRepository(DraftRepository):
     def get_drafts(self) -> Iterator[Draft]:
         return self.drafts.values().__iter__()
 
-    def clear_draft(self, title: Label) -> None:
+    def clear_draft(self, title: Label) -> bool:
         if (title in self.drafts):
             del self.drafts[title]
+            return True
+        return False
 
 
 class FileSystemDraftRepository(DraftRepository):
-    def __init__(self, working_path: Path, settings_path: Path) -> None:
+    def __init__(self, working_path: Path, drafts_path: Path) -> None:
         self._folder = working_path.resolve()
-        self._drafts = settings_path.resolve()
+        self._drafts = drafts_path.resolve()
+        self._content = self._drafts.joinpath('content')
+        self._data = self._drafts.joinpath('data')
 
-    def _write_draft_data(self, draft: Draft) -> SparseDraft:
-        with self._drafts.joinpath(draft.title.name, 'data').open('wb') as _path:
+    def dump_draft(self, draft: Draft, path: Path) -> SparseDraft:
+        with path.open('wb') as _path:
             _draft = SparseDraft.fromDraft(draft)
             pickle.dump(_draft, _path)
             return _draft
 
-    def _get_draft_data(self, title: Label) -> SparseDraft:
-        with self._drafts.joinpath(title.name, 'data').open('rb') as _path:
+    def load_draft(self, path: Path) -> SparseDraft:
+        with path.open('rb') as _path:
             _draft = pickle.load(_path)
             return _draft
 
     def set_draft(self, draft: Draft) -> Draft:
-        _draft = self._drafts.joinpath(draft.title.name)
-        _draft.mkdir(exist_ok=True)
-
-        _content = _draft.joinpath('content')
+        _content = self._content.joinpath(draft.title.name)
+        _data = self._data.joinpath(draft.title.name)
         _content.write_bytes(draft.content)
-
-        self._write_draft_data(draft)
-        _draft = self.get_draft(draft.title)
-        if (_draft is not None):
-            return _draft
-        else:
-            raise LookupError
+        self.dump_draft(draft, _data)
+        return draft
 
     def get_draft(self, title: Label) -> Draft | None:
-        _draft = self._drafts.joinpath(title.name)
-        if (not _draft.exists()):
+        content_path = self._content.joinpath(title.name)
+        data_path = self._data.joinpath(title.name)
+        if (not (content_path.exists() and data_path.exists())):
             return None
-        _content = _draft.joinpath('content').read_bytes()
-        _data = self._get_draft_data(title)
+        _content = content_path.read_bytes()
+        _data = self.load_draft(data_path)
         return Draft(
             _data.title,
             _content,
@@ -142,26 +126,31 @@ class FileSystemDraftRepository(DraftRepository):
         )
 
     def get_drafts(self) -> Iterator[Draft]:
-        for draft in self._drafts.iterdir():
+        for draft in self._data.iterdir():
             title = Label(draft.name)
             _draft = self.get_draft(title)
             if (_draft is not None):
                 yield _draft
 
-    def clear_draft(self, title: Label) -> None:
-        _draft = self._drafts.joinpath(title.name)
-        if (not _draft.exists() or
-                self._drafts == _draft
-                ):
-            return None
-        _draft.joinpath('data').unlink()
-        _draft.joinpath('content').unlink()
-        _draft.rmdir()
+    def clear_draft(self, title: Label) -> bool:
+        content_path = self._content.joinpath(title.name)
+        data_path = self._data.joinpath(title.name)
+        if (not (content_path.exists() and data_path.exists())):
+            return False
+        content_path.unlink()
+        data_path.unlink()
+        return True
 
     @staticmethod
     def initialize_directory(path: Path):
         if (not path.exists()):
             raise FileNotFoundError
-        _titlePath = path.joinpath('drafts')
-        _titlePath.mkdir()
-        return path
+        _draftPath = path.joinpath('drafts')
+        _draftPath.mkdir()
+
+        _contentPath = _draftPath.joinpath('content')
+        _contentPath.mkdir()
+
+        _dataPath = _draftPath.joinpath('data')
+        _dataPath.mkdir()
+        return _draftPath
