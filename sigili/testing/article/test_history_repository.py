@@ -7,19 +7,22 @@ import pytest
 
 
 @contextmanager
-def getHistoryRepository(style: str):
+def getHistoryRepository(style: str, directory: Path | None = None):
     match style:
         case MemoryHistoryRepository.__name__:
             yield MemoryHistoryRepository()
         case FileSystemHistoryRepository.__name__:
-            _dir = TemporaryDirectory()
-            _dirPath = Path(_dir.name)
-            _historyPath = FileSystemHistoryRepository.initialize_directory(
-                _dirPath)
+            _dir = None
+            if (directory is None):
+                _dir = TemporaryDirectory()
+                directory = Path(_dir.name)
+                directory = FileSystemHistoryRepository.initialize_directory(
+                    directory)
             try:
-                yield FileSystemHistoryRepository(path=_historyPath)
+                yield FileSystemHistoryRepository(path=directory)
             finally:
-                _dir.cleanup()
+                if (_dir is not None):
+                    _dir.cleanup()
 
 
 styles = {

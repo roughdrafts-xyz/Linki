@@ -87,11 +87,10 @@ class MemoryDraftRepository(DraftRepository):
 
 
 class FileSystemDraftRepository(DraftRepository):
-    def __init__(self, working_path: Path, drafts_path: Path) -> None:
-        self._folder = working_path.resolve()
-        self._drafts = drafts_path.resolve()
-        self._content = self._drafts.joinpath('content')
-        self._data = self._drafts.joinpath('data')
+    def __init__(self, path: Path) -> None:
+        self._path = path.resolve()
+        self._content = self._path.joinpath('content')
+        self._data = self._path.joinpath('data')
 
     def dump_draft(self, draft: Draft, path: Path) -> SparseDraft:
         with path.open('wb') as _path:

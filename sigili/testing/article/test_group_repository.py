@@ -6,19 +6,22 @@ from sigili.article.group.repository import MemoryGroupRepository, FileSystemGro
 
 
 @contextmanager
-def getGroupRepository(style: str):
+def getGroupRepository(style: str, directory: Path | None = None):
     match style:
         case MemoryGroupRepository.__name__:
             yield MemoryGroupRepository()
         case FileSystemGroupRepository.__name__:
-            _dir = TemporaryDirectory()
-            _dirPath = Path(_dir.name)
-            _groupPath = FileSystemGroupRepository.initialize_directory(
-                _dirPath)
+            _dir = None
+            if (directory is None):
+                _dir = TemporaryDirectory()
+                _dirPath = Path(_dir.name)
+                directory = FileSystemGroupRepository.initialize_directory(
+                    _dirPath)
             try:
-                yield FileSystemGroupRepository(path=_groupPath)
+                yield FileSystemGroupRepository(path=directory)
             finally:
-                _dir.cleanup()
+                if (_dir is not None):
+                    _dir.cleanup()
 
 
 styles = {

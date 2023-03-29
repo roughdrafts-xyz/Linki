@@ -19,21 +19,24 @@ class TestContentRepository(ContentRepository):
 
 
 @contextmanager
-def getContentRepository(style: str):
+def getContentRepository(style: str, directory: Path | None = None):
     match style:
         case MemoryContentRepository.__name__:
             yield MemoryContentRepository()
         case TestContentRepository.__name__:
             yield TestContentRepository()
         case FileSystemContentRepository.__name__:
-            _dir = TemporaryDirectory()
-            _dirPath = Path(_dir.name)
-            _contentPath = FileSystemContentRepository.initialize_directory(
-                _dirPath)
+            _dir = None
+            if (directory is None):
+                _dir = TemporaryDirectory()
+                _dirPath = Path(_dir.name)
+                directory = FileSystemContentRepository.initialize_directory(
+                    _dirPath)
             try:
-                yield FileSystemContentRepository(path=_contentPath)
+                yield FileSystemContentRepository(path=directory)
             finally:
-                _dir.cleanup()
+                if (_dir is not None):
+                    _dir.cleanup()
 
 
 styles = {

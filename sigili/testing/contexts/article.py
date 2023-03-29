@@ -48,20 +48,26 @@ class ControlArticleRepository(ArticleRepository):
 
 
 @contextmanager
-def getArticleRepository(style: str):
+def getArticleRepository(style: str, directory: Path | None = None):
     match style:
         case ControlArticleRepository.__name__:
             yield ControlArticleRepository()
         case MemoryArticleRepository.__name__:
             yield MemoryArticleRepository()
         case FileSystemArticleRepository.__name__:
-            _dir = TemporaryDirectory()
-            _dirPath = Path(_dir.name)
-            _paths = FileSystemArticleRepository.initialize_directory(_dirPath)
+            _dir = None
+            if (directory is None):
+                _dir = TemporaryDirectory()
+                directory = Path(_dir.name)
+                _paths = FileSystemArticleRepository.initialize_directory(
+                directory)
+            else:
+                _paths = FileSystemArticleRepository.get_paths(directory)
             try:
                 yield FileSystemArticleRepository(_paths)
             finally:
-                _dir.cleanup()
+                if (_dir is not None):
+                    _dir.cleanup()
 
 
 styles = {

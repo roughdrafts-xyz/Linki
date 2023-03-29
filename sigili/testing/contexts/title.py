@@ -6,19 +6,22 @@ from sigili.title.repository import FileSystemTitleRepository, MemoryTitleReposi
 
 
 @contextmanager
-def getTitleRepository(style: str):
+def getTitleRepository(style: str, directory: Path | None = None):
     match style:
         case MemoryTitleRepository.__name__:
             yield MemoryTitleRepository()
         case FileSystemTitleRepository.__name__:
-            _dir = TemporaryDirectory()
-            _dirPath = Path(_dir.name)
-            _titlePath = FileSystemTitleRepository.initialize_directory(
-                _dirPath)
+            _dir = None
+            if (directory is None):
+                _dir = TemporaryDirectory()
+                _dirPath = Path(_dir.name)
+                directory = FileSystemTitleRepository.initialize_directory(
+                    _dirPath)
             try:
-                yield FileSystemTitleRepository(_titlePath)
+                yield FileSystemTitleRepository(directory)
             finally:
-                _dir.cleanup()
+                if (_dir is not None):
+                    _dir.cleanup()
 
 
 styles = {

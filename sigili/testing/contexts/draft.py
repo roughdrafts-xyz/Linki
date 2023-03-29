@@ -7,21 +7,22 @@ from sigili.draft.repository import FileSystemDraftRepository, MemoryDraftReposi
 
 
 @contextmanager
-def getDraftRepository(style: str):
+def getDraftRepository(style: str, directory: Path | None = None):
     match style:
         case MemoryDraftRepository.__name__:
             yield MemoryDraftRepository()
         case FileSystemDraftRepository.__name__:
-            _dir = TemporaryDirectory()
-            _dirPath = Path(_dir.name)
-            _sigiliPath = _dirPath.joinpath('.sigili')
-            _sigiliPath.mkdir()
-            _draftPath = FileSystemDraftRepository.initialize_directory(
-                _sigiliPath)
+            _dir = None
+            if (directory is None):
+                _dir = TemporaryDirectory()
+                _dirPath = Path(_dir.name)
+                directory = FileSystemDraftRepository.initialize_directory(
+                    _dirPath)
             try:
-                yield FileSystemDraftRepository(_dirPath, _draftPath)
+                yield FileSystemDraftRepository(directory)
             finally:
-                _dir.cleanup()
+                if (_dir is not None):
+                    _dir.cleanup()
 
 
 styles = {
