@@ -16,7 +16,6 @@ from sigili.testing.strategies.draft import a_draft, some_drafts
 @given(a_draft())
 def test_should_set_a_draft(style, draft):
     with getDraftRepository(style) as repo:
-        print(draft)
         assert repo.set_draft(draft) == draft
 
 
@@ -25,7 +24,6 @@ def test_should_set_a_draft(style, draft):
 def test_should_set_some_drafts(style, drafts):
     with getDraftRepository(style) as repo:
         for draft in drafts:
-            print(draft)
             assert repo.set_draft(draft) == draft
 
 

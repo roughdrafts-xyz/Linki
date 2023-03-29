@@ -82,9 +82,12 @@ def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
 
     draft_count = [draft.title for draft in drafts.get_drafts()]
     title_count = [title.title for title in titles.get_titles()]
+    update_count = [draft.title for draft in editor.get_updates()]
 
     test = TestCase()
     test.assertCountEqual(title_count, draft_count)
+    test.assertCountEqual(title_count, update_count)
+    test.assertCountEqual(draft_count, update_count)
 
 
 @given(some_drafts(2))
@@ -100,9 +103,8 @@ def test_does_publish_some_drafts(some_drafts: List[Draft]):
 
     editor.publish_drafts()
 
-    draft_count = [draft.title for draft in drafts.get_drafts()]
+    update_count = [draft.title for draft in editor.get_updates()]
     title_count = [title.title for title in titles.get_titles()]
-    if (len(draft_count) > 0):
-        assert len(title_count) > 0
-        for title in title_count:
-            assert title in draft_count
+
+    test = TestCase()
+    test.assertCountEqual(title_count, update_count)

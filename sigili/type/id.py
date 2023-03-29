@@ -60,7 +60,7 @@ class Label():
     _name: str | None = field(init=False, repr=False, default=None)
 
     def __init__(self, name: str) -> None:
-        if (not str):
+        if (not str or len(name) < 1):
             raise AttributeError
         self._label = name
         self.labelId = LabelID.getLabelID(self.name)

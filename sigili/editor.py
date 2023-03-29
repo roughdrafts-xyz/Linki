@@ -23,6 +23,7 @@ class Editor():
                 self._titles.clear_title(title.title)
 
         for draft in self.get_updates():
+            print("DEBUG::AM UPDATING>", draft)
             article = self._articles.merge_article(draft.asArticleUpdate())
             self._titles.set_title(article.title, article)
 
