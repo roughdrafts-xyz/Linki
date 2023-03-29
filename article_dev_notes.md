@@ -4,3 +4,19 @@
   - by groups
   - by tags
   - by content
+
+# Wiki has
+
+-Titles
+-Drafts
+-Articles
+-Remotes
+
+# Remote has
+
+-Wiki
+
+# Remote can
+
+-Sync
+-Clone

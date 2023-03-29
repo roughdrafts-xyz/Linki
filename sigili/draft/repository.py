@@ -99,9 +99,9 @@ class MemoryDraftRepository(DraftRepository):
 
 
 class FileSystemDraftRepository(DraftRepository):
-    def __init__(self, path: Path) -> None:
-        self._folder = path.resolve()
-        self._drafts = path.joinpath('drafts').resolve()
+    def __init__(self, working_path: Path, settings_path: Path) -> None:
+        self._folder = working_path.resolve()
+        self._drafts = settings_path.resolve()
 
     def _write_draft_data(self, draft: Draft) -> SparseDraft:
         with self._drafts.joinpath(draft.title.name, 'data').open('wb') as _path:

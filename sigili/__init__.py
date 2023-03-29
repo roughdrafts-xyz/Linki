@@ -10,7 +10,8 @@ from sigili.article.content.repository import ContentRepository as ContentReposi
 
 from sigili.title.repository import TitleRepository as TitleRepository
 from sigili.title.repository import MemoryTitleRepository as MemoryTitleRepository
+from sigili.title.repository import FileSystemTitleRepository as FileSystemTitleRepository
 
 from sigili.draft.editor import Editor as Editor
 from sigili.draft.repository import MemoryDraftRepository as MemoryDraftRepository
-from sigili.title.repository import MemoryTitleRepository as MemoryTitleRepository
+from sigili.draft.repository import FileSystemDraftRepository as FileSystemDraftRepository
