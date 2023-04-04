@@ -15,7 +15,7 @@ def getTitleRepository(style: str, directory: Path | None = None):
             if (directory is None):
                 _dir = TemporaryDirectory()
                 _dirPath = Path(_dir.name)
-                directory = FileSystemTitleRepository.initialize_directory(
+                directory = FileSystemTitleRepository.init(
                     _dirPath)
             try:
                 yield FileSystemTitleRepository(directory)

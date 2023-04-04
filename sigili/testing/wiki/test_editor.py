@@ -1,12 +1,13 @@
 
-from typing import Iterator, List
+from typing import List
 from unittest import TestCase
 
-from hypothesis import given, strategies
-from sigili.article.repository import Article, ArticleUpdate, MemoryArticleRepository
+from hypothesis import given
+
+from sigili.article.repository import ArticleUpdate, MemoryArticleRepository
 from sigili.editor import Editor
 from sigili.draft.repository import Draft, MemoryDraftRepository
-from sigili.testing.strategies.article import an_article, an_article_update
+from sigili.testing.strategies.article import an_article_update
 from sigili.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
 from sigili.title.repository import MemoryTitleRepository, Title
 

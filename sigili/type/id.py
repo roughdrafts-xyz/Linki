@@ -25,7 +25,7 @@ class _ID(str):
 class ArticleID(_ID):
     @classmethod
     def getArticleID(cls, update) -> 'ArticleID':
-        _groups = map(str.encode, update.groups)
+        _groups = [str.encode(group.labelId) for group in update.groups]
         if (update.editOf is None):
             _editOf = str.encode(BlankArticleID)
         else:
@@ -60,12 +60,22 @@ class Label():
     _name: str | None = field(init=False, repr=False, default=None)
 
     def __init__(self, name: str) -> None:
-        if (not str or len(name) < 1):
+        if (not self.is_valid(name)):
             raise AttributeError
         self._label = name
         self.labelId = LabelID.getLabelID(self.name)
 
-    @property
+    @classmethod
+    def is_valid(cls, string: str) -> bool:
+        if not string:
+            return False
+        safe_str = cls.as_safe_string(string)
+        return (
+            (len(string) > 0) and
+            (len(safe_str) > 0)
+        )
+
+    @ property
     def name(self):
         if (self._label is None):
             raise ValueError
@@ -73,17 +83,21 @@ class Label():
             self._name = self.as_safe_string(self._label)
         return self._name
 
-    @property
+    @ property
     def unsafe_raw_name(self):
         return self._label
 
-    @staticmethod
+    @ staticmethod
     def as_safe_string(string: str) -> str:
         _str = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", "-", string)
         _str = _str.strip()
+        _str = _str.strip('.')
         if (not _str):
             _str = "-"
         return _str
+
+    def __repr__(self) -> str:
+        return f"Label({self.unsafe_raw_name})"
 
     def __hash__(self) -> int:
         return hash(self.labelId)

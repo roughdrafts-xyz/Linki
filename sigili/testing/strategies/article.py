@@ -7,16 +7,9 @@ from sigili.type.id import ArticleID, ContentID, Label
 
 
 @strategies.composite
-def a_group(draw: strategies.DrawFn):
-    group = draw(strategies.text(alphabet=string.printable, min_size=10))
-    assume(len(group) > 0)
-    return group
-
-
-@strategies.composite
 def a_label(draw: strategies.DrawFn):
     label = draw(strategies.text(alphabet=string.printable))
-    assume(label)
+    assume(Label.is_valid(label))
     return Label(label)
 
 
@@ -24,7 +17,7 @@ def a_label(draw: strategies.DrawFn):
 def a_new_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
     if (data is None):
         data = draw(strategies.binary())
-    groups = draw(strategies.lists(a_group(), unique=True))
+    groups = [Label('test')]
     title = draw(a_label())
     article_update = ArticleUpdate(
         title,

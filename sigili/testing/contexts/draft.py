@@ -16,7 +16,7 @@ def getDraftRepository(style: str, directory: Path | None = None):
             if (directory is None):
                 _dir = TemporaryDirectory()
                 _dirPath = Path(_dir.name)
-                directory = FileSystemDraftRepository.initialize_directory(
+                directory = FileSystemDraftRepository.init(
                     _dirPath)
             try:
                 yield FileSystemDraftRepository(directory)

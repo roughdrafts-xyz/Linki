@@ -14,7 +14,7 @@ from sigili.type.id import ArticleID, BlankArticleID, ContentID, Label
 class ArticleUpdate():
     title: Label
     content: bytes
-    groups: list[str]
+    groups: list[Label]
     editOf: ArticleID = BlankArticleID
 
 
@@ -23,7 +23,7 @@ class Article():
     title: Label
     articleId: ArticleID
     contentId: ContentID
-    groups: list[str]
+    groups: list[Label]
     editOf: ArticleID = BlankArticleID
 
     @staticmethod
@@ -161,12 +161,7 @@ class FileSystemArticleRepository(ArticleRepository):
         }
 
     @classmethod
-    def initialize_directory(cls, path: Path) -> dict[str, Path]:
-        if (not path.exists()):
-            raise FileNotFoundError
-        path_is_not_empty = any(path.iterdir())
-        if (path_is_not_empty):
-            raise FileExistsError
+    def init(cls, path: Path) -> dict[str, Path]:
         _articlePath = path.joinpath('articles')
         _articlePath.mkdir()
         FileSystemContentRepository.initialize_directory(path)

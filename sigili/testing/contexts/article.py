@@ -59,8 +59,8 @@ def getArticleRepository(style: str, directory: Path | None = None):
             if (directory is None):
                 _dir = TemporaryDirectory()
                 directory = Path(_dir.name)
-                _paths = FileSystemArticleRepository.initialize_directory(
-                directory)
+                _paths = FileSystemArticleRepository.init(
+                    directory)
             else:
                 _paths = FileSystemArticleRepository.get_paths(directory)
             try:

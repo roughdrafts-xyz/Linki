@@ -1,8 +1,10 @@
 from contextlib import contextmanager
 from pathlib import Path
+from unittest import TestCase
 import pytest
 from tempfile import TemporaryDirectory
 from sigili.article.group.repository import MemoryGroupRepository, FileSystemGroupRepository
+from sigili.type.id import Label
 
 
 @contextmanager
@@ -33,21 +35,15 @@ styles = {
 @pytest.mark.parametrize('style', styles)
 def test_does_get_groups_of(style):
     with getGroupRepository(style) as repo:
-        expected = 'group'
+        group = 'group'
+        expected = Label('group')
 
-        repo.add_to_group('0', expected)
+        repo.add_to_group('0', group)
 
         actual = repo.get_groups_of('0')
 
-        assert sorted([expected]) == sorted(actual)
-        # GroupRepository
-        #   add_group(refId, group)
-        #   get_groups(refId)
-
-        # a refId is part of a group named after its filename
-        # any parent folders of that filename become parent groups of that group
-        # /hello/world/text.md becomes
-        # group(text.md) is a member of group(world) is a member of group(hello)
+        test = TestCase()
+        test.assertCountEqual([expected], actual)
 
 
 @pytest.mark.parametrize('style', styles)
@@ -67,11 +63,14 @@ def test_does_get_groups(style):
         actual = repo.get_groups()
 
         assert (len(actual)) == 3
-        article_groups = actual.get(articleId) or []
-        assert sorted(article_groups) == sorted(['three', 'two', 'one'])
-        assert actual.get('three') == ['two']
-        assert actual.get('two') == ['one']
-        assert actual.get('one') == None
+        article_groups = actual.get(Label(articleId)) or []
+        test = TestCase()
+        test.assertCountEqual(
+            article_groups, map(Label, ['three', 'two', 'one'])
+        )
+        test.assertCountEqual(actual.get(Label('three'), []), [Label('two')])
+        test.assertCountEqual(actual.get(Label('two'), []), [Label('one')])
+        assert actual.get(Label('one')) == None
 
 
 @pytest.mark.parametrize('style', styles)
@@ -83,7 +82,8 @@ def test_does_get_members(style):
 
         actual = repo.get_members_of('group')
 
-        assert sorted([expected]) == sorted(actual)
+        test = TestCase()
+        test.assertCountEqual([Label(expected)], actual)
 
 
 @pytest.mark.parametrize('style', styles)
@@ -94,7 +94,8 @@ def test_does_group_groups(style):
 
         actual = repo.get_groups_of('a')
 
-        assert sorted(['b']) == sorted(actual)
+        test = TestCase()
+        test.assertCountEqual([Label('b')], actual)
 
 
 @pytest.mark.parametrize('style', styles)
@@ -105,4 +106,5 @@ def test_does_not_add_existing_groups(style):
 
         actual = repo.get_groups_of('0')
 
-        assert sorted(['a']) == sorted(actual)
+        test = TestCase()
+        test.assertCountEqual([Label('a')], actual)

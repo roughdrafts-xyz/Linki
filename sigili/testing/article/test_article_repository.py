@@ -7,7 +7,7 @@ from sigili.testing.contexts.article import ControlArticleRepository, getArticle
 
 @pytest.fixture
 def fileRepo(tmp_path):
-    _paths = FileSystemArticleRepository.initialize_directory(tmp_path)
+    _paths = FileSystemArticleRepository.init(tmp_path)
     yield FileSystemArticleRepository(_paths)
 
 

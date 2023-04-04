@@ -72,7 +72,7 @@ class FileSystemTitleRepository(TitleRepository):
         self._titles = path.resolve()
 
     @staticmethod
-    def initialize_directory(path: Path):
+    def init(path: Path):
         if (not path.exists()):
             raise FileNotFoundError
         _titlePath = path.joinpath('titles')

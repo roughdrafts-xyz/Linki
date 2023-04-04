@@ -14,7 +14,7 @@ from sigili.type.id import ArticleID, ContentID, Label, LabelID
 class Draft:
     title: Label
     content: bytes
-    groups: list[str]
+    groups: list[Label]
     editOf: Article | None = None
     _contentId: ContentID | None = field(init=False, repr=False, default=None)
 
@@ -49,7 +49,7 @@ class Draft:
 @dataclass
 class SparseDraft:
     title: Label
-    groups: list[str]
+    groups: list[Label]
     editOf: Article | None = None
 
     @classmethod
@@ -155,7 +155,7 @@ class FileSystemDraftRepository(DraftRepository):
         return True
 
     @staticmethod
-    def initialize_directory(path: Path):
+    def init(path: Path):
         if (not path.exists()):
             raise FileNotFoundError
         _draftPath = path.joinpath('drafts')
