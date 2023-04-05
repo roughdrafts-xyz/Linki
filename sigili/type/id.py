@@ -67,6 +67,9 @@ class Label():
 
     @classmethod
     def is_valid(cls, string: str) -> bool:
+        if type(string) is not str:
+            return False
+
         if not string:
             return False
         safe_str = cls.as_safe_string(string)

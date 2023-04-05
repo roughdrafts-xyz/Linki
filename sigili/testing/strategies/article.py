@@ -17,33 +17,21 @@ def a_label(draw: strategies.DrawFn):
 def a_new_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
     if (data is None):
         data = draw(strategies.binary())
-    groups = [Label('test')]
+    groups = ['test']
     title = draw(a_label())
     article_update = ArticleUpdate(
-        title,
+        title.name,
         data,
         groups
     )
-    contentID = ContentID.getContentID(data)
-    articleID = ArticleID.getArticleID(article_update)
-    article = Article(
-        title,
-        articleID,
-        contentID,
-        groups
-    )
-    return article
+    return Article.fromArticleUpdate(article_update)
 
 
 @strategies.composite
 def an_edit_of(draw: strategies.DrawFn, base_article: Article, data: bytes | None = None):
     if (data is None):
         data = draw(strategies.binary())
-    article_update = ArticleUpdate(
-        base_article.title,
-        data,
-        base_article.groups
-    )
+    article_update = ArticleUpdate.createUpdate(base_article, data)
     contentID = ContentID.getContentID(data)
     articleID = ArticleID.getArticleID(article_update)
     return Article(
@@ -80,9 +68,4 @@ def an_article_update(draw: strategies.DrawFn, data: bytes | None = None):
     if (data is None):
         data = draw(strategies.binary())
     article = draw(an_article(data))
-    return ArticleUpdate(
-        article.title,
-        data,
-        article.groups,
-        article.editOf
-    )
+    return ArticleUpdate.createUpdate(article, data)

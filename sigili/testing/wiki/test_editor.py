@@ -45,7 +45,8 @@ def test_loads_titles(update: ArticleUpdate):
     assert _draft.title == _title.title
     assert _draft.content == articles.content.get_content(
         _title.contentId)
-    assert sorted(_draft.groups) == sorted(_title.groups)
+    test = TestCase()
+    test.assertCountEqual(_draft.groups, _title.groups)
     assert _draft.editOf == _title
     assert _draft.editOf == Title.fromArticle(article)
 

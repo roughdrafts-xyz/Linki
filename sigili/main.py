@@ -16,8 +16,8 @@ def init(destination: str):
 @app.command()
 def publish(location: str):
     editor = FileEditor.fromPath(Path(location))
+    editor.load_drafts()
     x = editor.publish_drafts()
-    print('DEBUG x: ', x)
     x = 1
     typer.echo(f"Published {x} drafts.")
 

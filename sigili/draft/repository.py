@@ -32,17 +32,19 @@ class Draft:
         return groups_different or content_different
 
     def asArticleUpdate(self):
+        _groups = [_group.name for _group in self.groups]
+        _title = self.title.name
         if (self.editOf is not None):
             return ArticleUpdate(
-                self.title,
+                _title,
                 self.content,
-                self.groups,
+                _groups,
                 self.editOf.articleId
             )
         return ArticleUpdate(
-            self.title,
+            _title,
             self.content,
-            self.groups
+            _groups,
         )
 
 

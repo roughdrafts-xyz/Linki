@@ -3,6 +3,7 @@ from typing import Iterable
 from sigili.article.repository import ArticleRepository, ArticleUpdate, FileSystemArticleRepository
 from sigili.draft.repository import Draft, DraftRepository, FileSystemDraftRepository
 from sigili.title.repository import FileSystemTitleRepository, TitleRepository
+from sigili.type.id import Label
 
 
 class Editor():
@@ -44,6 +45,12 @@ class Editor():
 
 
 class FileEditor(Editor):
+    def __init__(self, path: Path,
+                 titles: TitleRepository,
+                 drafts: DraftRepository,
+                 articles: ArticleRepository) -> None:
+        super().__init__(titles, drafts, articles)
+        self._path = path
 
     @staticmethod
     def init(path: Path):
@@ -53,11 +60,25 @@ class FileEditor(Editor):
         FileSystemTitleRepository.init(_path)
         FileSystemDraftRepository.init(_path)
 
-    @staticmethod
-    def fromPath(path: Path):
+    @classmethod
+    def fromPath(cls, path: Path):
         _path = path.joinpath('.sigili')
-        titles = FileSystemTitleRepository(_path)
-        drafts = FileSystemDraftRepository(_path)
+        titles = FileSystemTitleRepository(_path.joinpath('titles'))
+        drafts = FileSystemDraftRepository(_path.joinpath('drafts'))
         a_paths = FileSystemArticleRepository.get_paths(_path)
         articles = FileSystemArticleRepository(a_paths)
-        return Editor(titles, drafts, articles)
+        return cls(path, titles, drafts, articles)
+
+    def load_drafts(self):
+        for file in self._path.iterdir():
+            groups = [Label(part)
+                      for part in file.relative_to(self._path).parts]
+            title = Label(file.name)
+            editOf = self._titles.get_title(title)
+            _draft = Draft(
+                title,
+                file.read_bytes(),
+                groups,
+                editOf
+            )
+            self._drafts.set_draft(_draft)
