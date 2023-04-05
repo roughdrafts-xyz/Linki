@@ -1,3 +1,4 @@
+from glob import iglob
 from pathlib import Path
 from typing import Iterable
 from sigili.article.repository import ArticleRepository, ArticleUpdate, FileSystemArticleRepository
@@ -69,8 +70,16 @@ class FileEditor(Editor):
         articles = FileSystemArticleRepository(a_paths)
         return cls(path, titles, drafts, articles)
 
+    def iterdir(self):
+        # Path.rglob doesn't handle avoiding hidden folders well.
+        #
+        # Using the more correct root_dir=self.path breaks for a
+        # reason I don't care to research at the moment.
+        glob = map(Path, iglob(f'{self._path}/**', recursive=True))
+        return (_glob.resolve() for _glob in glob if _glob.is_file())
+
     def load_drafts(self):
-        for file in self._path.iterdir():
+        for file in self.iterdir():
             groups = [Label(part)
                       for part in file.relative_to(self._path).parts]
             title = Label(file.name)
