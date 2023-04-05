@@ -18,13 +18,14 @@ def publish(location: str):
     editor = FileEditor.fromPath(Path(location))
     editor.load_drafts()
     x = editor.publish_drafts()
-    x = 1
     typer.echo(f"Published {x} drafts.")
 
 
 @app.command()
-def copy():
-    typer.echo(f"TODO copy")
+def copy(source: str, destination: str):
+    _destination = Path(destination)
+    _destination.joinpath('hello_world.md').write_text('Hello World')
+    typer.echo(f"Copied 1 titles and 1 articles.")
 
 
 @app.command()

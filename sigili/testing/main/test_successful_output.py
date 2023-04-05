@@ -14,13 +14,44 @@ def test_successful_init(tmp_path: Path):
 def test_successful_publish(tmp_path: Path):
     runner.invoke(app, ["init", str(tmp_path)])
     tmp_path.joinpath('hello_world.md').write_text('Hello World')
+
     res = runner.invoke(app, ["publish", str(tmp_path)])
     x = 1
     assert res.stdout == f"Published {x} drafts.\n"
 
+    tmp_path.joinpath('hello_world.md').write_text('Hello World')
+    res = runner.invoke(app, ["publish", str(tmp_path)])
+    x = 0
+    assert res.stdout == f"Published {x} drafts.\n"
 
-def test_successful_copy():
-    pass
+    tmp_path.joinpath('hello_world.md').write_text('Goodnight Moon')
+    res = runner.invoke(app, ["publish", str(tmp_path)])
+    x = 1
+    assert res.stdout == f"Published {x} drafts.\n"
+
+    tmp_path.joinpath('good_moon.md').write_text('Goodnight Moon')
+    tmp_path.joinpath('hello_world.md').write_text('Hello World')
+    res = runner.invoke(app, ["publish", str(tmp_path)])
+    x = 2
+    assert res.stdout == f"Published {x} drafts.\n"
+
+
+def test_successful_local_copy(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    copy.mkdir()
+    runner.invoke(app, ["init", str(base)])
+    runner.invoke(app, ["init", str(copy)])
+    base.joinpath('hello_world.md').write_text('Hello World')
+    runner.invoke(app, ["publish", str(base)])
+    res = runner.invoke(app, ["copy", str(base), str(copy)])
+    x = 1
+    y = 1
+    assert res.stdout == f"Copied {x} titles and {y} articles.\n"
+
+    content = copy.joinpath('hello_world.md').read_text()
+    assert content == "Hello World"
 
 
 def test_successful_subscribe():

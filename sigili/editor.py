@@ -70,7 +70,7 @@ class FileEditor(Editor):
         articles = FileSystemArticleRepository(a_paths)
         return cls(path, titles, drafts, articles)
 
-    def iterdir(self):
+    def iterfiles(self):
         # Path.rglob doesn't handle avoiding hidden folders well.
         #
         # Using the more correct root_dir=self.path breaks for a
@@ -79,7 +79,7 @@ class FileEditor(Editor):
         return (_glob.resolve() for _glob in glob if _glob.is_file())
 
     def load_drafts(self):
-        for file in self.iterdir():
+        for file in self.iterfiles():
             groups = [Label(part)
                       for part in file.relative_to(self._path).parts]
             title = Label(file.name)
