@@ -10,21 +10,8 @@ class ControlArticleRepository(ArticleRepository):
         self.articles = {}
         self.updates = {}
 
-    def _add_article(self, update: ArticleUpdate) -> Article:
-        articleId = ArticleID.getArticleID(update)
-        contentId = ContentID.getContentID(update.content)
-        title = update.title
-        newArticle = Article(
-            title,
-            articleId,
-            contentId,
-            update.groups,
-            update.editOf
-        )
-        return newArticle
-
     def add_article(self, update: ArticleUpdate) -> Article:
-        newArticle = self._add_article(update)
+        newArticle = Article.fromArticleUpdate(update)
         self.articles[newArticle.articleId] = newArticle
         self.updates[newArticle.articleId] = update
         return newArticle
@@ -34,16 +21,16 @@ class ControlArticleRepository(ArticleRepository):
             raise KeyError
         return self.add_article(update)
 
-    def get_article(self, articleId: str) -> Article:
+    def get_article(self, articleId: ArticleID) -> Article:
         return self.articles[articleId]
 
-    def has_article(self, articleId: str) -> bool:
+    def has_article(self, articleId: ArticleID) -> bool:
         return articleId in self.articles
 
-    def get_articleIds(self) -> set[str]:
+    def get_articleIds(self) -> set[ArticleID]:
         return set(self.articles)
 
-    def get_update(self, articleId: str) -> ArticleUpdate:
+    def get_update(self, articleId: ArticleID) -> ArticleUpdate:
         return self.updates[articleId]
 
 

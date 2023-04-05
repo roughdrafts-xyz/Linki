@@ -12,10 +12,20 @@ from sigili.type.id import ArticleID, BlankArticleID, ContentID, Label
 
 @dataclass
 class ArticleUpdate():
-    title: Label
+    title: str
     content: bytes
-    groups: list[Label]
+    groups: list[str]
     editOf: ArticleID = BlankArticleID
+
+    @classmethod
+    def createUpdate(cls, article: 'Article', content: bytes) -> 'ArticleUpdate':
+        _groups = [label.name for label in article.groups]
+        return cls(
+            article.title.name,
+            content,
+            _groups,
+            article.editOf
+        )
 
 
 @dataclass
@@ -26,21 +36,20 @@ class Article():
     groups: list[Label]
     editOf: ArticleID = BlankArticleID
 
-    @staticmethod
-    def fromArticleUpdate(update: ArticleUpdate) -> 'Article':
-        _content = update.content
-        _groups = update.groups
-        _contentId = ContentID.getContentID(_content)
+    @classmethod
+    def fromArticleUpdate(cls, update: ArticleUpdate) -> 'Article':
+        _title = Label(update.title)
         _articleId = ArticleID.getArticleID(update)
-        _title = update.title
+        _contentId = ContentID.getContentID(update.content)
+        _groups = [Label(_group) for _group in update.groups]
         if (update.editOf is None):
-            return Article(
+            return cls(
                 _title,
                 _articleId,
                 _contentId,
                 _groups,
             )
-        return Article(
+        return cls(
             _title,
             _articleId,
             _contentId,
@@ -132,12 +141,7 @@ class MemoryArticleRepository(ArticleRepository):
     def get_update(self, articleId: ArticleID) -> ArticleUpdate:
         _article = self._articles[articleId]
         _content = self._content.get_content(_article.contentId)
-        return ArticleUpdate(
-            _article.title,
-            _content,
-            _article.groups,
-            _article.editOf
-        )
+        return ArticleUpdate.createUpdate(_article, _content)
 
 
 class FileSystemArticleRepository(ArticleRepository):
@@ -169,22 +173,6 @@ class FileSystemArticleRepository(ArticleRepository):
         FileSystemGroupRepository.initialize_directory(path)
         return cls.get_paths(path)
 
-    def _add_article(self, update: ArticleUpdate) -> Article:
-        _content = update.content
-        _groups = update.groups
-        _contentId = self._content.add_content(_content)
-        _articleId = ArticleID.getArticleID(update)
-
-        for group in _groups:
-            self._groups.add_to_group(_contentId, group)
-
-        return Article(
-            update.title,
-            _articleId,
-            _contentId,
-            _groups
-        )
-
     def _write_article(self, article: Article) -> None:
         with self._articles.joinpath(article.articleId).open('wb') as _path:
             pickle.dump(article, _path)
@@ -195,7 +183,8 @@ class FileSystemArticleRepository(ArticleRepository):
             return _pickle
 
     def add_article(self, update: ArticleUpdate) -> Article:
-        newArticle = self._add_article(update)
+        newArticle = Article.fromArticleUpdate(update)
+        self._content.add_content(update.content)
         self._write_article(newArticle)
         return newArticle
 
@@ -215,7 +204,7 @@ class FileSystemArticleRepository(ArticleRepository):
             raise KeyError(
                 'Article must be an edit of another Article already in the Repository. Try using merge_article or add_article instead.')
 
-        newArticle = self._add_article(update)
+        newArticle = Article.fromArticleUpdate(update)
         newArticle.editOf = update.editOf
         self._history.add_edit(newArticle.editOf, newArticle.articleId)
         self._write_article(newArticle)
@@ -228,9 +217,4 @@ class FileSystemArticleRepository(ArticleRepository):
     def get_update(self, articleId: ArticleID) -> ArticleUpdate:
         _article = self.get_article(articleId)
         _content = self._content.get_content(_article.contentId)
-        return ArticleUpdate(
-            _article.title,
-            _content,
-            _article.groups,
-            _article.editOf
-        )
+        return ArticleUpdate.createUpdate(_article, _content)

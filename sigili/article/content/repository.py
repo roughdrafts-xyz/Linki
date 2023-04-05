@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from hashlib import sha224
 from pathlib import Path
 
 from sigili.type.id import ContentID

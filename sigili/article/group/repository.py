@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import os
 from pathlib import Path
-import string
 
 from sigili.type.id import Label
 

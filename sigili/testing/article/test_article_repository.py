@@ -1,8 +1,9 @@
 import pytest
-from sigili.article.repository import ArticleUpdate
+from sigili.article.repository import Article, ArticleUpdate
 from sigili.article.repository import MemoryArticleRepository
 from sigili.article.repository import FileSystemArticleRepository
 from sigili.testing.contexts.article import ControlArticleRepository, getArticleRepository, styles
+from sigili.type.id import Label
 
 
 @pytest.fixture
@@ -36,18 +37,21 @@ def testUpdate():
 
 
 @pytest.fixture
-def testArticle(testRepo, testUpdate):
-    return testRepo._add_article(testUpdate)
+def anotherUpdate():
+    return ArticleUpdate('Hello World', b'Hello World', ['hello world'])
+
+
+@pytest.fixture
+def testArticle(testUpdate):
+    return Article.fromArticleUpdate(testUpdate)
 
 
 @pytest.mark.parametrize('style', styles)
-def test_does_add_article(style, testRepo):
+def test_does_add_article(style, testRepo, anotherUpdate):
     with getArticleRepository(style) as repo:
-        articleUpdate = ArticleUpdate(
-            'Hello World', b'Hello World', ['hello world'])
-        articleDetails = repo.add_article(articleUpdate)
+        articleDetails = repo.add_article(anotherUpdate)
         assert articleDetails == testRepo.add_article(
-            articleUpdate)
+            anotherUpdate)
 
 
 @pytest.mark.parametrize('style', styles)
@@ -93,8 +97,9 @@ def test_does_not_get_missing_update(style, testArticle):
 @pytest.mark.parametrize('style', styles)
 def test_does_get_existing_update(style, testUpdate, testRepo, testArticle):
     with getArticleRepository(style) as repo:
-        repo.add_article(testUpdate)
-        testRepo.add_article(testUpdate)
+        added = repo.add_article(testUpdate)
+        testAdded = testRepo.add_article(testUpdate)
+        assert added == testAdded
         expectedUpdate = testRepo.get_update(
             testArticle.articleId)
         actualUpdate = repo.get_update(testArticle.articleId)

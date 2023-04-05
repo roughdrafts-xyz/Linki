@@ -25,7 +25,7 @@ class _ID(str):
 class ArticleID(_ID):
     @classmethod
     def getArticleID(cls, update) -> 'ArticleID':
-        _groups = [str.encode(group.labelId) for group in update.groups]
+        _groups = [str.encode(group) for group in update.groups]
         if (update.editOf is None):
             _editOf = str.encode(BlankArticleID)
         else:

@@ -50,7 +50,10 @@ styles = {
 def test_does_add_and_get_content(style):
     helloWorld = b'Hello World'
     expected = helloWorld
+    testRepo = MemoryContentRepository()
     with getContentRepository(style) as repo:
         refId = repo.add_content(helloWorld)
+        testRepo.add_content(helloWorld)
         actual = repo.get_content(refId)
         assert expected == actual
+        assert testRepo.get_content(refId) == actual
