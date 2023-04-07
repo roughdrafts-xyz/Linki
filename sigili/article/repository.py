@@ -5,7 +5,7 @@ from pathlib import Path
 from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
 from sigili.article.group.repository import FileSystemGroupRepository, GroupRepository, MemoryGroupRepository
 from sigili.article.history.repository import FileSystemHistoryRepository, HistoryRepository, MemoryHistoryRepository
-from sigili.connection import Connection, PathConnection
+from sigili.connection import Connection, MemoryConnection, PathConnection
 from sigili.type.id import ArticleID, BlankArticleID, ContentID, Label
 
 
@@ -118,7 +118,7 @@ class ArticleRepository(ABC):
 
 class MemoryArticleRepository(ArticleRepository):
     def __init__(self) -> None:
-        self._articles: dict[ArticleID, Article] = {}
+        self._articles = MemoryConnection[Article]()
         self._content = MemoryContentRepository()
         self._history = MemoryHistoryRepository()
         self._groups = MemoryGroupRepository()
@@ -130,7 +130,7 @@ class FileSystemArticleRepository(ArticleRepository):
             raise FileNotFoundError(
                 f'Articles folder not found in repository. The folder might not be initialized.')
 
-        self._articles = PathConnection(paths['articles'])
+        self._articles = PathConnection[Article](paths['articles'])
         self._content = FileSystemContentRepository(paths['content'])
         self._history = FileSystemHistoryRepository(paths['history'])
         self._groups = FileSystemGroupRepository(paths['groups'])
@@ -152,3 +152,8 @@ class FileSystemArticleRepository(ArticleRepository):
         FileSystemHistoryRepository.initialize_directory(path)
         FileSystemGroupRepository.initialize_directory(path)
         return cls.get_paths(path)
+
+    @classmethod
+    def fromPath(cls, path: Path) -> ArticleRepository:
+        paths = cls.get_paths(path)
+        return cls(paths)
