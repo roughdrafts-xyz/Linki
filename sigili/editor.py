@@ -44,11 +44,29 @@ class Editor():
             )
             self._drafts.set_draft(draft)
 
-    def copy_articles(self, articles):
-        pass
+    def copy_articles(self, articles: ArticleRepository):
+        # TODO Make a dataclass of ArticleCollection that simplifies this?
 
-    def copy_titles(self, titles):
-        pass
+        count = 0
+        for article_id in articles.get_articleIds():
+            if (self._articles.has_article(article_id)):
+                continue
+            article = articles.get_article(article_id)
+            content = articles.content.get_content(article.contentId)
+            update = ArticleUpdate.createUpdate(article, content)
+            self._articles.add_article(update)
+            count += 1
+        return count
+
+    def copy_titles(self, titles: TitleRepository):
+        count = 0
+        for title in titles.get_titles():
+            _title = self._titles.get_title(title.title)
+            if (_title is title):
+                continue
+            self._titles.set_title(title.title, title)
+            count += 1
+        return count
 
 
 class FileEditor(Editor):
