@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from hashlib import sha224
 import re
-import string
+from typing import TypeVar
 
 SHA224 = re.compile(r'[a-f0-9]{56}')
 
@@ -20,6 +20,9 @@ class _ID(str):
     @staticmethod
     def isValidID(id: str) -> bool:
         return bool(SHA224.fullmatch(id))
+
+
+ID = TypeVar('ID', bound=_ID)
 
 
 class ArticleID(_ID):

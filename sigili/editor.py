@@ -54,7 +54,7 @@ class Editor():
             article = articles.get_article(article_id)
             content = articles.content.get_content(article.contentId)
             update = ArticleUpdate.createUpdate(article, content)
-            self._articles.add_article(update)
+            self._articles.merge_article(update)
             count += 1
         return count
 
