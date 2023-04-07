@@ -31,17 +31,7 @@ def copy(source: str, destination: str):
     articles = ArticleRepository.fromURL(source)
     titles = TitleRepository.fromURL(source)
     articles_count = editor.copy_articles(articles)
-    # for articles in articles:
-    # check if we have article
-    # if we do, continue
-    # if we do not, record article
-    # if recorded article has history, check it in the same way
-    # articles += 1
     titles_count = editor.copy_titles(titles)
-    # for title in server.get_titles():
-    # set title
-    # update draft if necessary
-    # titles += 1
 
     typer.echo(f"Copied {titles_count} titles and {articles_count} articles.")
 

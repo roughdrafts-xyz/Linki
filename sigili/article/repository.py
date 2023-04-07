@@ -1,6 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 
 from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
 from sigili.article.group.repository import FileSystemGroupRepository, GroupRepository, MemoryGroupRepository
@@ -58,7 +59,7 @@ class Article():
 
 
 class ArticleRepository(ABC):
-    _articles: Connection
+    _articles: Connection[Article]
     _content: ContentRepository
     _history: HistoryRepository
     _groups: GroupRepository
@@ -114,6 +115,21 @@ class ArticleRepository(ABC):
         if (self.has_article(update.editOf)):
             return self.update_article(update)
         return self.add_article(update)
+
+    @staticmethod
+    def fromURL(url: str | None = None):
+        if (url is None):
+            return MemoryArticleRepository()
+        _url = urlparse(url)
+        match _url.scheme:
+            case 'file':
+                return FileSystemArticleRepository.fromPath(Path(url))
+            case 'ssh':
+                raise NotImplementedError
+            case 'http':
+                raise NotImplementedError
+            case _:
+                raise NotImplementedError
 
 
 class MemoryArticleRepository(ArticleRepository):
