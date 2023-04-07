@@ -44,6 +44,12 @@ class Editor():
             )
             self._drafts.set_draft(draft)
 
+    def copy_articles(self, articles):
+        pass
+
+    def copy_titles(self, titles):
+        pass
+
 
 class FileEditor(Editor):
     def __init__(self, path: Path,

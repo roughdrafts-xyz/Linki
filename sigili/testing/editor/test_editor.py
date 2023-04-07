@@ -128,3 +128,28 @@ def test_does_publish_some_drafts(some_drafts: List[Draft]):
 
     test = TestCase()
     test.assertCountEqual(title_count, update_count)
+
+
+@given(an_article_update())
+def test_does_copy(update: ArticleUpdate):
+    r_articles = MemoryArticleRepository()
+    r_titles = MemoryTitleRepository()
+
+    articles = MemoryArticleRepository()
+    titles = MemoryTitleRepository()
+    drafts = MemoryDraftRepository()
+    editor = Editor(titles, drafts, articles)
+
+    article = r_articles.add_article(update)
+    r_titles.set_title(article.title, article)
+
+    editor.copy_articles(r_articles)
+    test = TestCase()
+
+    test.assertCountEqual(r_articles.get_articleIds(),
+                          articles.get_articleIds())
+
+    editor.copy_titles(r_titles)
+
+    test.assertCountEqual(r_titles.get_titles(),
+                          titles.get_titles())

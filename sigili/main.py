@@ -1,7 +1,9 @@
 from pathlib import Path
 import typer
+from sigili.article.repository import ArticleRepository
 
 from sigili.editor import FileEditor
+from sigili.title.repository import TitleRepository
 
 app = typer.Typer()
 
@@ -23,23 +25,43 @@ def publish(location: str):
 
 @app.command()
 def copy(source: str, destination: str):
-    _destination = Path(destination)
-    _destination.joinpath('hello_world.md').write_text('Hello World')
-    typer.echo(f"Copied 1 titles and 1 articles.")
+    # TODO this is a fake implementation
+    # FALSE Dependency server class and subscription class
+    editor = FileEditor.fromPath(Path(destination))
+    articles = ArticleRepository.fromURL(source)
+    titles = TitleRepository.fromURL(source)
+    articles_count = editor.copy_articles(articles)
+    # for articles in articles:
+    # check if we have article
+    # if we do, continue
+    # if we do not, record article
+    # if recorded article has history, check it in the same way
+    # articles += 1
+    titles_count = editor.copy_titles(titles)
+    # for title in server.get_titles():
+    # set title
+    # update draft if necessary
+    # titles += 1
+
+    typer.echo(f"Copied {titles_count} titles and {articles_count} articles.")
 
 
 @app.command()
 def subscribe():
+    # add a subscription to the subscriptions repository
     typer.echo(f"TODO subscribe")
 
 
 @app.command()
 def serve():
+    # run a fastapi server
+    # also provides endpoint for receiving announcements
     typer.echo(f"TODO serve")
 
 
 @app.command()
 def announce():
+    # add subscribers to announcement list or ping subscribers
     typer.echo(f"TODO announce")
 
 
