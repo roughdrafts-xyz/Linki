@@ -1,6 +1,7 @@
 from abc import ABC
 from pathlib import Path
 from typing import Iterator
+from urllib.parse import urlparse
 from sigili.article.repository import Article
 from sigili.connection import Connection, MemoryConnection, PathConnection
 
@@ -39,6 +40,21 @@ class TitleRepository(ABC):
     def clear_title(self, title: Label) -> None:
         if (title.labelId in self.titles):
             del self.titles[title.labelId]
+
+    @staticmethod
+    def fromURL(url: str | None = None):
+        if (url is None):
+            return MemoryTitleRepository()
+        _url = urlparse(url)
+        match _url.scheme:
+            case 'file':
+                return FileSystemTitleRepository(Path(url))
+            case 'ssh':
+                raise NotImplementedError
+            case 'http':
+                raise NotImplementedError
+            case _:
+                raise NotImplementedError
 
 
 class MemoryTitleRepository(TitleRepository):
