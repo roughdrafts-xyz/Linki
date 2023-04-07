@@ -42,18 +42,16 @@ class PathConnection(Connection[VT]):
             pickle.dump(__value, _)
 
     def __getitem__(self, __key: ID) -> VT:
-        key_path = self._.joinpath(__key)
-        if (not key_path.exists()):
+        if (not self.__contains__(__key)):
             raise KeyError
 
         with self._.joinpath(__key).open('rb') as _:
             return pickle.load(_)
 
     def __delitem__(self, __key: ID) -> None:
-        key_path = self._.joinpath(__key)
-        if (not key_path.exists()):
+        if (not self.__contains__(__key)):
             raise KeyError
-        key_path.unlink()
+        self._.joinpath(__key).unlink()
 
     def __iter__(self) -> Iterator[ID]:
         for _ in self._.iterdir():
@@ -62,3 +60,7 @@ class PathConnection(Connection[VT]):
 
     def __len__(self) -> int:
         return len(list(self._.iterdir()))
+
+    def __contains__(self, __key: ID) -> bool:
+        key_path = self._.joinpath(__key)
+        return key_path.exists() and key_path.is_file()
