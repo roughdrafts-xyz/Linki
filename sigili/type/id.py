@@ -10,7 +10,7 @@ class InvalidIDError(Exception):
     pass
 
 
-class _ID(str):
+class ID(str):
     def __new__(cls, content):
         if (not cls.isValidID(content)):
             raise InvalidIDError(
@@ -22,10 +22,7 @@ class _ID(str):
         return bool(SHA224.fullmatch(id))
 
 
-ID = TypeVar('ID', bound=_ID)
-
-
-class ArticleID(_ID):
+class ArticleID(ID):
     @classmethod
     def getArticleID(cls, update) -> 'ArticleID':
         _groups = [str.encode(group) for group in update.groups]
@@ -45,13 +42,13 @@ class ArticleID(_ID):
 BlankArticleID = ArticleID(sha224(b'BlankArticleID').hexdigest())
 
 
-class ContentID(_ID):
+class ContentID(ID):
     @classmethod
     def getContentID(cls, content: bytes) -> 'ContentID':
         return cls(sha224(content).hexdigest())
 
 
-class LabelID(_ID):
+class LabelID(ID):
     @classmethod
     def getLabelID(cls, name: str) -> 'LabelID':
         return cls(sha224(str.encode(name)).hexdigest())
