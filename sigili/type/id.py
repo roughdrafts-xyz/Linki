@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from hashlib import sha224
 import re
-from typing import TypeVar
 
 SHA224 = re.compile(r'[a-f0-9]{56}')
 

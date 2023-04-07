@@ -1,12 +1,11 @@
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, asdict
-import json
+from abc import ABC
+from dataclasses import dataclass
 from pathlib import Path
-import pickle
 
 from sigili.article.content.repository import ContentRepository, FileSystemContentRepository, MemoryContentRepository
 from sigili.article.group.repository import FileSystemGroupRepository, GroupRepository, MemoryGroupRepository
 from sigili.article.history.repository import FileSystemHistoryRepository, HistoryRepository, MemoryHistoryRepository
+from sigili.connection import Connection, PathConnection
 from sigili.type.id import ArticleID, BlankArticleID, ContentID, Label
 
 
@@ -59,6 +58,7 @@ class Article():
 
 
 class ArticleRepository(ABC):
+    _articles: Connection
     _content: ContentRepository
     _history: HistoryRepository
     _groups: GroupRepository
@@ -71,42 +71,9 @@ class ArticleRepository(ABC):
     def content(self) -> ContentRepository:
         return self._content
 
-    @abstractmethod
-    def add_article(self, update: ArticleUpdate) -> Article:
-        raise NotImplementedError
-
-    @abstractmethod
-    def update_article(self, update: ArticleUpdate) -> Article:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_article(self, articleId: ArticleID) -> Article:
-        raise NotImplementedError
-
-    @abstractmethod
-    def has_article(self, articleId: ArticleID | None) -> bool:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_articleIds(self) -> set[ArticleID]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_update(self, articleId: ArticleID) -> ArticleUpdate:
-        raise NotImplementedError
-
-    def merge_article(self, update: ArticleUpdate) -> Article:
-        if (self.has_article(update.editOf)):
-            return self.update_article(update)
-        return self.add_article(update)
-
-
-class MemoryArticleRepository(ArticleRepository):
-    def __init__(self) -> None:
-        self._articles: dict[ArticleID, Article] = {}
-        self._content = MemoryContentRepository()
-        self._history = MemoryHistoryRepository()
-        self._groups = MemoryGroupRepository()
+    @property
+    def history(self) -> HistoryRepository:
+        return self._history
 
     def add_article(self, update: ArticleUpdate) -> Article:
         newArticle = Article.fromArticleUpdate(update)
@@ -136,12 +103,25 @@ class MemoryArticleRepository(ArticleRepository):
         return newArticle
 
     def get_articleIds(self) -> set[ArticleID]:
-        return set(self._articles)
+        return {ArticleID(_article) for _article in self._articles}
 
     def get_update(self, articleId: ArticleID) -> ArticleUpdate:
         _article = self._articles[articleId]
         _content = self._content.get_content(_article.contentId)
         return ArticleUpdate.createUpdate(_article, _content)
+
+    def merge_article(self, update: ArticleUpdate) -> Article:
+        if (self.has_article(update.editOf)):
+            return self.update_article(update)
+        return self.add_article(update)
+
+
+class MemoryArticleRepository(ArticleRepository):
+    def __init__(self) -> None:
+        self._articles: dict[ArticleID, Article] = {}
+        self._content = MemoryContentRepository()
+        self._history = MemoryHistoryRepository()
+        self._groups = MemoryGroupRepository()
 
 
 class FileSystemArticleRepository(ArticleRepository):
@@ -150,7 +130,7 @@ class FileSystemArticleRepository(ArticleRepository):
             raise FileNotFoundError(
                 f'Articles folder not found in repository. The folder might not be initialized.')
 
-        self._articles = paths['articles']
+        self._articles = PathConnection(paths['articles'])
         self._content = FileSystemContentRepository(paths['content'])
         self._history = FileSystemHistoryRepository(paths['history'])
         self._groups = FileSystemGroupRepository(paths['groups'])
@@ -172,49 +152,3 @@ class FileSystemArticleRepository(ArticleRepository):
         FileSystemHistoryRepository.initialize_directory(path)
         FileSystemGroupRepository.initialize_directory(path)
         return cls.get_paths(path)
-
-    def _write_article(self, article: Article) -> None:
-        with self._articles.joinpath(article.articleId).open('wb') as _path:
-            pickle.dump(article, _path)
-
-    def _load_article(self, articleId: ArticleID) -> Article:
-        with self._articles.joinpath(articleId).open('rb') as _path:
-            _pickle = pickle.load(_path)
-            return _pickle
-
-    def add_article(self, update: ArticleUpdate) -> Article:
-        newArticle = Article.fromArticleUpdate(update)
-        self._content.add_content(update.content)
-        self._write_article(newArticle)
-        return newArticle
-
-    def get_article(self, articleId: ArticleID) -> Article:
-        if (self.has_article(articleId)):
-            return self._load_article(articleId)
-        raise KeyError(
-            'Article not found. Try using merge_article or add_article first.')
-
-    def has_article(self, articleId: ArticleID | None) -> bool:
-        if (articleId is None):
-            return False
-        return self._articles.joinpath(articleId).exists()
-
-    def update_article(self, update: ArticleUpdate) -> Article:
-        if (update.editOf is None or not self.has_article(update.editOf)):
-            raise KeyError(
-                'Article must be an edit of another Article already in the Repository. Try using merge_article or add_article instead.')
-
-        newArticle = Article.fromArticleUpdate(update)
-        newArticle.editOf = update.editOf
-        self._history.add_edit(newArticle.editOf, newArticle.articleId)
-        self._write_article(newArticle)
-
-        return newArticle
-
-    def get_articleIds(self) -> set[ArticleID]:
-        return {ArticleID(_article.name) for _article in self._articles.iterdir() if ArticleID.isValidID(_article.name)}
-
-    def get_update(self, articleId: ArticleID) -> ArticleUpdate:
-        _article = self.get_article(articleId)
-        _content = self._content.get_content(_article.contentId)
-        return ArticleUpdate.createUpdate(_article, _content)
