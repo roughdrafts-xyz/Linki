@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from glob import iglob
 from pathlib import Path
 from typing import Iterable
@@ -5,6 +6,20 @@ from sigili.article.repository import ArticleRepository, ArticleUpdate, FileSyst
 from sigili.draft.repository import Draft, DraftRepository, FileSystemDraftRepository
 from sigili.title.repository import FileSystemTitleRepository, TitleRepository
 from sigili.type.id import Label
+
+
+@dataclass
+class Subscription:
+    titles: TitleRepository
+    articles: ArticleRepository
+
+    @classmethod
+    def fromPath(cls, path: Path):
+        _path = path.joinpath('.sigili')
+        titles = FileSystemTitleRepository(_path.joinpath('titles'))
+        a_paths = FileSystemArticleRepository.get_paths(_path)
+        articles = FileSystemArticleRepository(a_paths)
+        return cls(titles, articles)
 
 
 class Editor():
@@ -115,3 +130,8 @@ class FileEditor(Editor):
                 editOf
             )
             self._drafts.set_draft(_draft)
+
+    def unload_titles(self):
+        for title in self._titles.get_titles():
+            content = self._articles.content.get_content(title.contentId)
+            self._path.joinpath(title.title.name).write_bytes(content)

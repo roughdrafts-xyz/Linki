@@ -43,3 +43,20 @@ def test_does_copy(update: ArticleUpdate):
 
         test.assertCountEqual(r_editor._titles.get_titles(),
                               l_editor._titles.get_titles())
+
+
+@given(an_article_update())
+def test_does_unload_titles(update: ArticleUpdate):
+    with get_file_editor() as r_editor, get_file_editor() as l_editor:
+        article = r_editor._articles.add_article(update)
+        r_editor._titles.set_title(article.title, article)
+
+        l_editor.copy_articles(r_editor._articles)
+        l_editor.copy_titles(r_editor._titles)
+
+        l_editor.unload_titles()
+        test = TestCase()
+        test.assertCountEqual(
+            [title.title.name for title in l_editor._titles.get_titles()],
+            [file.name for file in l_editor.iterfiles()]
+        )
