@@ -1,7 +1,6 @@
 from pathlib import Path
-import pytest
 from typer.testing import CliRunner
-from sigili.main import app, copy as copy_cmd
+from sigili.main import app
 
 runner = CliRunner()
 
@@ -58,9 +57,12 @@ def test_successful_local_copy(tmp_path: Path):
 
 
 def test_successful_subscribe():
-    pass
+    assert False
 
 
 def test_successful_serve():
-    # also announce
+    pass
+
+
+def test_successful_announce():
     pass

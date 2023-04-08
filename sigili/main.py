@@ -1,9 +1,7 @@
 from pathlib import Path
 import typer
-from sigili.article.repository import ArticleRepository
 
 from sigili.editor import FileEditor, Subscription
-from sigili.title.repository import TitleRepository
 
 app = typer.Typer()
 
