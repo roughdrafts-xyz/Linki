@@ -28,10 +28,14 @@ def copy(source: str, destination: str):
     # TODO this is a fake implementation
     # FALSE Dependency server class and subscription class
     editor = FileEditor.fromPath(Path(destination))
-    articles = ArticleRepository.fromURL(source)
-    titles = TitleRepository.fromURL(source)
-    articles_count = editor.copy_articles(articles)
-    titles_count = editor.copy_titles(titles)
+    s_editor = FileEditor.fromPath(Path(source))
+    # repo_url = Path(source).joinpath('.sigili').resolve()
+    # title_url = repo_url.joinpath('titles').resolve()
+    # articles = ArticleRepository.fromURL(repo_url.as_uri())
+    # titles = TitleRepository.fromURL(title_url.as_uri())
+    articles_count = editor.copy_articles(s_editor._articles)
+    titles_count = editor.copy_titles(s_editor._titles)
+    # editor.load_drafts()
 
     typer.echo(f"Copied {titles_count} titles and {articles_count} articles.")
 

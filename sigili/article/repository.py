@@ -123,7 +123,7 @@ class ArticleRepository(ABC):
         _url = urlparse(url)
         match _url.scheme:
             case 'file':
-                return FileSystemArticleRepository.fromPath(Path(url))
+                return FileSystemArticleRepository.fromPath(Path(_url.path))
             case 'ssh':
                 raise NotImplementedError
             case 'http':

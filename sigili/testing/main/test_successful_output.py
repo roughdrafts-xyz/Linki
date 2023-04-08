@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 from typer.testing import CliRunner
-from sigili.main import app
+from sigili.main import app, copy as copy_cmd
 
 runner = CliRunner()
 
@@ -41,10 +41,13 @@ def test_successful_local_copy(tmp_path: Path):
     copy = tmp_path.joinpath('copy')
     base.mkdir()
     copy.mkdir()
-    runner.invoke(app, ["init", str(base)])
-    runner.invoke(app, ["init", str(copy)])
+    res = runner.invoke(app, ["init", str(base)])
+    assert res.stdout == f"Initialized wiki in {str(base)}.\n"
+    res = runner.invoke(app, ["init", str(copy)])
+    assert res.stdout == f"Initialized wiki in {str(copy)}.\n"
     base.joinpath('hello_world.md').write_text('Hello World')
-    runner.invoke(app, ["publish", str(base)])
+    res = runner.invoke(app, ["publish", str(base)])
+    assert res.stdout == f"Published 1 drafts.\n"
     res = runner.invoke(app, ["copy", str(base), str(copy)])
     x = 1
     y = 1

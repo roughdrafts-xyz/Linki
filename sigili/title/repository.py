@@ -48,7 +48,7 @@ class TitleRepository(ABC):
         _url = urlparse(url)
         match _url.scheme:
             case 'file':
-                return FileSystemTitleRepository(Path(url))
+                return FileSystemTitleRepository(Path(_url.path))
             case 'ssh':
                 raise NotImplementedError
             case 'http':
