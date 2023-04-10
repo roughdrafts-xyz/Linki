@@ -8,20 +8,6 @@ from sigili.title.repository import FileSystemTitleRepository, TitleRepository
 from sigili.type.id import Label
 
 
-@dataclass
-class Subscription:
-    titles: TitleRepository
-    articles: ArticleRepository
-
-    @classmethod
-    def fromPath(cls, path: Path):
-        _path = path.joinpath('.sigili')
-        titles = FileSystemTitleRepository(_path.joinpath('titles'))
-        a_paths = FileSystemArticleRepository.get_paths(_path)
-        articles = FileSystemArticleRepository(a_paths)
-        return cls(titles, articles)
-
-
 class Editor():
 
     def __init__(self, titles: TitleRepository, drafts: DraftRepository, articles: ArticleRepository) -> None:

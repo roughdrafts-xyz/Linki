@@ -5,12 +5,12 @@ from sigili.main import app
 runner = CliRunner()
 
 
-def test_successful_init(tmp_path: Path):
+def test_init_repositories(tmp_path: Path):
     res = runner.invoke(app, ["init", str(tmp_path)])
     assert res.stdout == f"Initialized wiki in {str(tmp_path)}.\n"
 
 
-def test_successful_publish(tmp_path: Path):
+def test_publish_drafts(tmp_path: Path):
     runner.invoke(app, ["init", str(tmp_path)])
     tmp_path.joinpath('hello_world.md').write_text('Hello World')
 
@@ -35,7 +35,7 @@ def test_successful_publish(tmp_path: Path):
     assert res.stdout == f"Published {x} drafts.\n"
 
 
-def test_successful_local_copy(tmp_path: Path):
+def test_create_local_copy(tmp_path: Path):
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
     base.mkdir()
@@ -56,7 +56,21 @@ def test_successful_local_copy(tmp_path: Path):
     assert content == "Hello World"
 
 
-def test_successful_subscribe():
+def test_add_subscription(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    copy.mkdir()
+
+    runner.invoke(app, ["init", str(base)])
+    runner.invoke(app, ["init", str(copy)])
+    res = runner.invoke(app, ["subscribe", str(base), str(copy)])
+
+    assert res.stdout == f"Subscribed to {str(base)}.\n"
+
+
+def test_view_subscription_update(tmp_path: Path):
+    # checks Inbox command
     assert False
 
 

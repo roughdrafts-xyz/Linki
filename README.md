@@ -81,7 +81,7 @@ There are likely wikis that you'd like to copy from consistently. This might be 
 
 If you subscribe to the same url multiple times, it'll unsubscribe from the wiki and then subscribe again. This is a good way to change settings on a subscription.
 
-When you subscribe to a wiki, sigili will inform you when it has updated. If the same title has changed multiple times, it'll batch these changes together so that you only see the latest one. You can pick and choose which ones you'd like to copy over using the `sigili copy` command. You can do `sigili copy <update>` as a shortcut.
+When you subscribe to a wiki, sigili will show you to updates to wikis with `sigili inbox`. If the same title has changed multiple times, it'll batch these changes together so that you only see the latest one. You can pick and choose which ones you'd like to copy over using the `sigili copy` command. You can do `sigili copy <update>` as a shortcut.
 
 Just like `sigili copy` you can subscribe to a whole wiki, a group in that wiki, or just an individual page. It'll subscribe accordingly. You can subscribe to the same wiki multiple times, using different urls. This is useful if you want different subscriptions to the same wiki to have different settings.
 

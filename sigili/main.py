@@ -1,7 +1,8 @@
 from pathlib import Path
 import typer
 
-from sigili.editor import FileEditor, Subscription
+from sigili.editor import FileEditor
+from sigili.subscription import PathSubscriptionRepository, Subscription
 
 app = typer.Typer()
 
@@ -33,9 +34,10 @@ def copy(source: str, destination: str):
 
 
 @app.command()
-def subscribe():
-    # add a subscription to the subscriptions repository
-    typer.echo(f"TODO subscribe")
+def subscribe(url: str, location: str):
+    subscriptions = PathSubscriptionRepository(Path(location))
+    subscriptions.add_subscription(url)
+    typer.echo(f"Subscribed to {str(url)}.")
 
 
 @app.command()
@@ -49,6 +51,12 @@ def serve():
 def announce():
     # add subscribers to announcement list or ping subscribers
     typer.echo(f"TODO announce")
+
+
+@app.command()
+def inbox():
+    # tells you what wikis have updates
+    typer.echo(f"TODO inbox")
 
 
 if __name__ == "__main__":
