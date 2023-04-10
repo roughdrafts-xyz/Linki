@@ -41,6 +41,17 @@ def subscribe(url: str, location: str):
 
 
 @app.command()
+def subscriptions(url: str, location: str):
+    typer.echo(f"TODO subscriptions")
+
+
+@app.command()
+def inbox():
+    # tells you what wikis have updates
+    typer.echo(f"TODO inbox")
+
+
+@app.command()
 def serve():
     # run a fastapi server
     # also provides endpoint for receiving announcements
@@ -48,15 +59,19 @@ def serve():
 
 
 @app.command()
-def announce():
-    # add subscribers to announcement list or ping subscribers
-    typer.echo(f"TODO announce")
+def contribute(url: str, location: str):
+    typer.echo(f"TODO contribute")
 
 
 @app.command()
-def inbox():
-    # tells you what wikis have updates
-    typer.echo(f"TODO inbox")
+def contributions(url: str, location: str):
+    typer.echo(f"TODO contributions")
+
+
+@app.command()
+def announce():
+    # add subscribers to announcement list or ping subscribers
+    typer.echo(f"TODO announce")
 
 
 if __name__ == "__main__":

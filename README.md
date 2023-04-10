@@ -101,7 +101,7 @@ It's likely some of the wikis you subscribe to will have similar articles with t
 
 Automatic subscriptions will copy updates from all automatic subscriptions. Priority determines which article becomes the title article.
 
-You can view your existing subscriptions and their priorities with `sigili subscription` with no parameters. This will show you both your automatic and non-automatic subscriptions. It will also show you your wiki, labeled as `This Wiki`. Your Wiki defaults to having the highest priority.
+You can view your existing subscriptions and their priorities with `sigili subscriptions` with no parameters. This will show you both your automatic and non-automatic subscriptions. It will also show you your wiki, labeled as `This Wiki`. Your Wiki defaults to having the highest priority.
 
 A new subscription has the lowest priority until you change it. You can also set the priority when you run `sigili subscribe` with `sigili subscribe <url> [priority]`. You can also use this format to change the priority of an existing subscription. Your Wiki's url is `this`.
 
@@ -119,11 +119,15 @@ The Sigili Server comes with a basic search function, html displays of your arti
 
 ## I don't want to host this on my personal computer
 
-Smart! You can run `sigili serve` on a server, and this is the recommended option. Sigili comes with a tool to help with this `sigili announce` will tell subscribers of your choice that you're currently serving and want them to copy over the updates. This is a good way to update a copy of your wiki hosted on a server.
+Smart! You can run `sigili serve` on a server, and this is the recommended option.
 
 ## I don't want to maintain a server
 
 Find a public sigili host that will serve your wiki for you. They'll likely have advanced tools to help you, such as user groups or multi-author wiki tools. They'll likely also offer you search and discovery tools too.
+
+# Contributing to other wikis
+
+You can contribute to other wikis, and they might like to know when you're making a contribution to them. You can do this with the `sigili announce` function. The `sigili announce` function tells wikis that you've made some updates they should copy over. You can track which wikis receive announcements using the `sigili contribute` command. It operates similarly to the `sigili subscribe` command. Similarly, you can see who you're contributing to with the `sigili contributions` command.
 
 # Questions
 
