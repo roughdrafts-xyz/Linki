@@ -56,7 +56,7 @@ def subscriptions(location: str):
 
 
 @app.command()
-def inbox():
+def inbox(location: str):
     # tells you what wikis have updates
     typer.echo(f"TODO inbox")
 

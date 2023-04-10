@@ -74,7 +74,22 @@ def test_add_subscription(tmp_path: Path):
 
 def test_view_subscription_update(tmp_path: Path):
     # checks Inbox command
-    assert False
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    copy.mkdir()
+
+    runner.invoke(app, ["init", str(base)])
+    runner.invoke(app, ["init", str(copy)])
+    runner.invoke(app, ["subscribe", str(base), str(copy)])
+
+    update = 'Hello World!'
+    update_path = base.joinpath('hello.md').resolve()
+    update_path.write_text(update)
+    update_id = '000000'
+    runner.invoke(app, ["publish", str(base)])
+    res = runner.invoke(app, ["inbox", str(copy)])
+    assert res.stdout == f'{update_id} {update_path.as_uri()} (+{len(update)})'
 
 
 def test_successful_serve():
