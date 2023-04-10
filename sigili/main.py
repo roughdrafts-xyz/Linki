@@ -36,13 +36,23 @@ def copy(source: str, destination: str):
 @app.command()
 def subscribe(url: str, location: str):
     subscriptions = PathSubscriptionRepository(Path(location))
-    subscriptions.add_subscription(url)
+    _url = Path(url).resolve().as_uri()
+    subscriptions.add_subscription(_url)
     typer.echo(f"Subscribed to {str(url)}.")
 
 
 @app.command()
-def subscriptions(url: str, location: str):
-    typer.echo(f"TODO subscriptions")
+def subscriptions(location: str):
+    subscriptions = PathSubscriptionRepository(Path(location))
+    typer.echo(f"Subscriptions by priority (highest to lowest)")
+    priority = 0
+    typer.echo(f'{priority}\tThis Wiki')
+    for subscription in subscriptions.get_subscriptions():
+        priority += 1
+        _subscription = subscriptions.get_subscription(subscription)
+        if (_subscription is None):
+            continue
+        typer.echo(f"{priority}\t{_subscription.url}")
 
 
 @app.command()

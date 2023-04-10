@@ -1,6 +1,6 @@
 from pathlib import Path
 from typer.testing import CliRunner
-from sigili.main import app
+from sigili.main import app, subscribe, subscriptions
 
 runner = CliRunner()
 
@@ -67,6 +67,9 @@ def test_add_subscription(tmp_path: Path):
     res = runner.invoke(app, ["subscribe", str(base), str(copy)])
 
     assert res.stdout == f"Subscribed to {str(base)}.\n"
+
+    res = runner.invoke(app, ["subscriptions", str(copy)])
+    assert res.stdout == f"Subscriptions by priority (highest to lowest)\n0\tThis Wiki\n1\t{base.resolve().as_uri()}\n"
 
 
 def test_view_subscription_update(tmp_path: Path):

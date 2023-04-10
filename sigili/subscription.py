@@ -54,6 +54,10 @@ class SubscriptionRepository(ABC):
         SubURL = SubscriptionURL(url)
         self.subscriptions[SubURL.labelId] = SubURL
 
+    def get_subscription(self, label: str):
+        _id = LabelID(label)
+        return self.subscriptions.get(_id)
+
     def get_subscriptions(self) -> Iterator[ID]:
         return self.subscriptions.__iter__()
 

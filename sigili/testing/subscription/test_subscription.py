@@ -10,5 +10,7 @@ def test_crud_subscriptions(tmp_path):
     subscriptions = MemorySubscriptionRepository()
     subscriptions.add_subscription(url)
 
+    assert subscriptions.get_subscription(SubURL.labelId) == SubURL
+
     test = TestCase()
     test.assertCountEqual([SubURL.labelId], subscriptions.get_subscriptions())
