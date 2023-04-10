@@ -13,54 +13,54 @@ class Connection(MutableMapping[ID, VT]):
 
 class MemoryConnection(Connection[VT]):
     def __init__(self) -> None:
-        self._: Dict[ID, VT] = dict()
+        self.store: Dict[ID, VT] = dict()
 
     def __setitem__(self, __key: ID, __value: VT) -> None:
-        self._[__key] = __value
+        self.store[__key] = __value
 
     def __getitem__(self, __key: ID) -> VT:
-        return self._[__key]
+        return self.store[__key]
 
     def __delitem__(self, __key: ID) -> None:
-        del self._[__key]
+        del self.store[__key]
 
     def __iter__(self) -> Iterator[ID]:
-        return self._.__iter__()
+        return self.store.__iter__()
 
     def __len__(self) -> int:
-        return self._.__len__()
+        return self.store.__len__()
 
 
 class PathConnection(Connection[VT]):
     def __init__(self, path: Path) -> None:
-        self._ = path.resolve()
-        if (not self._.is_dir()):
+        self.store = path.resolve()
+        if (not self.store.is_dir()):
             raise TypeError('Path must be a directory.')
 
     def __setitem__(self, __key: ID, __value: VT) -> None:
-        with self._.joinpath(__key).open('wb') as _:
-            pickle.dump(__value, _)
+        with self.store.joinpath(__key).open('wb') as item:
+            pickle.dump(__value, item)
 
     def __getitem__(self, __key: ID) -> VT:
         if (not self.__contains__(__key)):
             raise KeyError
 
-        with self._.joinpath(__key).open('rb') as _:
-            return pickle.load(_)
+        with self.store.joinpath(__key).open('rb') as item:
+            return pickle.load(item)
 
     def __delitem__(self, __key: ID) -> None:
         if (not self.__contains__(__key)):
             raise KeyError
-        self._.joinpath(__key).unlink()
+        self.store.joinpath(__key).unlink()
 
     def __iter__(self) -> Iterator[ID]:
-        for _ in self._.iterdir():
-            if (_.is_file()):
-                yield ID(_.name)
+        for item in self.store.iterdir():
+            if (item.is_file()):
+                yield ID(item.name)
 
     def __len__(self) -> int:
-        return len(list(self._.iterdir()))
+        return len(list(self.store.iterdir()))
 
     def __contains__(self, __key: ID) -> bool:
-        key_path = self._.joinpath(__key)
+        key_path = self.store.joinpath(__key)
         return key_path.exists() and key_path.is_file()
