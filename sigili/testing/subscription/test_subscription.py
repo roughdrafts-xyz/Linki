@@ -1,10 +1,11 @@
+from pathlib import Path
 from unittest import TestCase
 
 from sigili.subscription import MemorySubscriptionRepository, SubscriptionURL
 
 
-def test_crud_subscriptions():
-    url = 'test_location'
+def test_crud_subscriptions(tmp_path):
+    url = Path(tmp_path).resolve().as_uri()
     SubURL = SubscriptionURL(url)
     subscriptions = MemorySubscriptionRepository()
     subscriptions.add_subscription(url)
