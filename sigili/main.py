@@ -58,7 +58,9 @@ def subscriptions(location: str):
 @app.command()
 def inbox(location: str):
     # tells you what wikis have updates
-    typer.echo(f"TODO inbox")
+    subscriptions = PathSubscriptionRepository(Path(location))
+    for update in subscriptions.get_updates():
+        typer.echo(f"{update.labelId} {update.url} ({update.size:+g})")
 
 
 @app.command()

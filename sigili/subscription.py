@@ -43,8 +43,18 @@ class SubscriptionURL():
             return False
         if (len(parsed.path) <= 0):
             return False
-
         return True
+
+
+@dataclass
+class SubscriptionUpdate(SubscriptionURL):
+    def __init__(self, url: str) -> None:
+        super().__init__(url)
+        self.size = 12
+
+    @classmethod
+    def fromURL(cls, subscription: SubscriptionURL):
+        return cls(subscription.url)
 
 
 class SubscriptionRepository(ABC):
@@ -60,6 +70,13 @@ class SubscriptionRepository(ABC):
 
     def get_subscriptions(self) -> Iterator[ID]:
         return self.subscriptions.__iter__()
+
+    def get_updates(self) -> Iterator[SubscriptionUpdate]:
+        for subscription in self.get_subscriptions():
+            sub = self.get_subscription(subscription)
+            if (sub is None):
+                continue
+            yield SubscriptionUpdate.fromURL(sub)
 
 
 class MemorySubscriptionRepository(SubscriptionRepository):
