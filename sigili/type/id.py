@@ -23,15 +23,17 @@ class ID(str):
 
 class ArticleID(ID):
     @classmethod
-    def getArticleID(cls, update) -> 'ArticleID':
-        if (update.editOf is None):
+    def getArticleID(cls, label: 'Label', content: bytes, editOf: 'ArticleID' | None) -> 'ArticleID':
+        if (editOf is None):
             _editOf = str.encode(BlankArticleID)
         else:
-            _editOf = str.encode(update.editOf)
+            _editOf = str.encode(editOf)
+        _label = str.encode(label.name)
         return cls(sha224(
             b''.join([
+                _label,
+                content,
                 _editOf,
-                update.content,
             ])
         ).hexdigest())
 

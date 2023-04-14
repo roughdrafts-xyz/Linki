@@ -8,53 +8,27 @@ from sigili.type.id import ArticleID, BlankArticleID, Label
 
 
 @dataclass
-class ArticleUpdate():
-    title: str
-    content: bytes
-    editOf: ArticleID = BlankArticleID
-
-    @classmethod
-    def fromArticle(cls, article: 'Article') -> 'ArticleUpdate':
-        return cls(
-            article.title.name,
-            article.content,
-            article.editOf
-        )
-
-
-@dataclass
 class Article():
-    title: Label
-    content: bytes
     articleId: ArticleID
+    label: Label
+    content: bytes
     editOf: ArticleID = BlankArticleID
 
-    @classmethod
-    def fromArticleUpdate(cls, update: ArticleUpdate) -> 'Article':
-        _title = Label(update.title)
-        _articleId = ArticleID.getArticleID(update)
-        _content = update.content
-        if (update.editOf is None):
-            return cls(
-                _title,
-                _content,
-                _articleId,
-            )
-        return cls(
-            _title,
-            _content,
-            _articleId,
-            update.editOf
-        )
+    def __init__(self, label: str, content: bytes, editOf: ArticleID) -> None:
+        self.label = Label(label)
+        self.content = content
+        self.editOf = editOf
+        self.articleId = ArticleID.getArticleID(
+            self.label, self.content, self.editOf)
 
 
 class ArticleRepository(ABC):
     _articles: Connection[Article]
 
-    def add_article(self, update: ArticleUpdate) -> Article:
-        newArticle = Article.fromArticleUpdate(update)
-        self._articles[newArticle.articleId] = newArticle
-        return newArticle
+    def merge_article(self, label: str, content: bytes, editOf: ArticleID = BlankArticleID) -> Article:
+        article = Article(label, content, editOf)
+        self._articles[article.articleId] = article
+        return article
 
     def get_article(self, articleId: ArticleID) -> Article:
         if (self.has_article(articleId)):
@@ -64,27 +38,6 @@ class ArticleRepository(ABC):
 
     def has_article(self, articleId: ArticleID | None) -> bool:
         return articleId in self._articles
-
-    def update_article(self, update: ArticleUpdate) -> Article:
-        if (update.editOf is None or not self.has_article(update.editOf)):
-            raise KeyError(
-                'Article must be an edit of another Article already in the Repository. Try using merge_article or add_article instead.')
-
-        newArticle = self.add_article(update)
-
-        return newArticle
-
-    def get_articleIds(self) -> set[ArticleID]:
-        return {ArticleID(_article) for _article in self._articles}
-
-    def get_update(self, articleId: ArticleID) -> ArticleUpdate:
-        _article = self._articles[articleId]
-        return ArticleUpdate.fromArticle(_article)
-
-    def merge_article(self, update: ArticleUpdate) -> Article:
-        if (self.has_article(update.editOf)):
-            return self.update_article(update)
-        return self.add_article(update)
 
     @staticmethod
     def fromURL(url: str | None = None):
