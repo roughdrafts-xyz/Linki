@@ -1,6 +1,7 @@
 from pathlib import Path
 from typer.testing import CliRunner
 from sigili.main import app, inbox
+from sigili.subscription import PathSubscriptionRepository
 
 runner = CliRunner()
 
@@ -83,14 +84,14 @@ def test_view_subscription_update(tmp_path: Path):
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
-    runner.invoke(app, ["subscribe", str(update_path), str(copy)])
+    PathSubscriptionRepository.init(copy.joinpath('.sigili'))
+    runner.invoke(app, ["subscribe", str(base), str(copy)])
 
     update = 'Hello World!'
     update_path.write_text(update)
     runner.invoke(app, ["publish", str(base)])
-    inbox(str(copy))
-    # res = runner.invoke(app, ["inbox", str(copy)])
-    # assert res.stdout == f'{0} {update_path.as_uri()} (+{len(update)})\n'
+    res = runner.invoke(app, ["inbox", str(copy)])
+    assert res.stdout == f'{0} {update_path.as_uri()} (+{len(update)})\n'
 
 
 def test_successful_serve():

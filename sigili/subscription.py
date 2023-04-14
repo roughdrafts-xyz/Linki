@@ -45,11 +45,8 @@ class SubURLRepository(ABC):
         return self.subscriptions.get(_id)
 
     def get_sub_urls(self) -> Iterator[SubURL]:
-        for url in self.subscriptions:
-            _url = self.subscriptions.get(url)
-            if (_url is None):
-                continue
-            yield _url
+        for url in self.subscriptions.values():
+            yield url
 
 
 class MemorySubscriptionRepository(SubURLRepository):

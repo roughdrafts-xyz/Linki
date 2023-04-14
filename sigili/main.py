@@ -38,8 +38,9 @@ def copy(source: str, destination: str):
 
 @app.command()
 def subscribe(url: str, location: str):
-    subscriptions = PathSubscriptionRepository(Path(location))
-    _url = Path(url).resolve().as_uri()
+    subscriptions = PathSubscriptionRepository(
+        Path(location).joinpath('.sigili', 'subscriptions'))
+    _url = Path(url).joinpath('.sigili', 'titles').resolve().as_uri()
     subscriptions.add_sub_url(_url)
     typer.echo(f"Subscribed to {str(url)}.")
 
@@ -57,12 +58,14 @@ def subscriptions(location: str):
 
 @app.command()
 def inbox(location: str):
-    subscriptions = PathSubscriptionRepository(Path(location))
-    titles = FileSystemTitleRepository(Path(location))
+    subscriptions = PathSubscriptionRepository(
+        Path(location).joinpath('.sigili', 'subscriptions'))
+    titles = FileSystemTitleRepository(
+        Path(location).joinpath('.sigili', 'titles'))
     inbox = Inbox(subscriptions, titles)
     for update in inbox.get_inbox():
         typer.echo(
-            f"{update.rowId} {update.url.url}{update.label.name} ({update.size:+n})")
+            f"{update.rowId} {update.url.url}/{update.label.name} ({update.size:+n})")
 
 
 @app.command()
