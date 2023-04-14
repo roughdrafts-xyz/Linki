@@ -5,22 +5,10 @@ from typing import Iterator
 from urllib.parse import urlparse
 from sigili.article.repository import ArticleRepository, FileSystemArticleRepository, MemoryArticleRepository
 from sigili.connection import Connection, MemoryConnection, PathConnection
-from sigili.title.repository import FileSystemTitleRepository, MemoryTitleRepository, TitleRepository
+from sigili.draft.repository import Draft, DraftRepository, MemoryDraftRepository
+from sigili.editor import Editor
+from sigili.title.repository import FileSystemTitleRepository, MemoryTitleRepository, Title, TitleRepository
 from sigili.type.id import ID, Label, LabelID
-
-
-@dataclass
-class Subscription:
-    titles: TitleRepository
-    articles: ArticleRepository
-
-    @classmethod
-    def fromPath(cls, path: Path):
-        _path = path.joinpath('.sigili')
-        titles = FileSystemTitleRepository(_path.joinpath('titles'))
-        a_paths = FileSystemArticleRepository.get_paths(_path)
-        articles = FileSystemArticleRepository(a_paths)
-        return cls(titles, articles)
 
 
 @dataclass
@@ -46,15 +34,15 @@ class SubscriptionURL():
         return True
 
 
-@dataclass
-class SubscriptionUpdate(SubscriptionURL):
-    def __init__(self, url: str) -> None:
-        super().__init__(url)
-        self.size = 12
-
-    @classmethod
-    def fromURL(cls, subscription: SubscriptionURL):
-        return cls(subscription.url)
+class Updater(Editor):
+    def __init__(self, titles: TitleRepository, remote: TitleRepository) -> None:
+        drafts = MemoryDraftRepository()
+        articles = MemoryArticleRepository()
+        for title in remote.get_titles():
+            draft  = Draft.fromTitle(title)
+            drafts.set_draft(draft)
+        super().__init__(titles, drafts, articles)
+    pass
 
 
 class SubscriptionRepository(ABC):
@@ -71,12 +59,13 @@ class SubscriptionRepository(ABC):
     def get_subscriptions(self) -> Iterator[ID]:
         return self.subscriptions.__iter__()
 
-    def get_updates(self) -> Iterator[SubscriptionUpdate]:
-        for subscription in self.get_subscriptions():
-            sub = self.get_subscription(subscription)
-            if (sub is None):
-                continue
-            yield SubscriptionUpdate.fromURL(sub)
+    def get_updates(self, titles: TitleRepository):
+        # TODO Optimize. No one likes this many loops.
+
+        for sub in self.get_subscriptions():
+            # start an editor using local articles and titles
+            # load remote titles as drafts
+            # dry publish and report changes
 
 
 class MemorySubscriptionRepository(SubscriptionRepository):

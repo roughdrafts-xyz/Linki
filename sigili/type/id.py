@@ -24,7 +24,6 @@ class ID(str):
 class ArticleID(ID):
     @classmethod
     def getArticleID(cls, update) -> 'ArticleID':
-        _groups = [str.encode(group) for group in update.groups]
         if (update.editOf is None):
             _editOf = str.encode(BlankArticleID)
         else:
@@ -32,19 +31,12 @@ class ArticleID(ID):
         return cls(sha224(
             b''.join([
                 _editOf,
-                *_groups,
-                update.content
+                update.content,
             ])
         ).hexdigest())
 
 
 BlankArticleID = ArticleID(sha224(b'BlankArticleID').hexdigest())
-
-
-class ContentID(ID):
-    @classmethod
-    def getContentID(cls, content: bytes) -> 'ContentID':
-        return cls(sha224(content).hexdigest())
 
 
 class LabelID(ID):

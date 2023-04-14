@@ -3,6 +3,7 @@ import typer
 
 from sigili.editor import FileEditor
 from sigili.subscription import PathSubscriptionRepository, Subscription
+from sigili.title.repository import TitleRepository
 
 app = typer.Typer()
 
@@ -57,10 +58,10 @@ def subscriptions(location: str):
 
 @app.command()
 def inbox(location: str):
-    # tells you what wikis have updates
     subscriptions = PathSubscriptionRepository(Path(location))
-    for update in subscriptions.get_updates():
-        typer.echo(f"{update.labelId} {update.url} ({update.size:+g})")
+    titles = TitleRepository.fromURL(location)
+    for update in subscriptions.get_updates(titles):
+        typer.echo(f"{update.labelId} {update.url} ({update.size:+n})")
 
 
 @app.command()

@@ -77,6 +77,8 @@ Instead of running `sigili init` you can use `sigili copy`. This will automatica
 
 # Subscribing to Wikis
 
+> TODO This needs to account for the new Filter concept.
+
 There are likely wikis that you'd like to copy from consistently. This might be a copy of your wiki deployed to a server, or a wiki that covers a topic very related to your own. You can use `sigili subscribe <url>` to do this.
 
 If you subscribe to the same url multiple times, it'll unsubscribe from the wiki and then subscribe again. This is a good way to change settings on a subscription.
