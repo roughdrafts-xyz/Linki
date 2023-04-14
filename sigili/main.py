@@ -2,8 +2,8 @@ from pathlib import Path
 import typer
 
 from sigili.editor import FileEditor
-from sigili.subscription import PathSubscriptionRepository, Updater
-from sigili.title.repository import TitleRepository
+from sigili.subscription import Inbox, PathSubscriptionRepository
+from sigili.title.repository import FileSystemTitleRepository, TitleRepository
 
 app = typer.Typer()
 
@@ -40,7 +40,7 @@ def copy(source: str, destination: str):
 def subscribe(url: str, location: str):
     subscriptions = PathSubscriptionRepository(Path(location))
     _url = Path(url).resolve().as_uri()
-    subscriptions.add_subscription(_url)
+    subscriptions.add_sub_url(_url)
     typer.echo(f"Subscribed to {str(url)}.")
 
 
@@ -50,20 +50,19 @@ def subscriptions(location: str):
     typer.echo(f"Subscriptions by priority (highest to lowest)")
     priority = 0
     typer.echo(f'{priority}\tThis Wiki')
-    for subscription in subscriptions.get_subscriptions():
+    for subscription in subscriptions.get_sub_urls():
         priority += 1
-        _subscription = subscriptions.get_subscription(subscription)
-        if (_subscription is None):
-            continue
-        typer.echo(f"{priority}\t{_subscription.url}")
+        typer.echo(f"{priority}\t{subscription.url}")
 
 
 @app.command()
 def inbox(location: str):
     subscriptions = PathSubscriptionRepository(Path(location))
-    titles = TitleRepository.fromURL(location)
-    for update in subscriptions.get_updates(titles):
-        typer.echo(f"{update.labelId} {update.url} ({update.size:+n})")
+    titles = FileSystemTitleRepository(Path(location))
+    inbox = Inbox(subscriptions, titles)
+    for update in inbox.get_inbox():
+        typer.echo(
+            f"{update.rowId} {update.url.url}{update.label.name} ({update.size:+n})")
 
 
 @app.command()

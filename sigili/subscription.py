@@ -1,16 +1,17 @@
 from abc import ABC
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, List
 from urllib.parse import urlparse
+from sigili.article.repository import Article
 from sigili.connection import Connection, MemoryConnection, PathConnection
 from sigili.draft.repository import Draft, MemoryDraftRepository
 from sigili.title.repository import TitleRepository
-from sigili.type.id import ID, Label, LabelID
+from sigili.type.id import ID, ArticleID, Label, LabelID
 
 
 @dataclass
-class SubscriptionURL():
+class SubURL():
     valid_schemes = ['file', 'http']
 
     def __init__(self, url: str) -> None:
@@ -32,62 +33,33 @@ class SubscriptionURL():
         return True
 
 
-class Updater():
-    def __init__(self, titles: TitleRepository, remote: TitleRepository) -> None:
-        drafts = MemoryDraftRepository()
-        for title in remote.get_titles():
-            current = titles.get_title(title.label)
-            editOf = None
-            if (current is not None):
-                editOf = current.article
-            draft = Draft(
-                title.label,
-                title.article.content,
-                editOf
-            )
-            drafts.set_draft(draft)
+class SubURLRepository(ABC):
+    subscriptions: Connection[SubURL]
 
+    def add_sub_url(self, url: str):
+        subURL = SubURL(url)
+        self.subscriptions[subURL.labelId] = subURL
 
-@dataclass
-class Update():
-    labelId: LabelID
-    url: SubscriptionURL
-    size: int
-
-
-class SubscriptionRepository(ABC):
-    subscriptions: Connection[SubscriptionURL]
-
-    def add_subscription(self, url: str):
-        SubURL = SubscriptionURL(url)
-        self.subscriptions[SubURL.labelId] = SubURL
-
-    def get_subscription(self, label: str):
+    def get_sub_url(self, label: str):
         _id = LabelID(label)
         return self.subscriptions.get(_id)
 
-    def get_subscriptions(self) -> Iterator[ID]:
-        return self.subscriptions.__iter__()
-
-    def get_updates(self, titles: TitleRepository):
-        # TODO Optimize. No one likes this many loops.
-
-        for sub in self.get_subscriptions():
-            label = Label('')
-            yield Update(label.labelId, SubscriptionURL('file://dev/null/'), 0)
-            # start an editor using local articles and titles
-            # load remote titles as drafts
-            # dry publish and report changes
+    def get_sub_urls(self) -> Iterator[SubURL]:
+        for url in self.subscriptions:
+            _url = self.subscriptions.get(url)
+            if (_url is None):
+                continue
+            yield _url
 
 
-class MemorySubscriptionRepository(SubscriptionRepository):
+class MemorySubscriptionRepository(SubURLRepository):
     def __init__(self) -> None:
-        self.subscriptions = MemoryConnection[SubscriptionURL]()
+        self.subscriptions = MemoryConnection[SubURL]()
 
 
-class PathSubscriptionRepository(SubscriptionRepository):
+class PathSubscriptionRepository(SubURLRepository):
     def __init__(self, path: Path) -> None:
-        self.subscriptions = PathConnection[SubscriptionURL](path.resolve())
+        self.subscriptions = PathConnection[SubURL](path.resolve())
 
     @staticmethod
     def init(path: Path):
@@ -96,3 +68,50 @@ class PathSubscriptionRepository(SubscriptionRepository):
         _titlePath = path.joinpath('subscriptions')
         _titlePath.mkdir()
         return _titlePath.resolve()
+
+
+@dataclass
+class Subscription():
+    titles: TitleRepository
+    remote: TitleRepository
+
+    def get_updates(self) -> Iterator[Draft]:
+        for title in self.remote.get_titles():
+            current = self.titles.get_title(title.label)
+            editOf = None
+            if (current is not None):
+                editOf = current.article
+            draft = Draft(
+                title.label,
+                title.article.content,
+                editOf
+            )
+            if (draft.should_update()):
+                yield draft
+
+
+@dataclass
+class InboxRow():
+    rowId: int
+    url: SubURL
+    label: Label
+    size: int
+
+
+class Inbox():
+    def __init__(self, subs: SubURLRepository,  titles: TitleRepository) -> None:
+        self.subs = subs
+        self.titles = titles
+        pass
+
+    def get_inbox(self):
+        # TODO Optimize. No one likes this many loops.
+        count = 0
+        for sub in self.subs.get_sub_urls():
+            remote = TitleRepository.fromURL(sub.url)
+            subscription = Subscription(self.titles, remote)
+            for update in subscription.get_updates():
+                size = len(update.content)
+                if (update.editOf is not None):
+                    size -= len(update.editOf.content)
+                yield InboxRow(count, sub, update.label, size)
