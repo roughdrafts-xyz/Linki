@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from glob import iglob
 from pathlib import Path
 from typing import Iterable
-from sigili.article.repository import ArticleRepository, ArticleUpdate, FileSystemArticleRepository
+from sigili.article.repository import ArticleRepository, FileSystemArticleRepository
 from sigili.draft.repository import Draft, DraftRepository, FileSystemDraftRepository
 from sigili.title.repository import FileSystemTitleRepository, TitleRepository
 from sigili.type.id import Label
@@ -32,18 +32,6 @@ class Editor():
             article = self._articles.merge_article(draft.asArticleUpdate())
             self._titles.set_title(article.title, article)
         return count
-
-    def load_titles(self) -> None:
-        for title in self._titles.get_titles():
-            content = self._articles.content.get_content(
-                title.contentId)
-            draft = Draft(
-                title.title,
-                content,
-                title.groups,
-                title
-            )
-            self._drafts.set_draft(draft)
 
     def copy_articles(self, articles: ArticleRepository):
         # TODO Make a dataclass of ArticleCollection that simplifies this?
@@ -105,15 +93,11 @@ class FileEditor(Editor):
 
     def load_drafts(self):
         for file in self.iterfiles():
-            groups = [Label(part)
-                      for part in file.relative_to(self._path).parts]
             title = Label(file.name)
             editOf = self._titles.get_title(title)
             _draft = Draft(
                 title,
                 file.read_bytes(),
-                groups,
-                editOf
             )
             self._drafts.set_draft(_draft)
 

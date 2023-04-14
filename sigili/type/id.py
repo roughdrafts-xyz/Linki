@@ -23,7 +23,7 @@ class ID(str):
 
 class ArticleID(ID):
     @classmethod
-    def getArticleID(cls, label: 'Label', content: bytes, editOf: 'ArticleID' | None) -> 'ArticleID':
+    def getArticleID(cls, label, content, editOf) -> 'ArticleID':
         if (editOf is None):
             _editOf = str.encode(BlankArticleID)
         else:

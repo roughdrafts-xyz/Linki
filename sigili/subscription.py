@@ -3,12 +3,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator
 from urllib.parse import urlparse
-from sigili.article.repository import ArticleRepository, FileSystemArticleRepository, MemoryArticleRepository
 from sigili.connection import Connection, MemoryConnection, PathConnection
-from sigili.draft.repository import Draft, DraftRepository, MemoryDraftRepository
-from sigili.editor import Editor
-from sigili.title.repository import FileSystemTitleRepository, MemoryTitleRepository, Title, TitleRepository
-from sigili.type.id import ID, Label, LabelID
+from sigili.draft.repository import Draft, MemoryDraftRepository
+from sigili.title.repository import TitleRepository
+from sigili.type.id import ID, LabelID
 
 
 @dataclass
@@ -34,15 +32,20 @@ class SubscriptionURL():
         return True
 
 
-class Updater(Editor):
+class Updater():
     def __init__(self, titles: TitleRepository, remote: TitleRepository) -> None:
         drafts = MemoryDraftRepository()
-        articles = MemoryArticleRepository()
         for title in remote.get_titles():
-            draft  = Draft.fromArticle(title)
+            current = titles.get_title(title.label)
+            editOf = None
+            if (current is not None):
+                editOf = current.article
+            draft = Draft(
+                title.label,
+                title.article.content,
+                editOf
+            )
             drafts.set_draft(draft)
-        super().__init__(titles, drafts, articles)
-    pass
 
 
 class SubscriptionRepository(ABC):
@@ -63,6 +66,7 @@ class SubscriptionRepository(ABC):
         # TODO Optimize. No one likes this many loops.
 
         for sub in self.get_subscriptions():
+            pass
             # start an editor using local articles and titles
             # load remote titles as drafts
             # dry publish and report changes

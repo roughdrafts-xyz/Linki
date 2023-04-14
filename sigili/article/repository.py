@@ -4,7 +4,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from sigili.connection import Connection, MemoryConnection, PathConnection
-from sigili.type.id import ArticleID, BlankArticleID, Label
+from sigili.type.id import ArticleID, Label
 
 
 @dataclass
@@ -12,9 +12,9 @@ class Article():
     articleId: ArticleID
     label: Label
     content: bytes
-    editOf: ArticleID = BlankArticleID
+    editOf: 'Article' | None
 
-    def __init__(self, label: str, content: bytes, editOf: ArticleID) -> None:
+    def __init__(self, label: str, content: bytes, editOf: 'Article' | None) -> None:
         self.label = Label(label)
         self.content = content
         self.editOf = editOf
@@ -25,8 +25,7 @@ class Article():
 class ArticleRepository(ABC):
     _articles: Connection[Article]
 
-    def merge_article(self, label: str, content: bytes, editOf: ArticleID = BlankArticleID) -> Article:
-        article = Article(label, content, editOf)
+    def merge_article(self, article: Article) -> Article:
         self._articles[article.articleId] = article
         return article
 

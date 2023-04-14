@@ -21,6 +21,14 @@ class Draft:
         content_different = self.content != self.editOf.content
         return label_different or content_different
 
+    @classmethod
+    def fromArticle(cls, article: Article) -> 'Draft':
+        return cls(
+            article.label,
+            article.content,
+            article
+        )
+
 
 class DraftRepository(ABC):
     drafts: Connection[Draft]
