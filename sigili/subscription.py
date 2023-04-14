@@ -39,7 +39,7 @@ class Updater(Editor):
         drafts = MemoryDraftRepository()
         articles = MemoryArticleRepository()
         for title in remote.get_titles():
-            draft  = Draft.fromTitle(title)
+            draft  = Draft.fromArticle(title)
             drafts.set_draft(draft)
         super().__init__(titles, drafts, articles)
     pass
