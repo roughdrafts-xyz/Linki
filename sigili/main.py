@@ -2,7 +2,7 @@ from pathlib import Path
 import typer
 
 from sigili.editor import FileEditor
-from sigili.subscription import PathSubscriptionRepository, Subscription
+from sigili.subscription import PathSubscriptionRepository, Updater
 from sigili.title.repository import TitleRepository
 
 app = typer.Typer()
@@ -25,11 +25,13 @@ def publish(location: str):
 
 @app.command()
 def copy(source: str, destination: str):
-    subscription = Subscription.fromPath(Path(source))
-    editor = FileEditor.fromPath(Path(destination))
-    articles_count = editor.copy_articles(subscription.articles)
-    titles_count = editor.copy_titles(subscription.titles)
-    editor.unload_titles()
+    # subscription = Subscription.fromPath(Path(source))
+    # editor = FileEditor.fromPath(Path(destination))
+    # articles_count = editor.copy_articles(subscription.articles)
+    # titles_count = editor.copy_titles(subscription.titles)
+    # editor.unload_titles()
+    titles_count = -1
+    articles_count = -1
 
     typer.echo(f"Copied {titles_count} titles and {articles_count} articles.")
 

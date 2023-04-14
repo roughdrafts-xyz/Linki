@@ -81,6 +81,8 @@ class Label():
 
     @ property
     def unsafe_raw_name(self):
+        if (self._label is None):
+            raise ValueError
         return self._label
 
     @ staticmethod

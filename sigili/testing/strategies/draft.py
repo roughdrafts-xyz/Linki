@@ -10,9 +10,8 @@ def an_update_draft(draw: strategies.DrawFn):
     new_data = draw(strategies.binary())
     new_article = draw(an_edit_of(base_article, new_data))
     return Draft(
-        new_article.title,
+        new_article.label,
         new_data,
-        new_article.groups,
         base_article
     )
 
@@ -22,9 +21,8 @@ def a_new_draft(draw: strategies.DrawFn):
     base_data = draw(strategies.binary())
     base_article = draw(a_new_article(base_data))
     return Draft(
-        base_article.title,
+        base_article.label,
         base_data,
-        base_article.groups,
         None
     )
 

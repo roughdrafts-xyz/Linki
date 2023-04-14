@@ -4,12 +4,12 @@ from unittest import TestCase
 
 from hypothesis import given
 
-from sigili.article.repository import ArticleUpdate, MemoryArticleRepository
+from sigili.article.repository import Article, MemoryArticleRepository
 from sigili.editor import Editor
 from sigili.draft.repository import Draft, MemoryDraftRepository
-from sigili.testing.strategies.article import an_article_update
+from sigili.testing.strategies.article import an_article
 from sigili.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
-from sigili.title.repository import MemoryTitleRepository, Title
+from sigili.title.repository import MemoryTitleRepository
 
 
 @given(a_new_draft())
@@ -27,30 +27,6 @@ def test_get_updates(draft: Draft):
     test.assertCountEqual([draft], draft_count)
 
 
-@given(an_article_update())
-def test_loads_titles(update: ArticleUpdate):
-    articles = MemoryArticleRepository()
-    titles = MemoryTitleRepository()
-    drafts = MemoryDraftRepository()
-    editor = Editor(titles, drafts, articles)
-
-    article = articles.add_article(update)
-    _title = titles.set_title(article.title, article)
-    assert _title is not None
-
-    editor.load_titles()
-    _draft = drafts.get_draft(_title.title)
-    assert _draft is not None
-
-    assert _draft.title == _title.title
-    assert _draft.content == articles.content.get_content(
-        _title.contentId)
-    test = TestCase()
-    test.assertCountEqual(_draft.groups, _title.groups)
-    assert _draft.editOf == _title
-    assert _draft.editOf == Title.fromArticle(article)
-
-
 @given(a_new_draft())
 def test_does_publish_new_draft(draft: Draft):
     articles = MemoryArticleRepository()
@@ -62,8 +38,8 @@ def test_does_publish_new_draft(draft: Draft):
 
     editor.publish_drafts()
 
-    draft_count = [draft.title for draft in drafts.get_drafts()]
-    title_count = [title.title for title in titles.get_titles()]
+    draft_count = [draft.label for draft in drafts.get_drafts()]
+    title_count = [title.label for title in titles.get_titles()]
 
     test = TestCase()
     test.assertCountEqual(title_count, draft_count)
@@ -80,8 +56,8 @@ def test_does_publish_draft(draft: Draft):
 
     editor.publish_drafts()
 
-    title_count = [title.title for title in titles.get_titles()]
-    update_count = [draft.title for draft in editor.get_updates()]
+    title_count = [title.label for title in titles.get_titles()]
+    update_count = [draft.label for draft in editor.get_updates()]
 
     test = TestCase()
     test.assertCountEqual(title_count, update_count)
@@ -100,9 +76,9 @@ def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
 
     editor.publish_drafts()
 
-    draft_count = [draft.title for draft in drafts.get_drafts()]
-    title_count = [title.title for title in titles.get_titles()]
-    update_count = [draft.title for draft in editor.get_updates()]
+    draft_count = [draft.label for draft in drafts.get_drafts()]
+    title_count = [title.label for title in titles.get_titles()]
+    update_count = [draft.label for draft in editor.get_updates()]
 
     test = TestCase()
     test.assertCountEqual(title_count, draft_count)
@@ -123,15 +99,15 @@ def test_does_publish_some_drafts(some_drafts: List[Draft]):
 
     editor.publish_drafts()
 
-    update_count = [draft.title for draft in editor.get_updates()]
-    title_count = [title.title for title in titles.get_titles()]
+    update_count = [draft.label for draft in editor.get_updates()]
+    title_count = [title.label for title in titles.get_titles()]
 
     test = TestCase()
     test.assertCountEqual(title_count, update_count)
 
 
-@given(an_article_update())
-def test_does_copy(update: ArticleUpdate):
+@given(an_article())
+def test_does_copy(update: Article):
     r_articles = MemoryArticleRepository()
     r_titles = MemoryTitleRepository()
 
@@ -140,14 +116,14 @@ def test_does_copy(update: ArticleUpdate):
     drafts = MemoryDraftRepository()
     editor = Editor(titles, drafts, articles)
 
-    article = r_articles.add_article(update)
-    r_titles.set_title(article.title, article)
+    article = r_articles.merge_article(update)
+    r_titles.set_title(article)
 
     editor.copy_articles(r_articles)
     test = TestCase()
 
-    test.assertCountEqual(r_articles.get_articleIds(),
-                          articles.get_articleIds())
+    test.assertCountEqual(r_articles.get_articles(),
+                          articles.get_articles())
 
     editor.copy_titles(r_titles)
 

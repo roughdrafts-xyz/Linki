@@ -1,10 +1,12 @@
 from abc import ABC
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterator
+from typing_extensions import Self
 from urllib.parse import urlparse
 
 from sigili.connection import Connection, MemoryConnection, PathConnection
-from sigili.type.id import ArticleID, Label
+from sigili.type.id import ID, ArticleID, Label
 
 
 @dataclass
@@ -12,9 +14,9 @@ class Article():
     articleId: ArticleID
     label: Label
     content: bytes
-    editOf: 'Article' | None
+    editOf: Self | None
 
-    def __init__(self, label: str, content: bytes, editOf: 'Article' | None) -> None:
+    def __init__(self, label: str, content: bytes, editOf: Self | None = None) -> None:
         self.label = Label(label)
         self.content = content
         self.editOf = editOf
@@ -34,6 +36,9 @@ class ArticleRepository(ABC):
             return self._articles[articleId]
         raise KeyError(
             'Article not found. Try using merge_article or add_article first.')
+
+    def get_articles(self) -> Iterator[ID]:
+        return self._articles.__iter__()
 
     def has_article(self, articleId: ArticleID | None) -> bool:
         return articleId in self._articles

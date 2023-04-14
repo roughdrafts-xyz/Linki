@@ -3,7 +3,6 @@ from sigili.article.repository import FileSystemArticleRepository as FileSystemA
 from sigili.article.repository import MemoryArticleRepository as MemoryArticleRepository
 
 from sigili.article.repository import Article as Article
-from sigili.article.repository import ArticleUpdate as ArticleUpdate
 
 from sigili.editor import Editor as Editor
 from sigili.draft.repository import MemoryDraftRepository as MemoryDraftRepository

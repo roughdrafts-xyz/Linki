@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from sigili.connection import Connection, MemoryConnection, PathConnection
 from sigili.draft.repository import Draft, MemoryDraftRepository
 from sigili.title.repository import TitleRepository
-from sigili.type.id import ID, LabelID
+from sigili.type.id import ID, Label, LabelID
 
 
 @dataclass
@@ -48,6 +48,13 @@ class Updater():
             drafts.set_draft(draft)
 
 
+@dataclass
+class Update():
+    labelId: LabelID
+    url: SubscriptionURL
+    size: int
+
+
 class SubscriptionRepository(ABC):
     subscriptions: Connection[SubscriptionURL]
 
@@ -66,7 +73,8 @@ class SubscriptionRepository(ABC):
         # TODO Optimize. No one likes this many loops.
 
         for sub in self.get_subscriptions():
-            pass
+            label = Label('')
+            yield Update(label.labelId, SubscriptionURL('file://dev/null/'), 0)
             # start an editor using local articles and titles
             # load remote titles as drafts
             # dry publish and report changes
