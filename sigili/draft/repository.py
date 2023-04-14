@@ -12,7 +12,6 @@ from sigili.type.id import Label
 class Draft:
     label: Label
     content: bytes
-    groups: list[Label]
     editOf: Article | None = None
 
     def should_update(self) -> bool:
