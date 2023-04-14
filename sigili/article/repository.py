@@ -37,8 +37,9 @@ class ArticleRepository(ABC):
         raise KeyError(
             'Article not found. Try using merge_article or add_article first.')
 
-    def get_articles(self) -> Iterator[ID]:
-        return self._articles.__iter__()
+    def get_articles(self) -> Iterator[ArticleID]:
+        for key in self._articles.keys():
+            yield ArticleID(key)
 
     def has_article(self, articleId: ArticleID | None) -> bool:
         return articleId in self._articles
@@ -66,7 +67,7 @@ class MemoryArticleRepository(ArticleRepository):
 
 class FileSystemArticleRepository(ArticleRepository):
     def __init__(self, path: Path) -> None:
-        self.articles = PathConnection(path.resolve())
+        self._articles = PathConnection(path.resolve())
 
     @staticmethod
     def init(path: Path):

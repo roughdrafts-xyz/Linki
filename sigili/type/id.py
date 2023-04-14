@@ -27,7 +27,7 @@ class ArticleID(ID):
         if (editOf is None):
             _editOf = str.encode(BlankArticleID)
         else:
-            _editOf = str.encode(editOf)
+            _editOf = str.encode(editOf.articleId)
         _label = str.encode(label.name)
         return cls(sha224(
             b''.join([

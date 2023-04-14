@@ -29,6 +29,13 @@ class Draft:
             article
         )
 
+    def asArticle(self) -> Article:
+        return Article(
+            self.label.unsafe_raw_name,
+            self.content,
+            self.editOf
+        )
+
 
 class DraftRepository(ABC):
     drafts: Connection[Draft]
