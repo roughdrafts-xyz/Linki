@@ -1,8 +1,8 @@
 import string
 from hypothesis import assume, strategies
-from sigili.article import Article
+from linki.article import Article
 
-from sigili.id import Label
+from linki.id import Label
 
 
 @strategies.composite

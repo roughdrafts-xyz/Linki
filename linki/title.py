@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Iterator
-from sigili.article import Article
-from sigili.connection import Connection
+from linki.article import Article
+from linki.connection import Connection
 
-from sigili.id import Label
+from linki.id import Label
 
 
 @dataclass

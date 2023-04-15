@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from sigili.repository import Repository
+from linki.repository import Repository
 
-from sigili.subscription import SubURL, SubURLCollection, Subscription
-from sigili.title import TitleCollection
-from sigili.id import Label
+from linki.subscription import SubURL, SubURLCollection, Subscription
+from linki.title import TitleCollection
+from linki.id import Label
 
 
 @dataclass

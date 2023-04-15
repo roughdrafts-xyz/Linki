@@ -1,9 +1,9 @@
 from urllib.parse import ParseResult, urlparse
-from sigili.article import ArticleCollection
-from sigili.connection import Connection, PathConnection
-from sigili.draft import DraftCollection
-from sigili.subscription import SubURLCollection
-from sigili.title import TitleCollection
+from linki.article import ArticleCollection
+from linki.connection import Connection, PathConnection
+from linki.draft import DraftCollection
+from linki.subscription import SubURLCollection
+from linki.title import TitleCollection
 
 
 class RepositoryConnection:

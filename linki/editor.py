@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from glob import iglob
 from pathlib import Path
 from typing import Iterable
-from sigili.article import ArticleCollection
-from sigili.draft import Draft, DraftCollection
-from sigili.repository import Repository
-from sigili.title import TitleCollection
-from sigili.id import Label
+from linki.article import ArticleCollection
+from linki.draft import Draft, DraftCollection
+from linki.repository import Repository
+from linki.title import TitleCollection
+from linki.id import Label
 
 
 class Editor():

@@ -1,5 +1,5 @@
 [project]
-name = "sigili"
+name = "linki"
 version = '0.0.9'
 description = 'Distributed wiki tools'
 authors = [

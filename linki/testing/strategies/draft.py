@@ -1,6 +1,6 @@
 from hypothesis import strategies
-from sigili.draft import Draft
-from sigili.testing.strategies.article import a_new_article, an_article, an_edit_of
+from linki.draft import Draft
+from linki.testing.strategies.article import a_new_article, an_article, an_edit_of
 
 
 @strategies.composite

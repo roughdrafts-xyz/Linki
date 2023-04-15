@@ -3,14 +3,14 @@ from typing import List
 from unittest import TestCase
 
 from hypothesis import given
-from sigili.article import Article, ArticleCollection
-from sigili.connection import MemoryConnection
-from sigili.draft import Draft, DraftCollection
+from linki.article import Article, ArticleCollection
+from linki.connection import MemoryConnection
+from linki.draft import Draft, DraftCollection
 
-from sigili.editor import Editor
-from sigili.testing.strategies.article import an_article
-from sigili.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
-from sigili.title import Title, TitleCollection
+from linki.editor import Editor
+from linki.testing.strategies.article import an_article
+from linki.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
+from linki.title import Title, TitleCollection
 
 
 @given(a_new_draft())

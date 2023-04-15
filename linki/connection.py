@@ -2,7 +2,7 @@ from pathlib import Path
 import pickle
 from typing import Dict, Iterator, MutableMapping, TypeVar
 
-from sigili.id import ID
+from linki.id import ID
 
 VT = TypeVar('VT')
 

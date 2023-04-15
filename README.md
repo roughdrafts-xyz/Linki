@@ -1,6 +1,6 @@
-# Sigili
+# Linki
 
-The Command Line Client for the Sigili project - A tool to create distributed wikis. You can use this to publish a new wiki or copy an existing one. You can also use it to manage your wiki.
+The Command Line Client for the linki project - A tool to create distributed wikis. You can use this to publish a new wiki or copy an existing one. You can also use it to manage your wiki.
 
 # What's a Distributed Wiki?
 
@@ -20,24 +20,24 @@ Let's say you have unreliable internet. It's a satellite connection, or it's che
 
 ### Copying Off Another Wiki
 
-Let's say you're interested in bird watching, and you find a great bird wiki using sigili. You run into an issue - their articles on birds local to you aren't anywhere near the quality of the rest of their articles. You feel a duty to improve on what they started. You have the power to copy those articles and edit on top of them, keeping attributions and history for all of them. You're not limited to individual articles either. You can copy whole groups or even the entire wiki.
+Let's say you're interested in bird watching, and you find a great bird wiki using linki. You run into an issue - their articles on birds local to you aren't anywhere near the quality of the rest of their articles. You feel a duty to improve on what they started. You have the power to copy those articles and edit on top of them, keeping attributions and history for all of them. You're not limited to individual articles either. You can copy whole groups or even the entire wiki.
 
 # Installation
 
-We're on PyPI! You can just run `pip install sigili` and continue.  
+We're on PyPI! You can just run `pip install linki` and continue.  
 Alternatively, download a release from [the releases](#installation).
 
 # Getting Started
 
-You can get started by running `sigili init` to start your own wiki. The initialization procedure should have created a folder that we'll be calling this folder the `working directory`. This is where your drafts will live.
+You can get started by running `linki init` to start your own wiki. The initialization procedure should have created a folder that we'll be calling this folder the `working directory`. This is where your wiki will live.
 
-The working directory should have a hidden folder in it called `.sigili` and a hidden folder named `.editor`. Don't touch those. They're for sigili to handle, and they're sensitive.
+The working directory should have a hidden folder in it called `.linki`. Don't touch this. Its for linki to handle, and its a sensitive folder.
 
 ## Terminology
 
 ### Titles
 
-Sigili puts documents known as "Titles" on display. Named after the fact that they're content associated with a title. Titles are Articles, under the hood. They're just special because they're what's on display. Other Articles are considered to be history.
+linki puts documents known as "Titles" on display. Named after the fact that they're content associated with a title. Titles are Articles, under the hood. They're just special because they're what's on display. Other Articles are considered to be history.
 
 ### Articles
 
@@ -45,47 +45,47 @@ Articles are an archive of all changes to a Title whether or not that Title is o
 
 ### Drafts
 
-Drafts are your works in progress. They aren't titles and they aren't articles. When you're using the command line application they're files on your computer. You can `publish` drafts so that they become Titles and get archived as Articles.
-
-### Groups
-
-Articles exist in Groups. You can think of them as tags or folders. A group can be part of another group. When you publish a draft using the command line application, it creates groups based on the folder structure. This is used for organization, search purposes, and some commands.
+Drafts are your works in progress. They aren't titles and they aren't articles. When you're using the command line application they're the files in your working directory. You can `publish` drafts so that they become Titles and get archived as Articles.
 
 # Writing your Drafts
 
 Writing Drafts is pretty easy - just use markdown in any text editor you prefer. As long as it can save to markdown directly, you're golden. (Future versions will support anything [Pandoc](https://pandoc.org/) can!)
 
-If a Draft is inside of a folder, it'll remember that - When you get to publishing it'll save the folder structure as a "group".You can edit your drafts like you would normal files. Move folders around. Rename things. Sigili will know what you changed when you ask it to publish your drafts.
+If a Draft is inside of a folder, it'll remember that - When you get to publishing it'll save the folder structure as part of the Title.You can edit your drafts like you would normal files. Move folders around. Rename things. linki will know what you changed when you ask it to publish your drafts.
 
 # Publishing Drafts
 
-When you're ready to turn your Drafts into Titles and archive them as Articles, run `sigili publish`. When a reader interacts with your wiki, they'll see those Titles. If something goes wrong while you're publishing don't fret - it'll roll back the publishing and your wiki will be safe.
+When you're ready to turn your Drafts into Titles and archive them as Articles, run `linki publish`. When a reader interacts with your wiki, they'll see those Titles. If something goes wrong while you're publishing don't fret - it'll roll back the publishing and your wiki will be safe.
 
 # Copying Articles from Other Wikis
 
-See something you like on another wiki? Maybe a version of an article you wrote that you like better? Or an article you think would be important on your wiki that you don't have? You can copy it! You can copy it _and_ its history! When this thing has comments, it'll copy the comments too! Just run `sigili copy <url of article>` and it'll copy all of that over to your wiki, ready to go. You can treat it like one of your own articles - edit its draft, change its groups, whatever. It's yours to change now.
+See something you like on another wiki? Maybe a version of an article you wrote that you like better? Or an article you think would be important on your wiki that you don't have? You can copy it! You can copy it _and_ its history! When this thing has comments, it'll copy the comments too! Just run `linki copy <url of article>` and it'll copy all of that over to your wiki, ready to go. You can treat it like one of your own articles - edit its draft, change its groups, whatever. It's yours to change now.
 
-Your drafts will be safe from this - It'll only update the draft when it updates the titles if the draft was already unchanged. This will let you copy an article and change the title without changing the draft. You might need to do a bit of effort to add your draft's changes to the article, but this avoids what is known as an "[edit conflict](https://en.wikipedia.org/wiki/Edit_conflict)".
+Your wiki will only update Drafts you haven't changed. This will let you copy an article and change the title without changing the draft. You might need to do a bit of effort to add your draft's changes to the article, but this avoids what is known as an "[edit conflict](https://en.wikipedia.org/wiki/Edit_conflict)".
 
-## Copying groups or a wiki
+## Copying a wiki
 
-If you want to, you can even copy a whole wiki or a group inside of it. Just do `sigili copy <url to wiki>` or `sigili copy <url to group>` and it'll work the same - think of it as running copy on every article in the group or wiki.
+If you want to, you can even copy a whole wiki. Just do `linki copy <url to wiki>` and it'll work the same - think of it as running copy on every article in the wiki.
+
+### Filtering
+
+When you copy an entire wiki you can use the `--filter` flag to filter titles using regex. This will let you only download specific file types, or only Titles that share parts of their label.
 
 ## Starting with a copy of a Wiki
 
-Instead of running `sigili init` you can use `sigili copy`. This will automatically initialize the folder, and then run the copy command like normal for you. It's a great way to get up and running with a pre-made set of articles you want to build on top of.
+Instead of running `linki init` you can use `linki copy`. This will automatically initialize the folder, and then run the copy command like normal for you. It's a great way to get up and running with a pre-made set of articles you want to build on top of.
 
 # Subscribing to Wikis
 
-> TODO This needs to account for the new Filter concept.
-
-There are likely wikis that you'd like to copy from consistently. This might be a copy of your wiki deployed to a server, or a wiki that covers a topic very related to your own. You can use `sigili subscribe <url>` to do this.
+There are likely wikis that you'd like to copy from consistently. This might be a copy of your wiki deployed to a server, or a wiki that covers a topic very related to your own. You can use `linki subscribe <url>` to do this.
 
 If you subscribe to the same url multiple times, it'll unsubscribe from the wiki and then subscribe again. This is a good way to change settings on a subscription.
 
-When you subscribe to a wiki, sigili will show you to updates to wikis with `sigili inbox`. If the same title has changed multiple times, it'll batch these changes together so that you only see the latest one. You can pick and choose which ones you'd like to copy over using the `sigili copy` command. You can do `sigili copy <update>` as a shortcut.
+## Reading your Subscriptions
 
-Just like `sigili copy` you can subscribe to a whole wiki, a group in that wiki, or just an individual page. It'll subscribe accordingly. You can subscribe to the same wiki multiple times, using different urls. This is useful if you want different subscriptions to the same wiki to have different settings.
+When you subscribe to a wiki, linki will show you to updates to wikis with `linki inbox`. If the same title has changed multiple times, it'll batch these changes together so that you only see the latest one. You can pick and choose which ones you'd like to copy over using the `linki copy` command.
+
+Just like `linki copy` you can subscribe to a whole wiki, a group in that wiki, or just an individual page. It'll subscribe accordingly. You can subscribe to the same wiki multiple times, using different urls. This is useful if you want different subscriptions to the same wiki to have different settings.
 
 ## Automatic Subscriptions
 
@@ -95,41 +95,41 @@ You can stop a subscription from being automatic by subscribing again with the `
 
 ## Subscribing to Multiple Wikis
 
-You can subscribe to multiple wikis. You do this by using `sigili subscribe` any number of times. If you aren't subscribed to the wiki already, it'll add it to your list of subscriptions.
+You can subscribe to multiple wikis. You do this by using `linki subscribe` any number of times. If you aren't subscribed to the wiki already, it'll add it to your list of subscriptions.
 
 ### Subscription priority
 
-It's likely some of the wikis you subscribe to will have similar articles with the same title. Because of this, sigili subscriptions have priority.
+It's likely some of the wikis you subscribe to will have similar articles with the same title. Because of this, linki subscriptions have priority.
 
 Automatic subscriptions will copy updates from all automatic subscriptions. Priority determines which article becomes the title article.
 
-You can view your existing subscriptions and their priorities with `sigili subscriptions` with no parameters. This will show you both your automatic and non-automatic subscriptions. It will also show you your wiki, labeled as `This Wiki`. Your Wiki defaults to having the highest priority.
+You can view your existing subscriptions and their priorities with `linki subscriptions` with no parameters. This will show you both your automatic and non-automatic subscriptions. It will also show you your wiki, labeled as `This Wiki`. Your Wiki defaults to having the highest priority.
 
-A new subscription has the lowest priority until you change it. You can also set the priority when you run `sigili subscribe` with `sigili subscribe <url> [priority]`. You can also use this format to change the priority of an existing subscription. Your Wiki's url is `this`.
+A new subscription has the lowest priority until you change it. You can also set the priority when you run `linki subscribe` with `linki subscribe <url> [priority]`. You can also use this format to change the priority of an existing subscription. Your Wiki's url is `this`.
 
 # Making your wiki public
 
-`sigili serve` will provide you with a ready-to-go web server that can display all your titles and articles. Your drafts will stay private, they're called drafts for a reason. It'll run up a web server with a basic wiki interface that displays your titles. You can use `sigili serve --home=<title>` to set a title as a home page. If you do not, it will display a list of your ungrouped groups and titles.
+`linki serve` will provide you with a ready-to-go web server that can display all your titles and articles. Your drafts will stay private, they're called drafts for a reason. It'll run up a web server with a basic wiki interface that displays your titles. You can use `linki serve --home=<title>` to set a title as a home page. If you do not, it will display a list of your ungrouped groups and titles.
 
-This also makes your wiki public for other sigili installations to subscribe to! It'll also create an API to access your titles and articles. You can read more about the API options in the [API Documentation](#).
+This also makes your wiki public for other linki installations to subscribe to! It'll also create an API to access your titles and articles. You can read more about the API options in the [API Documentation](#).
 
 ## I don't want to have some of these features
 
-Use `sigili serve --no-web` to only serve your API and Subscription access. You can also do `sigili serve --no-api` to turn off the API. Similarly you can do `sigili serve --no-subscribe`. You can do any mix of these, but if you do all three it might just be better not to serve in the first place.
+Use `linki serve --no-web` to only serve your API and Subscription access. You can also do `linki serve --no-api` to turn off the API. Similarly you can do `linki serve --no-subscribe`. You can do any mix of these, but if you do all three it might just be better not to serve in the first place.
 
-The Sigili Server comes with a basic search function, html displays of your articles, a history view of your titles, title lists, an API, and an endpoint for subscribers to update from.
+The linki Server comes with a basic search function, html displays of your articles, a history view of your titles, title lists, an API, and an endpoint for subscribers to update from.
 
 ## I don't want to host this on my personal computer
 
-Smart! You can run `sigili serve` on a server, and this is the recommended option.
+Smart! You can run `linki serve` on a server, and this is the recommended option.
 
 ## I don't want to maintain a server
 
-Find a public sigili host that will serve your wiki for you. They'll likely have advanced tools to help you, such as user groups or multi-author wiki tools. They'll likely also offer you search and discovery tools too.
+Find a public linki host that will serve your wiki for you. They'll likely have advanced tools to help you, such as user groups or multi-author wiki tools. They'll likely also offer you search and discovery tools too.
 
 # Contributing to other wikis
 
-You can contribute to other wikis, and they might like to know when you're making a contribution to them. You can do this with the `sigili announce` function. The `sigili announce` function tells wikis that you've made some updates they should copy over. You can track which wikis receive announcements using the `sigili contribute` command. It operates similarly to the `sigili subscribe` command. Similarly, you can see who you're contributing to with the `sigili contributions` command.
+You can contribute to other wikis, and they might like to know when you're making a contribution to them. You can do this with the `linki announce` function. The `linki announce` function tells wikis that you've made some updates they should copy over. You can track which wikis receive announcements using the `linki contribute` command. It operates similarly to the `linki subscribe` command. Similarly, you can see who you're contributing to with the `linki contributions` command.
 
 # Questions
 
@@ -139,11 +139,11 @@ These are questions I either asked myself or that someone asked me while discuss
 
 Git isn't very oriented toward non-developers, and its purpose is different. Existing wiki solutions built on top of git are great, but they are not purpose-built.
 
-For example, a sigili hosting service (like [roughdrafts.xyz](#)) could provide permissions on who can read what articles by article, group, or wiki. It could also introduce something like pull requests for articles. (By the way, [roughdrafts.xyz](#)) does this today. Check it out!)
+For example, a linki hosting service (like [roughdrafts.xyz](#)) could provide permissions on who can read what articles by article, group, or wiki. It could also introduce something like pull requests for articles. (By the way, [roughdrafts.xyz](#)) does this today. Check it out!)
 
 ## How do I prevent plagiarism?
 
-If you use a sigili hosting service it might be able to act as a Timestamp Authority. If this is the case, anyone who trusts that host can use it to verify who published something first and you can use it to store copies of the verification.
+If you use a linki hosting service it might be able to act as a Timestamp Authority. If this is the case, anyone who trusts that host can use it to verify who published something first and you can use it to store copies of the verification.
 
 You could also use this [pre-publish hook](#) to digitally timestamp your articles using the [FreeTSA Timestamp Authority service](https://www.freetsa.org/index_en.php) and [Sigstore TSA](https://www.sigstore.dev/).
 
@@ -159,4 +159,8 @@ Assume anything you publish is out there forever. You can send out a blank updat
 
 For data integrity reasons, there's no built-in way to request the deletion of an article's history, as it might break an edit history tree.
 
-If being able to delete your articles is a concern, develop a personal [web of trust](https://en.wikipedia.org/wiki/Web_of_trust), encrypt your articles using a secret key made just for sigili, and use another communication channel to request your public key be deleted when you need to make your data inaccessible.
+If being able to delete your articles is a concern, develop a personal [web of trust](https://en.wikipedia.org/wiki/Web_of_trust), encrypt your articles using a secret key made just for linki, and use another communication channel to request your public key be deleted when you need to make your data inaccessible.
+
+# Thanks
+
+Thank You, Ward Cunningham, for sharing the [concept of a Federated Wiki](https://www.youtube.com/watch?v=BdwLczSgvcc) at TEDx and laying the ground work necessary to build off of.

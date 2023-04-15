@@ -5,12 +5,12 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 
 from hypothesis import given
-from sigili.article import Article
+from linki.article import Article
 
-from sigili.editor import FileEditor
-from sigili.repository import Repository
-from sigili.testing.strategies.article import an_article
-from sigili.id import Label
+from linki.editor import FileEditor
+from linki.repository import Repository
+from linki.testing.strategies.article import an_article
+from linki.id import Label
 
 
 @contextmanager

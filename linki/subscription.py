@@ -2,10 +2,10 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Iterator
 from urllib.parse import urlparse
-from sigili.connection import Connection
-from sigili.draft import Draft
-from sigili.title import TitleCollection
-from sigili.id import LabelID
+from linki.connection import Connection
+from linki.draft import Draft
+from linki.title import TitleCollection
+from linki.id import LabelID
 
 
 @dataclass
