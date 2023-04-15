@@ -15,7 +15,7 @@ class RepositoryConnection:
     def get_style(self, style: str) -> Connection:
         match self.url.scheme:
             case 'file':
-                path = PathConnection.get_path(self.url.geturl(), style)
+                path = PathConnection.get_path(self.url.path, style)
                 return PathConnection(path)
             case 'ssh':
                 raise NotImplementedError
@@ -27,7 +27,7 @@ class RepositoryConnection:
     def create_style(self, style: str):
         match self.url.scheme:
             case 'file':
-                PathConnection.create_path(self.url.geturl(), style)
+                PathConnection.create_path(self.url.path, style)
             case 'ssh':
                 raise NotImplementedError
             case 'http':
