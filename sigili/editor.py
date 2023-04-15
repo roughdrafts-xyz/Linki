@@ -4,13 +4,13 @@ from pathlib import Path
 from typing import Iterable
 from sigili.article.repository import ArticleRepository, FileSystemArticleRepository
 from sigili.draft.repository import Draft, DraftRepository, FileSystemDraftRepository
-from sigili.title.repository import FileSystemTitleRepository, TitleRepository
+from sigili.title.repository import TitleCollection
 from sigili.type.id import Label
 
 
 class Editor():
 
-    def __init__(self, titles: TitleRepository, drafts: DraftRepository, articles: ArticleRepository) -> None:
+    def __init__(self, titles: TitleCollection, drafts: DraftRepository, articles: ArticleRepository) -> None:
         self._titles = titles
         self._drafts = drafts
         self._articles = articles
@@ -45,7 +45,7 @@ class Editor():
             count += 1
         return count
 
-    def copy_titles(self, titles: TitleRepository):
+    def copy_titles(self, titles: TitleCollection):
         count = 0
         for title in titles.get_titles():
             _title = self._titles.get_title(title.label)
@@ -58,7 +58,7 @@ class Editor():
 
 class FileEditor(Editor):
     def __init__(self, path: Path,
-                 titles: TitleRepository,
+                 titles: TitleCollection,
                  drafts: DraftRepository,
                  articles: ArticleRepository) -> None:
         super().__init__(titles, drafts, articles)

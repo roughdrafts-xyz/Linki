@@ -64,3 +64,38 @@ class PathConnection(Connection[VT]):
     def __contains__(self, __key: ID) -> bool:
         key_path = self.store.joinpath(__key)
         return key_path.exists() and key_path.is_file()
+
+    @staticmethod
+    def init(path: str, style: str):
+        base = Path(path).resolve()
+
+        if (not base.exists()):
+            raise FileNotFoundError
+        if (not base.is_dir()):
+            raise ValueError
+
+        root = base.joinpath('.sigili')
+        if (not root.exists()):
+            root.mkdir()
+
+        connection = root.joinpath(style)
+        connection.mkdir()
+        return connection.resolve()
+
+    @staticmethod
+    def get_path(path: str, style: str):
+        base = Path(path).resolve()
+
+        if (not base.exists()):
+            raise FileNotFoundError
+        if (not base.is_dir()):
+            raise ValueError
+
+        root = base.joinpath('.sigili')
+        if (not root.exists()):
+            raise FileNotFoundError
+        if (not root.is_dir()):
+            raise ValueError
+
+        connection = root.joinpath(style)
+        return connection.resolve()

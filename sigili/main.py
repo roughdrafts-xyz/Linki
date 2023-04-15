@@ -3,7 +3,6 @@ import typer
 
 from sigili.editor import FileEditor
 from sigili.subscription import Inbox, PathSubscriptionRepository
-from sigili.title.repository import FileSystemTitleRepository, TitleRepository
 
 app = typer.Typer()
 

@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from sigili.article.repository import Article
 from sigili.connection import Connection, MemoryConnection, PathConnection
 from sigili.draft.repository import Draft, MemoryDraftRepository
-from sigili.title.repository import TitleRepository
+from sigili.title.repository import TitleCollection
 from sigili.type.id import ID, ArticleID, Label, LabelID
 
 
@@ -69,8 +69,8 @@ class PathSubscriptionRepository(SubURLRepository):
 
 @dataclass
 class Subscription():
-    titles: TitleRepository
-    remote: TitleRepository
+    titles: TitleCollection
+    remote: TitleCollection
 
     def get_updates(self) -> Iterator[Draft]:
         for title in self.remote.get_titles():
@@ -96,7 +96,7 @@ class InboxRow():
 
 
 class Inbox():
-    def __init__(self, subs: SubURLRepository,  titles: TitleRepository) -> None:
+    def __init__(self, subs: SubURLRepository,  titles: TitleCollection) -> None:
         self.subs = subs
         self.titles = titles
         pass
@@ -105,7 +105,7 @@ class Inbox():
         # TODO Optimize. No one likes this many loops.
         count = 0
         for sub in self.subs.get_sub_urls():
-            remote = TitleRepository.fromURL(sub.url)
+            remote = TitleCollection.fromURL(sub.url)
             subscription = Subscription(self.titles, remote)
             for update in subscription.get_updates():
                 size = len(update.content)
