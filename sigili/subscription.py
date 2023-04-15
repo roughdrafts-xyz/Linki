@@ -1,13 +1,11 @@
 from abc import ABC
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Iterator, List
+from typing import Iterator
 from urllib.parse import urlparse
-from sigili.connection import Connection, MemoryConnection, PathConnection
+from sigili.connection import Connection
 from sigili.draft import Draft
-from sigili.repository import Repository, RepositoryConnection
 from sigili.title import TitleCollection
-from sigili.type.id import ID, ArticleID, Label, LabelID
+from sigili.type.id import LabelID
 
 
 @dataclass
@@ -68,31 +66,3 @@ class Subscription():
             )
             if (draft.should_update()):
                 yield draft
-
-
-@dataclass
-class InboxRow():
-    rowId: int
-    url: SubURL
-    label: Label
-    size: int
-
-
-class Inbox():
-    def __init__(self, subs: SubURLCollection,  titles: TitleCollection) -> None:
-        self.subs = subs
-        self.titles = titles
-        pass
-
-    def get_inbox(self):
-        # TODO Optimize. No one likes this many loops.
-        count = 0
-        for sub in self.subs.get_sub_urls():
-            repo = Repository(sub.url)
-            remote = repo.titles
-            subscription = Subscription(self.titles, remote)
-            for update in subscription.get_updates():
-                size = len(update.content)
-                if (update.editOf is not None):
-                    size -= len(update.editOf.content)
-                yield InboxRow(count, sub, update.label, size)

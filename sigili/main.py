@@ -2,8 +2,8 @@ from pathlib import Path
 import typer
 
 from sigili.editor import FileEditor
+from sigili.inbox import Inbox
 from sigili.repository import Repository
-from sigili.subscription import Inbox
 
 app = typer.Typer()
 
@@ -41,7 +41,7 @@ def subscribe(url: str, location: str):
     path = Path(location).resolve().as_uri()
     repo = Repository(path)
     subs = repo.subs
-    _url = Path(url).joinpath('.sigili', 'titles').resolve().as_uri()
+    _url = Path(url).resolve().as_uri()
     subs.add_sub_url(_url)
     typer.echo(f"Subscribed to {str(url)}.")
 

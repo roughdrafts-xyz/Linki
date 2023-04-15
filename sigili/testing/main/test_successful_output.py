@@ -9,6 +9,7 @@ def test_init_repositories(tmp_path: Path):
     # res = runner.invoke(app, ["init", str(tmp_path)])
     # assert res.stdout == f"Initialized wiki in {str(tmp_path)}.\n"
     init(str(tmp_path))
+    assert False
 
 
 def test_publish_drafts(tmp_path: Path):

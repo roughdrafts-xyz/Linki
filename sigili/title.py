@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Iterator
-from sigili.article.repository import Article
+from sigili.article import Article
 from sigili.connection import Connection
 
 from sigili.type.id import Label
