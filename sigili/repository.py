@@ -1,5 +1,7 @@
 from urllib.parse import ParseResult, urlparse
+from sigili.article import ArticleCollection
 from sigili.connection import Connection, PathConnection
+from sigili.draft import DraftCollection
 from sigili.subscription import SubURLCollection
 from sigili.title import TitleCollection
 
@@ -35,7 +37,7 @@ class RepositoryConnection:
 
 
 class Repository:
-    styles = {'titles', 'subs'}
+    styles = {'titles', 'subs', 'drafts', 'articles'}
 
     def __init__(self, url: str) -> None:
         self.connection = RepositoryConnection(url)
@@ -49,6 +51,16 @@ class Repository:
     def subs(self) -> SubURLCollection:
         connection = self.connection.get_style('subs')
         return SubURLCollection(connection)
+
+    @property
+    def drafts(self) -> DraftCollection:
+        connection = self.connection.get_style('drafts')
+        return DraftCollection(connection)
+
+    @property
+    def articles(self) -> ArticleCollection:
+        connection = self.connection.get_style('articles')
+        return ArticleCollection(connection)
 
     @classmethod
     def create(cls, base: str):

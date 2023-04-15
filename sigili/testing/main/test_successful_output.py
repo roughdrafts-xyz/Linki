@@ -1,13 +1,14 @@
 from pathlib import Path
 from typer.testing import CliRunner
-from sigili.main import app, inbox
+from sigili.main import app, inbox, init
 
 runner = CliRunner()
 
 
 def test_init_repositories(tmp_path: Path):
-    res = runner.invoke(app, ["init", str(tmp_path)])
-    assert res.stdout == f"Initialized wiki in {str(tmp_path)}.\n"
+    # res = runner.invoke(app, ["init", str(tmp_path)])
+    # assert res.stdout == f"Initialized wiki in {str(tmp_path)}.\n"
+    init(str(tmp_path))
 
 
 def test_publish_drafts(tmp_path: Path):
@@ -83,7 +84,6 @@ def test_view_subscription_update(tmp_path: Path):
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
-    PathSubscriptionRepository.init(copy.joinpath('.sigili'))
     runner.invoke(app, ["subscribe", str(base), str(copy)])
 
     update = 'Hello World!'

@@ -3,9 +3,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator, List
 from urllib.parse import urlparse
-from sigili.article.repository import Article
 from sigili.connection import Connection, MemoryConnection, PathConnection
-from sigili.draft.repository import Draft, MemoryDraftRepository
+from sigili.draft import Draft
 from sigili.repository import Repository, RepositoryConnection
 from sigili.title import TitleCollection
 from sigili.type.id import ID, ArticleID, Label, LabelID

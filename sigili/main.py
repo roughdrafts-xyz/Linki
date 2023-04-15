@@ -9,7 +9,7 @@ app = typer.Typer()
 
 
 @app.command()
-def create_path(destination: str):
+def init(destination: str):
     path = Path(destination).resolve().as_uri()
     Repository.create(path)
     typer.echo(f"Initialized wiki in {destination}.")
@@ -17,7 +17,7 @@ def create_path(destination: str):
 
 @app.command()
 def publish(location: str):
-    editor = FileEditor.fromPath(Path(location))
+    editor = FileEditor.fromPath(location)
     editor.load_drafts()
     x = editor.publish_drafts()
     typer.echo(f"Published {x} drafts.")

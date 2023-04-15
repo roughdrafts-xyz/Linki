@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator
-from sigili.article.repository import Article
+from sigili.article import Article
 from sigili.connection import Connection, MemoryConnection, PathConnection
 
 from sigili.type.id import Label
@@ -37,8 +37,9 @@ class Draft:
         )
 
 
-class DraftRepository(ABC):
-    drafts: Connection[Draft]
+class DraftCollection(ABC):
+    def __init__(self, connection: Connection[Draft]) -> None:
+        self.drafts = connection
 
     def set_draft(self, draft: Draft) -> Draft:
         self.drafts[draft.label.labelId] = draft
@@ -55,21 +56,3 @@ class DraftRepository(ABC):
             del self.drafts[label.labelId]
             return True
         return False
-
-
-class MemoryDraftRepository(DraftRepository):
-    def __init__(self) -> None:
-        self.drafts = MemoryConnection()
-
-
-class FileSystemDraftRepository(DraftRepository):
-    def __init__(self, path: Path) -> None:
-        self.drafts = PathConnection(path.resolve())
-
-    @staticmethod
-    def init(path: Path):
-        if (not path.exists()):
-            raise FileNotFoundError
-        _draftPath = path.joinpath('drafts')
-        _draftPath.mkdir()
-        return _draftPath

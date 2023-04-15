@@ -2,15 +2,16 @@ from dataclasses import dataclass
 from glob import iglob
 from pathlib import Path
 from typing import Iterable
-from sigili.article.repository import ArticleRepository, FileSystemArticleRepository
-from sigili.draft.repository import Draft, DraftRepository, FileSystemDraftRepository
-from sigili.title.repository import TitleCollection
+from sigili.article import ArticleCollection
+from sigili.draft import Draft, DraftCollection
+from sigili.repository import Repository
+from sigili.title import TitleCollection
 from sigili.type.id import Label
 
 
 class Editor():
 
-    def __init__(self, titles: TitleCollection, drafts: DraftRepository, articles: ArticleRepository) -> None:
+    def __init__(self, titles: TitleCollection, drafts: DraftCollection, articles: ArticleCollection) -> None:
         self._titles = titles
         self._drafts = drafts
         self._articles = articles
@@ -33,7 +34,7 @@ class Editor():
             self._titles.set_title(article)
         return count
 
-    def copy_articles(self, articles: ArticleRepository):
+    def copy_articles(self, articles: ArticleCollection):
         # TODO Make a dataclass of ArticleCollection that simplifies this?
 
         count = 0
@@ -59,14 +60,16 @@ class Editor():
 class FileEditor(Editor):
     def __init__(self, path: Path,
                  titles: TitleCollection,
-                 drafts: DraftRepository,
-                 articles: ArticleRepository) -> None:
+                 drafts: DraftCollection,
+                 articles: ArticleCollection) -> None:
         super().__init__(titles, drafts, articles)
         self._path = path
 
     @classmethod
-    def fromPath(cls, path: Path):
-        return cls(path, titles, drafts, articles)
+    def fromPath(cls, base: str):
+        path = Path(base).resolve()
+        repo = Repository(path.as_uri())
+        return cls(path, repo.titles, repo.drafts, repo.articles)
 
     def iterfiles(self):
         # Path.rglob doesn't handle avoiding hidden folders well.
