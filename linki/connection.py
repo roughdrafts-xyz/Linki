@@ -74,7 +74,7 @@ class PathConnection(Connection[VT]):
         if (not base.is_dir()):
             raise ValueError
 
-        root = base.joinpath('.sigili')
+        root = base.joinpath('.linki')
         if (not root.exists()):
             root.mkdir()
 
@@ -91,7 +91,7 @@ class PathConnection(Connection[VT]):
         if (not base.is_dir()):
             raise ValueError
 
-        root = base.joinpath('.sigili')
+        root = base.joinpath('.linki')
         if (not root.exists()):
             raise FileNotFoundError
         if (not root.is_dir()):
