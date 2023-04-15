@@ -66,7 +66,7 @@ class PathConnection(Connection[VT]):
         return key_path.exists() and key_path.is_file()
 
     @staticmethod
-    def init(path: str, style: str):
+    def create_path(path: str, style: str):
         base = Path(path).resolve()
 
         if (not base.exists()):

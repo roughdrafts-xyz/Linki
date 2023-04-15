@@ -64,20 +64,8 @@ class FileEditor(Editor):
         super().__init__(titles, drafts, articles)
         self._path = path
 
-    @staticmethod
-    def init(path: Path):
-        _path = path.joinpath('.sigili')
-        _path.mkdir()
-        FileSystemArticleRepository.init(_path)
-        FileSystemTitleRepository.init(_path)
-        FileSystemDraftRepository.init(_path)
-
     @classmethod
     def fromPath(cls, path: Path):
-        _path = path.joinpath('.sigili')
-        titles = FileSystemTitleRepository(_path.joinpath('titles'))
-        drafts = FileSystemDraftRepository(_path.joinpath('drafts'))
-        articles = FileSystemArticleRepository(_path.joinpath('articles'))
         return cls(path, titles, drafts, articles)
 
     def iterfiles(self):

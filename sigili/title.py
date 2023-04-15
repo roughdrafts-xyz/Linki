@@ -1,10 +1,7 @@
-from abc import ABC
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Iterator
-from urllib.parse import urlparse
 from sigili.article.repository import Article
-from sigili.connection import Connection, MemoryConnection, PathConnection
+from sigili.connection import Connection
 
 from sigili.type.id import Label
 

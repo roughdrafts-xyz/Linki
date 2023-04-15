@@ -1,8 +1,7 @@
-from dataclasses import dataclass
 from urllib.parse import ParseResult, urlparse
 from sigili.connection import Connection, PathConnection
-
-from sigili.title.repository import TitleCollection
+from sigili.subscription import SubURLCollection
+from sigili.title import TitleCollection
 
 
 class RepositoryConnection:
@@ -11,7 +10,7 @@ class RepositoryConnection:
     def __init__(self, url: str) -> None:
         self.url = urlparse(url)
 
-    def get_connection(self, style: str) -> Connection:
+    def get_style(self, style: str) -> Connection:
         match self.url.scheme:
             case 'file':
                 path = PathConnection.get_path(self.url.geturl(), style)
@@ -23,15 +22,36 @@ class RepositoryConnection:
             case _:
                 raise NotImplementedError
 
+    def create_style(self, style: str):
+        match self.url.scheme:
+            case 'file':
+                PathConnection.create_path(self.url.geturl(), style)
+            case 'ssh':
+                raise NotImplementedError
+            case 'http':
+                raise NotImplementedError
+            case _:
+                raise NotImplementedError
 
-@dataclass
+
 class Repository:
-    connection: RepositoryConnection
+    styles = {'titles', 'subs'}
 
     def __init__(self, url: str) -> None:
         self.connection = RepositoryConnection(url)
 
     @property
     def titles(self) -> TitleCollection:
-        connection = self.connection.get_connection('titles')
+        connection = self.connection.get_style('titles')
         return TitleCollection(connection)
+
+    @property
+    def subs(self) -> SubURLCollection:
+        connection = self.connection.get_style('subs')
+        return SubURLCollection(connection)
+
+    @classmethod
+    def create(cls, base: str):
+        connection = RepositoryConnection(base)
+        for style in cls.styles:
+            connection.create_style(style)

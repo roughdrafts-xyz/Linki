@@ -2,15 +2,16 @@ from pathlib import Path
 import typer
 
 from sigili.editor import FileEditor
-from sigili.subscription import Inbox, PathSubscriptionRepository
+from sigili.repository import Repository
+from sigili.subscription import Inbox
 
 app = typer.Typer()
 
 
 @app.command()
-def init(destination: str):
-    path = Path(destination).resolve()
-    FileEditor.init(path)
+def create_path(destination: str):
+    path = Path(destination).resolve().as_uri()
+    Repository.create(path)
     typer.echo(f"Initialized wiki in {destination}.")
 
 
@@ -37,31 +38,34 @@ def copy(source: str, destination: str):
 
 @app.command()
 def subscribe(url: str, location: str):
-    subscriptions = PathSubscriptionRepository(
-        Path(location).joinpath('.sigili', 'subscriptions'))
+    path = Path(location).resolve().as_uri()
+    repo = Repository(path)
+    subs = repo.subs
     _url = Path(url).joinpath('.sigili', 'titles').resolve().as_uri()
-    subscriptions.add_sub_url(_url)
+    subs.add_sub_url(_url)
     typer.echo(f"Subscribed to {str(url)}.")
 
 
 @app.command()
 def subscriptions(location: str):
-    subscriptions = PathSubscriptionRepository(Path(location))
+    path = Path(location).resolve().as_uri()
+    repo = Repository(path)
+    subs = repo.subs
     typer.echo(f"Subscriptions by priority (highest to lowest)")
     priority = 0
     typer.echo(f'{priority}\tThis Wiki')
-    for subscription in subscriptions.get_sub_urls():
+    for subscription in subs.get_sub_urls():
         priority += 1
         typer.echo(f"{priority}\t{subscription.url}")
 
 
 @app.command()
 def inbox(location: str):
-    subscriptions = PathSubscriptionRepository(
-        Path(location).joinpath('.sigili', 'subscriptions'))
-    titles = FileSystemTitleRepository(
-        Path(location).joinpath('.sigili', 'titles'))
-    inbox = Inbox(subscriptions, titles)
+    path = Path(location).resolve().as_uri()
+    repo = Repository(path)
+    subs = repo.subs
+    titles = repo.titles
+    inbox = Inbox(subs, titles)
     for update in inbox.get_inbox():
         typer.echo(
             f"{update.rowId} {update.url.url}/{update.label.name} ({update.size:+n})")

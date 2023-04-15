@@ -6,7 +6,8 @@ from urllib.parse import urlparse
 from sigili.article.repository import Article
 from sigili.connection import Connection, MemoryConnection, PathConnection
 from sigili.draft.repository import Draft, MemoryDraftRepository
-from sigili.title.repository import TitleCollection
+from sigili.repository import Repository, RepositoryConnection
+from sigili.title import TitleCollection
 from sigili.type.id import ID, ArticleID, Label, LabelID
 
 
@@ -33,8 +34,9 @@ class SubURL():
         return True
 
 
-class SubURLRepository(ABC):
-    subscriptions: Connection[SubURL]
+class SubURLCollection(ABC):
+    def __init__(self, connection: Connection[SubURL]) -> None:
+        self.subscriptions = connection
 
     def add_sub_url(self, url: str):
         subURL = SubURL(url)
@@ -47,24 +49,6 @@ class SubURLRepository(ABC):
     def get_sub_urls(self) -> Iterator[SubURL]:
         for url in self.subscriptions.values():
             yield url
-
-
-class MemorySubscriptionRepository(SubURLRepository):
-    def __init__(self) -> None:
-        self.subscriptions = MemoryConnection[SubURL]()
-
-
-class PathSubscriptionRepository(SubURLRepository):
-    def __init__(self, path: Path) -> None:
-        self.subscriptions = PathConnection[SubURL](path.resolve())
-
-    @staticmethod
-    def init(path: Path):
-        if (not path.exists()):
-            raise FileNotFoundError
-        _titlePath = path.joinpath('subscriptions')
-        _titlePath.mkdir()
-        return _titlePath.resolve()
 
 
 @dataclass
@@ -96,7 +80,7 @@ class InboxRow():
 
 
 class Inbox():
-    def __init__(self, subs: SubURLRepository,  titles: TitleCollection) -> None:
+    def __init__(self, subs: SubURLCollection,  titles: TitleCollection) -> None:
         self.subs = subs
         self.titles = titles
         pass
@@ -105,7 +89,8 @@ class Inbox():
         # TODO Optimize. No one likes this many loops.
         count = 0
         for sub in self.subs.get_sub_urls():
-            remote = TitleCollection.fromURL(sub.url)
+            repo = Repository(sub.url)
+            remote = repo.titles
             subscription = Subscription(self.titles, remote)
             for update in subscription.get_updates():
                 size = len(update.content)

@@ -1,7 +1,6 @@
 from pathlib import Path
 from typer.testing import CliRunner
 from sigili.main import app, inbox
-from sigili.subscription import PathSubscriptionRepository
 
 runner = CliRunner()
 
