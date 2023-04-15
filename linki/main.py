@@ -1,5 +1,6 @@
 from pathlib import Path
 import typer
+from bottle import Bottle, run
 
 from linki.editor import FileEditor
 from linki.inbox import Inbox
@@ -72,9 +73,16 @@ def inbox(location: str):
 
 @app.command()
 def serve(location: str):
-    # run a fastapi server
-    # also provides endpoint for receiving announcements
-    typer.echo(f"TODO serve")
+    # https://bottlepy.org/docs/dev/routing.html#explicit-routing-configuration
+    # Do some magic with this to make your life easier with the CRUD shit - its already dev'd, it just needs to be linked
+    # probably need to add a hook for receiving announcements?
+    # Should ignore drafts - only cares about articles and titles?
+    # Might just be time to do the WebViewer thing.
+
+    web_app = Bottle()
+    path = Path(location).resolve().as_uri()
+    repo = Repository(path)
+    run(web_app, host='localhost', port=8080)
 
 
 @app.command()
