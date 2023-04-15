@@ -1,6 +1,6 @@
 import string
 from hypothesis import assume, strategies
-from sigili.article.repository import Article
+from sigili.article import Article
 
 from sigili.id import Label
 

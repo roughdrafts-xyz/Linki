@@ -3,20 +3,21 @@ from typing import List
 from unittest import TestCase
 
 from hypothesis import given
+from sigili.article import Article, ArticleCollection
+from sigili.connection import MemoryConnection
+from sigili.draft import Draft, DraftCollection
 
-from sigili.article.repository import Article, MemoryArticleRepository
 from sigili.editor import Editor
-from sigili.draft.repository import Draft, MemoryDraftRepository
 from sigili.testing.strategies.article import an_article
 from sigili.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
-from sigili.title.repository import MemoryTitleRepository
+from sigili.title import Title, TitleCollection
 
 
 @given(a_new_draft())
 def test_get_updates(draft: Draft):
-    titles = MemoryTitleRepository()
-    drafts = MemoryDraftRepository()
-    articles = MemoryArticleRepository()
+    titles = TitleCollection(MemoryConnection[Title]())
+    drafts = DraftCollection(MemoryConnection[Draft]())
+    articles = ArticleCollection(MemoryConnection[Article]())
     editor = Editor(titles, drafts, articles)
 
     drafts.set_draft(draft)
@@ -29,9 +30,9 @@ def test_get_updates(draft: Draft):
 
 @given(a_new_draft())
 def test_does_publish_new_draft(draft: Draft):
-    articles = MemoryArticleRepository()
-    titles = MemoryTitleRepository()
-    drafts = MemoryDraftRepository()
+    titles = TitleCollection(MemoryConnection[Title]())
+    drafts = DraftCollection(MemoryConnection[Draft]())
+    articles = ArticleCollection(MemoryConnection[Article]())
     editor = Editor(titles, drafts, articles)
 
     drafts.set_draft(draft)
@@ -47,9 +48,9 @@ def test_does_publish_new_draft(draft: Draft):
 
 @given(a_draft())
 def test_does_publish_draft(draft: Draft):
-    articles = MemoryArticleRepository()
-    titles = MemoryTitleRepository()
-    drafts = MemoryDraftRepository()
+    titles = TitleCollection(MemoryConnection[Title]())
+    drafts = DraftCollection(MemoryConnection[Draft]())
+    articles = ArticleCollection(MemoryConnection[Article]())
     editor = Editor(titles, drafts, articles)
 
     drafts.set_draft(draft)
@@ -66,9 +67,9 @@ def test_does_publish_draft(draft: Draft):
 @given(some_new_drafts(2))
 def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
     some_drafts = list(some_drafts)
-    articles = MemoryArticleRepository()
-    titles = MemoryTitleRepository()
-    drafts = MemoryDraftRepository()
+    titles = TitleCollection(MemoryConnection[Title]())
+    drafts = DraftCollection(MemoryConnection[Draft]())
+    articles = ArticleCollection(MemoryConnection[Article]())
     editor = Editor(titles, drafts, articles)
 
     for draft in some_drafts:
@@ -89,9 +90,9 @@ def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
 @given(some_drafts(2))
 def test_does_publish_some_drafts(some_drafts: List[Draft]):
     some_drafts = list(some_drafts)
-    articles = MemoryArticleRepository()
-    titles = MemoryTitleRepository()
-    drafts = MemoryDraftRepository()
+    titles = TitleCollection(MemoryConnection[Title]())
+    drafts = DraftCollection(MemoryConnection[Draft]())
+    articles = ArticleCollection(MemoryConnection[Article]())
     editor = Editor(titles, drafts, articles)
 
     for draft in some_drafts:
@@ -108,12 +109,12 @@ def test_does_publish_some_drafts(some_drafts: List[Draft]):
 
 @given(an_article())
 def test_does_copy(update: Article):
-    r_articles = MemoryArticleRepository()
-    r_titles = MemoryTitleRepository()
+    r_articles = ArticleCollection(MemoryConnection[Article]())
+    r_titles = TitleCollection(MemoryConnection[Title]())
 
-    articles = MemoryArticleRepository()
-    titles = MemoryTitleRepository()
-    drafts = MemoryDraftRepository()
+    titles = TitleCollection(MemoryConnection[Title]())
+    drafts = DraftCollection(MemoryConnection[Draft]())
+    articles = ArticleCollection(MemoryConnection[Article]())
     editor = Editor(titles, drafts, articles)
 
     article = r_articles.merge_article(update)

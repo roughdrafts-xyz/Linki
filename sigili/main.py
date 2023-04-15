@@ -25,11 +25,12 @@ def publish(location: str):
 
 @app.command()
 def copy(source: str, destination: str):
-    # subscription = Subscription.fromPath(Path(source))
-    # editor = FileEditor.fromPath(Path(destination))
-    # articles_count = editor.copy_articles(subscription.articles)
-    # titles_count = editor.copy_titles(subscription.titles)
-    # editor.unload_titles()
+    path = Path(source).resolve().as_uri()
+    repo = Repository(path)
+    editor = FileEditor.fromPath(destination)
+    articles_count = editor.copy_articles(repo.articles)
+    titles_count = editor.copy_titles(repo.titles)
+    editor.unload_titles()
     titles_count = -1
     articles_count = -1
 

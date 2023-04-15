@@ -5,9 +5,10 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 
 from hypothesis import given
-from sigili.article.repository import Article
+from sigili.article import Article
 
 from sigili.editor import FileEditor
+from sigili.repository import Repository
 from sigili.testing.strategies.article import an_article
 from sigili.id import Label
 
@@ -15,9 +16,9 @@ from sigili.id import Label
 @contextmanager
 def get_file_editor():
     with TemporaryDirectory() as _dir:
-        _path = Path(_dir)
-        FileEditor.init(_path)
-        yield FileEditor.fromPath(_path)
+        path = Path(_dir).resolve().as_uri()
+        Repository.create(path)
+        yield FileEditor.fromPath(_dir)
 
 
 def test_loads_drafts():

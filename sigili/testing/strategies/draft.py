@@ -1,5 +1,5 @@
 from hypothesis import strategies
-from sigili.draft.repository import Draft
+from sigili.draft import Draft
 from sigili.testing.strategies.article import a_new_article, an_article, an_edit_of
 
 
