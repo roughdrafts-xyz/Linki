@@ -31,8 +31,6 @@ def copy(source: str, destination: str):
     articles_count = editor.copy_articles(repo.articles)
     titles_count = editor.copy_titles(repo.titles)
     editor.unload_titles()
-    titles_count = -1
-    articles_count = -1
 
     typer.echo(f"Copied {titles_count} titles and {articles_count} articles.")
 
