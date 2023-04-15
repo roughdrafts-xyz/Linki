@@ -71,7 +71,7 @@ def inbox(location: str):
 
 
 @app.command()
-def serve():
+def serve(location: str):
     # run a fastapi server
     # also provides endpoint for receiving announcements
     typer.echo(f"TODO serve")

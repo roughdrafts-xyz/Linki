@@ -92,7 +92,10 @@ def test_view_subscription_update(tmp_path: Path):
     assert res.stdout == f'{0} {update_path.as_uri()} (+{len(update)})\n'
 
 
-def test_successful_serve():
+def test_successful_serve(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    res = runner.invoke(app, ["serve", str(base)])
+    assert res.stdout == "Running! Look at http://localhost:8080/"
     pass
 
 
