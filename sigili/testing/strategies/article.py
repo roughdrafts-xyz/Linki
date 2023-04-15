@@ -2,7 +2,7 @@ import string
 from hypothesis import assume, strategies
 from sigili.article.repository import Article
 
-from sigili.type.id import Label
+from sigili.id import Label
 
 
 @strategies.composite

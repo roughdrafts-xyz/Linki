@@ -3,7 +3,7 @@ from typing import Iterator
 from sigili.article import Article
 from sigili.connection import Connection
 
-from sigili.type.id import Label
+from sigili.id import Label
 
 
 @dataclass

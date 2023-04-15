@@ -6,7 +6,7 @@ from typing_extensions import Self
 from urllib.parse import urlparse
 
 from sigili.connection import Connection, MemoryConnection, PathConnection
-from sigili.type.id import ID, ArticleID, Label
+from sigili.id import ID, ArticleID, Label
 
 
 @dataclass

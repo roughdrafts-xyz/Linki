@@ -1,6 +1,6 @@
 import pytest
 from sigili.connection import Connection, MemoryConnection, PathConnection
-from sigili.type.id import Label
+from sigili.id import Label
 
 
 def do_test(connection: Connection):

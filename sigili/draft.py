@@ -5,7 +5,7 @@ from typing import Iterator
 from sigili.article import Article
 from sigili.connection import Connection, MemoryConnection, PathConnection
 
-from sigili.type.id import Label
+from sigili.id import Label
 
 
 @dataclass

@@ -1,6 +1,6 @@
 from hypothesis import strategies
 
-from sigili.type.id import SHA224
+from sigili.id import SHA224
 
 
 @strategies.composite

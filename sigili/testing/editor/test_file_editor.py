@@ -9,7 +9,7 @@ from sigili.article.repository import Article
 
 from sigili.editor import FileEditor
 from sigili.testing.strategies.article import an_article
-from sigili.type.id import Label
+from sigili.id import Label
 
 
 @contextmanager

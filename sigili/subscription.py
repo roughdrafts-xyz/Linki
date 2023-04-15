@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from sigili.connection import Connection
 from sigili.draft import Draft
 from sigili.title import TitleCollection
-from sigili.type.id import LabelID
+from sigili.id import LabelID
 
 
 @dataclass

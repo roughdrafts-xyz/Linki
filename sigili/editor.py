@@ -6,7 +6,7 @@ from sigili.article import ArticleCollection
 from sigili.draft import Draft, DraftCollection
 from sigili.repository import Repository
 from sigili.title import TitleCollection
-from sigili.type.id import Label
+from sigili.id import Label
 
 
 class Editor():

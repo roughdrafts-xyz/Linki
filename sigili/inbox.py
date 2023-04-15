@@ -3,7 +3,7 @@ from sigili.repository import Repository
 
 from sigili.subscription import SubURL, SubURLCollection, Subscription
 from sigili.title import TitleCollection
-from sigili.type.id import Label
+from sigili.id import Label
 
 
 @dataclass
