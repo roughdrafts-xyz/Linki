@@ -5,7 +5,7 @@ from bottle import Bottle, run
 from linki.editor import FileEditor
 from linki.inbox import Inbox
 from linki.repository import Repository
-from linki.viewer import WebView
+from linki.viewer import WebView, WebViewConf
 
 app = typer.Typer()
 
@@ -76,11 +76,12 @@ def inbox(location: str):
 def serve(location: str):
     path = Path(location).resolve().as_uri()
     repo = Repository(path)
-    viewer = WebView(repo, {
-        'sub': True,
-        'api': True,
-        'web': True
-    })
+    viewer = WebView(repo, WebViewConf(
+        sub=True,
+        api=True,
+        web=True
+    ))
+
     viewer.run(host='localhost', port=8080)
 
 
