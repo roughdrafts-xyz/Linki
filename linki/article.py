@@ -32,11 +32,10 @@ class ArticleCollection():
         self.articles[article.articleId] = article
         return article
 
-    def get_article(self, articleId: ArticleID) -> Article:
+    def get_article(self, articleId: ArticleID) -> Article | None:
         if (self.has_article(articleId)):
             return self.articles[articleId]
-        raise KeyError(
-            'Article not found. Try using merge_article or add_article first.')
+        return None
 
     def get_articles(self) -> Iterator[ArticleID]:
         for key in self.articles.keys():

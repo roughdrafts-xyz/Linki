@@ -1,9 +1,11 @@
+from typing import cast
 from urllib.parse import ParseResult, urlparse
-from linki.article import ArticleCollection
+from linki.article import Article, ArticleCollection
 from linki.connection import Connection, PathConnection
-from linki.draft import DraftCollection
-from linki.subscription import SubURLCollection
-from linki.title import TitleCollection
+from linki.draft import Draft, DraftCollection
+from linki.id import Label
+from linki.subscription import SubURL, SubURLCollection
+from linki.title import Title, TitleCollection
 
 
 class RepositoryConnection:
@@ -41,6 +43,14 @@ class Repository:
 
     def __init__(self, url: str) -> None:
         self.connection = RepositoryConnection(url)
+
+    def get_item(self, style: str, label: Label):
+        connection = self.connection.get_style(style)
+        if (connection is None):
+            return None
+        if (label.labelId not in connection):
+            return None
+        return connection.get(label.labelId)
 
     @property
     def titles(self) -> TitleCollection:
