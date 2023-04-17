@@ -82,3 +82,14 @@ class Repository:
         connection = RepositoryConnection(base)
         for style in cls.styles:
             connection.create_style(style)
+
+
+class FileRepository(Repository):
+    def __init__(self, url: str) -> None:
+        super().__init__(url)
+        if (self.connection.url.scheme != 'file'):
+            raise ValueError
+
+    @property
+    def path(self) -> str:
+        return self.connection.url.path

@@ -125,4 +125,4 @@ def test_successful_announce(tmp_path: Path):
     update_path.write_text(update)
     runner.invoke(app, ["publish", str(base)])
     res = runner.invoke(app, ["announce", str(copy)])
-    assert res.stdout == f"Announced 1 update to 1 wikis you're contributing to.\n"
+    assert res.stdout == f"Announced updates to 1 wikis you're contributing to.\n"

@@ -3,6 +3,7 @@ import typer
 
 from linki.editor import FileCopier, FileEditor
 from linki.inbox import Inbox
+from linki.outbox import Outbox
 from linki.repository import Repository
 from linki.viewer import WebView, WebViewConf
 
@@ -111,7 +112,12 @@ def contributions(location: str):
 @app.command()
 def announce(location: str):
     # add subscribers to announcement list or ping subscribers
-    typer.echo(f"Announced 1 update to 1 wikis you're contributing to.")
+    path = Path(location).resolve().as_uri()
+    repo = Repository(path)
+    outbox = Outbox(repo)
+    update_count = outbox.send_updates()
+    typer.echo(
+        f"Announced updates to {update_count} wikis you're contributing to.")
 
 
 if __name__ == "__main__":
