@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Iterator
 from typing_extensions import Self
 
-from linki.connection import Connection
 from linki.id import ArticleID, Label
 
 
@@ -22,7 +21,7 @@ class Article():
 
 
 class ArticleCollection():
-    def __init__(self, connection: Connection[Article]) -> None:
+    def __init__(self, connection) -> None:
         self.articles = connection
 
     def merge_article(self, article: Article | None) -> Article | None:

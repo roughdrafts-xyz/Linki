@@ -10,7 +10,7 @@ from linki.id import LabelID
 
 @dataclass
 class URL():
-    valid_schemes = ['file', 'http']
+    valid_schemes = ['file', 'http', 'https']
 
     def __init__(self, url: str) -> None:
         self.url = url

@@ -1,7 +1,7 @@
 from pathlib import Path
 from urllib.parse import ParseResult
 from linki.article import ArticleCollection
-from linki.connection import Connection, PathConnection
+from linki.connection import ROWebConnection, Connection, PathConnection
 from linki.draft import DraftCollection
 from linki.id import LabelID
 from linki.url import URL, URLCollection
@@ -21,8 +21,10 @@ class RepositoryConnection:
                 return PathConnection(path)
             case 'ssh':
                 raise NotImplementedError
-            case 'http':
-                raise NotImplementedError
+            case 'http' | 'https':
+                if (style not in ['articles', 'titles']):
+                    raise NotImplementedError
+                return ROWebConnection(self.url, style)
             case _:
                 raise NotImplementedError
 
@@ -32,7 +34,7 @@ class RepositoryConnection:
                 PathConnection.create_path(self.url.path, style)
             case 'ssh':
                 raise NotImplementedError
-            case 'http':
+            case 'http' | 'https':
                 raise NotImplementedError
             case _:
                 raise NotImplementedError

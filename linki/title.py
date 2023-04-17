@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Iterator
 from linki.article import Article
-from linki.connection import Connection
 
 from linki.id import Label
 
@@ -20,7 +19,7 @@ class Title():
 
 
 class TitleCollection():
-    def __init__(self, connection: Connection[Title]) -> None:
+    def __init__(self, connection) -> None:
         self.titles = connection
 
     def set_title(self, article: Article | None) -> Title | None:

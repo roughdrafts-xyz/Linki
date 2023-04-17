@@ -1,3 +1,4 @@
+import pickle
 from linki.id import Label, LabelID
 from linki.repository import Repository
 from dataclasses import asdict, dataclass
@@ -22,6 +23,8 @@ class WebView:
             self.app.route('/api/<style>/<label:path>',
                            'GET', self.handle_api)
         if (conf.sub):
+            self.app.route('/pickles/<style>/<label_id>',
+                           'GET', self.handle_pickles)
             self.app.route('/announce', 'POST', self.handle_announce)
 
     def handle_web(self, style: str, label: str):
@@ -52,6 +55,17 @@ class WebView:
             raise bottle.HTTPError(404, f'label not found: {label}')
 
         return asdict(item)
+
+    def handle_pickles(self, style, label_id):
+        if style not in ['titles', 'articles']:
+            raise bottle.HTTPError(404, f'style not found: {style}')
+
+        item = self.repo.get_item(style, label_id)
+
+        if (item is None):
+            raise bottle.HTTPError(404, f'label not found: {label_id}')
+
+        return pickle.dumps(item)
 
     def handle_announce(self):
         return "Announce"
