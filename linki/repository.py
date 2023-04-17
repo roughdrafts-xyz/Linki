@@ -96,11 +96,11 @@ class FileRepository(Repository):
         return self.connection.url.path
 
     @classmethod
-    def fromPath(cls, path: str):
+    def fromPath(cls, path: str | Path):
         path = Path(path).resolve().as_uri()
         return cls(path)
 
     @classmethod
-    def createPath(cls, path: str):
+    def createPath(cls, path: str | Path):
         path = Path(path).resolve().as_uri()
         return cls.create(path)

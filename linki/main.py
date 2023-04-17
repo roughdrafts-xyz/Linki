@@ -11,13 +11,17 @@ app = typer.Typer()
 
 
 @app.command()
-def init(destination: str):
+def init(
+    destination: Path = typer.Argument(Path.cwd())
+):
     FileRepository.createPath(destination)
     typer.echo(f"Initialized wiki in {destination}.")
 
 
 @app.command()
-def publish(location: str):
+def publish(
+    location: Path = typer.Argument(Path.cwd())
+):
     editor = FileEditor.fromPath(location)
     editor.load_drafts()
     x = editor.publish_drafts()
@@ -45,7 +49,9 @@ def subscribe(url: str, location: str):
 
 
 @app.command()
-def subscriptions(location: str):
+def subscriptions(
+    location: Path = typer.Argument(Path.cwd())
+):
     repo = FileRepository.fromPath(location)
     subs = repo.subs
     typer.echo(f"Subscriptions by priority (highest to lowest)")
@@ -57,7 +63,9 @@ def subscriptions(location: str):
 
 
 @app.command()
-def inbox(location: str):
+def inbox(
+    location: Path = typer.Argument(Path.cwd())
+):
     repo = FileRepository.fromPath(location)
     subs = repo.subs
     titles = repo.titles
@@ -68,13 +76,17 @@ def inbox(location: str):
 
 
 @app.command()
-def serve(location: str):
-    print("hi")
+def serve(
+    location: Path = typer.Argument(Path.cwd()),
+    api: bool = typer.Option(True),
+    web: bool = typer.Option(True),
+    subscribe: bool = typer.Option(True)
+):
     repo = FileRepository.fromPath(location)
     viewer = WebView(repo, WebViewConf(
-        sub=True,
-        api=True,
-        web=True
+        sub=subscribe,
+        api=api,
+        web=web
     ))
 
     viewer.run(host='localhost', port=8080)
@@ -90,7 +102,9 @@ def contribute(url: str, location: str):
 
 
 @app.command()
-def contributions(location: str):
+def contributions(
+    location: Path = typer.Argument(Path.cwd()),
+):
     repo = FileRepository.fromPath(location)
     contribs = repo.contribs
     typer.echo(f"Contributions by priority (highest to lowest)")
@@ -102,7 +116,9 @@ def contributions(location: str):
 
 
 @app.command()
-def announce(location: str):
+def announce(
+    location: Path = typer.Argument(Path.cwd()),
+):
     # add subscribers to announcement list or ping subscribers
     repo = FileRepository.fromPath(location)
     outbox = Outbox(repo)

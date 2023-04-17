@@ -58,7 +58,7 @@ class FileEditor(Editor):
         self.repo = repo
 
     @classmethod
-    def fromPath(cls, base: str):
+    def fromPath(cls, base: str | Path):
         path = Path(base).resolve()
         repo = FileRepository(path.as_uri())
         return cls(repo)
