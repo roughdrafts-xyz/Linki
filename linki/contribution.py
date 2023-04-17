@@ -9,11 +9,11 @@ from linki.id import LabelID
 
 
 @dataclass
-class Subscription():
+class Contribution():
     titles: TitleCollection
     remote: TitleCollection
 
-    def get_updates(self) -> Iterator[Draft]:
+    def announce_updates(self) -> Iterator[Draft]:
         for title in self.remote.get_titles():
             current = self.titles.get_title(title.label)
             editOf = None

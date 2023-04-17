@@ -4,7 +4,7 @@ from linki.article import Article, ArticleCollection
 from linki.connection import Connection, PathConnection
 from linki.draft import Draft, DraftCollection
 from linki.id import Label, LabelID
-from linki.subscription import SubURL, SubURLCollection
+from linki.url import URL, URLCollection
 from linki.title import Title, TitleCollection
 
 
@@ -39,7 +39,7 @@ class RepositoryConnection:
 
 
 class Repository:
-    styles = {'titles', 'subs', 'drafts', 'articles'}
+    styles = {'titles', 'subs', 'contribs', 'drafts', 'articles'}
 
     def __init__(self, url: str) -> None:
         self.connection = RepositoryConnection(url)
@@ -58,9 +58,14 @@ class Repository:
         return TitleCollection(connection)
 
     @property
-    def subs(self) -> SubURLCollection:
+    def subs(self) -> URLCollection:
         connection = self.connection.get_style('subs')
-        return SubURLCollection(connection)
+        return URLCollection(connection)
+
+    @property
+    def contribs(self) -> URLCollection:
+        connection = self.connection.get_style('contribs')
+        return URLCollection(connection)
 
     @property
     def drafts(self) -> DraftCollection:

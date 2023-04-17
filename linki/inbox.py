@@ -1,21 +1,22 @@
 from dataclasses import dataclass
 from linki.repository import Repository
+from linki.subscription import Subscription
 
-from linki.subscription import SubURL, SubURLCollection, Subscription
 from linki.title import TitleCollection
 from linki.id import Label
+from linki.url import URL, URLCollection
 
 
 @dataclass
 class InboxRow():
     rowId: int
-    url: SubURL
+    url: URL
     label: Label
     size: int
 
 
 class Inbox():
-    def __init__(self, subs: SubURLCollection,  titles: TitleCollection) -> None:
+    def __init__(self, subs: URLCollection,  titles: TitleCollection) -> None:
         self.subs = subs
         self.titles = titles
         pass
@@ -23,7 +24,7 @@ class Inbox():
     def get_inbox(self):
         # TODO Optimize. No one likes this many loops.
         count = 0
-        for sub in self.subs.get_sub_urls():
+        for sub in self.subs.get_urls():
             repo = Repository(sub.url)
             remote = repo.titles
             subscription = Subscription(self.titles, remote)

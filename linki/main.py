@@ -1,6 +1,5 @@
 from pathlib import Path
 import typer
-from bottle import Bottle, run
 
 from linki.editor import FileEditor
 from linki.inbox import Inbox
@@ -43,7 +42,7 @@ def subscribe(url: str, location: str):
     repo = Repository(path)
     subs = repo.subs
     sub_url = Path(url).resolve().as_uri()
-    subs.add_sub_url(sub_url)
+    subs.add_url(sub_url)
     typer.echo(f"Subscribed to {str(url)}.")
 
 
@@ -55,7 +54,7 @@ def subscriptions(location: str):
     typer.echo(f"Subscriptions by priority (highest to lowest)")
     priority = 0
     typer.echo(f'{priority}\tThis Wiki')
-    for subscription in subs.get_sub_urls():
+    for subscription in subs.get_urls():
         priority += 1
         typer.echo(f"{priority}\t{subscription.url}")
 
@@ -74,6 +73,7 @@ def inbox(location: str):
 
 @app.command()
 def serve(location: str):
+    print("hi")
     path = Path(location).resolve().as_uri()
     repo = Repository(path)
     viewer = WebView(repo, WebViewConf(
@@ -87,12 +87,25 @@ def serve(location: str):
 
 @app.command()
 def contribute(url: str, location: str):
-    typer.echo(f"TODO contribute")
+    path = Path(location).resolve().as_uri()
+    repo = Repository(path)
+    contribs = repo.contribs
+    contrib_url = Path(url).resolve().as_uri()
+    contribs.add_url(contrib_url)
+    typer.echo(f"Contributing to {str(url)}.")
 
 
 @app.command()
-def contributions(url: str, location: str):
-    typer.echo(f"TODO contributions")
+def contributions(location: str):
+    path = Path(location).resolve().as_uri()
+    repo = Repository(path)
+    contribs = repo.contribs
+    typer.echo(f"contributions by priority (highest to lowest)")
+    priority = 0
+    typer.echo(f'{priority}\tThis Wiki')
+    for contrib in contribs.get_urls():
+        priority += 1
+        typer.echo(f"{priority}\t{contrib.url}")
 
 
 @app.command()
