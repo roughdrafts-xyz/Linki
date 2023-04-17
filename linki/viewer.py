@@ -1,4 +1,4 @@
-from linki.id import ArticleID, Label
+from linki.id import ArticleID, Label, LabelID
 from linki.repository import Repository
 from dataclasses import asdict, dataclass
 import json
@@ -41,17 +41,32 @@ class WebView:
     def handle_api(self, style: str, label: str):
         # Note to self - if you return a dictionary to bottle it automatically converts to json API.
         # TODO This is not useful
-        if (style not in ['titles', 'articles']):
+        label_id = None
+        match style:
+            case 'titles':
+                _label = Label(label)
+                label_id = _label.labelId
+            case 'articles':
+                label_id = LabelID(label)
+
+        if (label_id is None):
             raise bottle.HTTPError(404, f'style not found: {style}')
 
-        _label = Label(label)
-        item = self.repo.get_item(style, _label)
+        item = self.repo.get_item(style, label_id)
 
         if (item is None):
             raise bottle.HTTPError(404, f'label not found: {label}')
 
-        return asdict(item)
+        return asdict(item, dict_factory=self.decoded_dict)
 
+    @staticmethod
+    def decoded_dict(item) -> Dict:
+        dic = dict(item)
+        for key in dic:
+            val = dic[key]
+            if (type(val) == bytes):
+                dic[key] = bytes.decode(val)
+        return dic
     # def handle_sub(self):
         # return "Sub"
 
