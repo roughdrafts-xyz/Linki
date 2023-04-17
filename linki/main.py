@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 import typer
 
 from linki.editor import FileCopier, FileEditor
@@ -7,7 +8,9 @@ from linki.outbox import Outbox
 from linki.repository import FileRepository, Repository
 from linki.viewer import WebView, WebViewConf
 
-app = typer.Typer()
+app = typer.Typer(
+    no_args_is_help=True
+)
 
 
 @app.command()
@@ -126,5 +129,12 @@ def announce(
         f"Announced updates to {update_count} wikis you're contributing to.")
 
 
+def run():
+    try:
+        app()
+    except Exception as e:
+        typer.echo(e)
+
+
 if __name__ == "__main__":
-    app()
+    run()

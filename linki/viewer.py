@@ -2,7 +2,6 @@ from linki.id import Label, LabelID
 from linki.repository import Repository
 from dataclasses import asdict, dataclass
 import bottle
-bottle.debug(True)
 
 
 @dataclass(kw_only=True)
