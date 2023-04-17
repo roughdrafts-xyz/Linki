@@ -16,22 +16,21 @@ from linki.title import Title, TitleCollection
 
 class MemoryRepository(Repository):
     def __init__(self) -> None:
-        pass
+        self._titles = TitleCollection(MemoryConnection[Title]())
+        self._drafts = DraftCollection(MemoryConnection[Draft]())
+        self._articles = ArticleCollection(MemoryConnection[Article]())
 
     @property
     def titles(self) -> TitleCollection:
-        connection = MemoryConnection[Title]()
-        return TitleCollection(connection)
+        return self._titles
 
     @property
     def drafts(self) -> DraftCollection:
-        connection = MemoryConnection[Draft]()
-        return DraftCollection(connection)
+        return self._drafts
 
     @property
     def articles(self) -> ArticleCollection:
-        connection = MemoryConnection[Article]()
-        return ArticleCollection(connection)
+        return self._articles
 
 
 @given(a_new_draft())
