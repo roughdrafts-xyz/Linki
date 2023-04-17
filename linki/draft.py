@@ -11,7 +11,7 @@ from linki.id import Label
 @dataclass
 class Draft:
     label: Label
-    content: bytes
+    content: str
     editOf: Article | None = None
 
     def should_update(self) -> bool:

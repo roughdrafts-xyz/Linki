@@ -13,10 +13,10 @@ from linki.id import ID, ArticleID, Label
 class Article():
     articleId: ArticleID
     label: Label
-    content: bytes
+    content: str
     editOf: Self | None
 
-    def __init__(self, label: str, content: bytes, editOf: Self | None = None) -> None:
+    def __init__(self, label: str, content: str, editOf: Self | None = None) -> None:
         self.label = Label(label)
         self.content = content
         self.editOf = editOf
@@ -28,7 +28,9 @@ class ArticleCollection():
     def __init__(self, connection: Connection[Article]) -> None:
         self.articles = connection
 
-    def merge_article(self, article: Article) -> Article:
+    def merge_article(self, article: Article | None) -> Article | None:
+        if (article is None):
+            return None
         self.articles[article.articleId] = article
         return article
 

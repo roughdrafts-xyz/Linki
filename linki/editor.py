@@ -88,12 +88,12 @@ class FileEditor(Editor):
                 _editOf = editOf.article
             _draft = Draft(
                 title,
-                file.read_bytes(),
+                file.read_text(),
                 _editOf
             )
             self._drafts.set_draft(_draft)
 
     def unload_titles(self):
         for title in self._titles.get_titles():
-            self._path.joinpath(title.label.name).write_bytes(
+            self._path.joinpath(title.label.name).write_text(
                 title.article.content)

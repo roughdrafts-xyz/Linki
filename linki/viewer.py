@@ -39,8 +39,6 @@ class WebView:
         return "Web"
 
     def handle_api(self, style: str, label: str):
-        # Note to self - if you return a dictionary to bottle it automatically converts to json API.
-        # TODO This is not useful
         label_id = None
         match style:
             case 'titles':
@@ -57,16 +55,8 @@ class WebView:
         if (item is None):
             raise bottle.HTTPError(404, f'label not found: {label}')
 
-        return asdict(item, dict_factory=self.decoded_dict)
+        return asdict(item)
 
-    @staticmethod
-    def decoded_dict(item) -> Dict:
-        dic = dict(item)
-        for key in dic:
-            val = dic[key]
-            if (type(val) == bytes):
-                dic[key] = bytes.decode(val)
-        return dic
     # def handle_sub(self):
         # return "Sub"
 

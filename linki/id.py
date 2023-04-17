@@ -29,10 +29,11 @@ class ArticleID(ID):
         else:
             _editOf = str.encode(editOf.articleId)
         _label = str.encode(label.name)
+        _content = str.encode(content)
         return cls(sha224(
             b''.join([
                 _label,
-                content,
+                _content,
                 _editOf,
             ])
         ).hexdigest())

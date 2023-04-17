@@ -23,7 +23,9 @@ class TitleCollection():
     def __init__(self, connection: Connection[Title]) -> None:
         self.titles = connection
 
-    def set_title(self, article: Article) -> Title | None:
+    def set_title(self, article: Article | None) -> Title | None:
+        if (article is None):
+            return None
         title = Title.fromArticle(article)
         self.titles[title.label.labelId] = title
         return title

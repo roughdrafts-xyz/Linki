@@ -13,7 +13,7 @@ def a_label(draw: strategies.DrawFn):
 
 
 @strategies.composite
-def a_new_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article:
+def a_new_article(draw: strategies.DrawFn, data: str | None = None) -> Article:
     if (data is None):
         data = draw(strategies.binary())
     label = draw(a_label())
@@ -25,7 +25,7 @@ def a_new_article(draw: strategies.DrawFn, data: bytes | None = None) -> Article
 
 
 @strategies.composite
-def an_edit_of(draw: strategies.DrawFn, base_article: Article, data: bytes | None = None):
+def an_edit_of(draw: strategies.DrawFn, base_article: Article, data: str | None = None):
     if (data is None):
         data = draw(strategies.binary())
     return Article(
@@ -36,7 +36,7 @@ def an_edit_of(draw: strategies.DrawFn, base_article: Article, data: bytes | Non
 
 
 @strategies.composite
-def an_article(draw: strategies.DrawFn, data: bytes | None = None):
+def an_article(draw: strategies.DrawFn, data: str | None = None):
     if (data is not None):
         article = a_new_article(data)
         update = an_edit_of(draw(article), data)
