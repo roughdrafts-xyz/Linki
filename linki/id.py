@@ -50,13 +50,14 @@ class LabelID(ID):
 
 @dataclass
 class Label():
-    _label: str | None = field(init=False, repr=False, default=None)
-    _name: str | None = field(init=False, repr=False, default=None)
+    name: str
+    labelId: LabelID
 
     def __init__(self, name: str) -> None:
         if (not self.is_valid(name)):
             raise AttributeError
         self._label = name
+        self.name = self.as_safe_string(name)
         self.labelId = LabelID.getLabelID(self.name)
 
     @classmethod
@@ -73,17 +74,7 @@ class Label():
         )
 
     @ property
-    def name(self):
-        if (self._label is None):
-            raise ValueError
-        if (self._name is None):
-            self._name = self.as_safe_string(self._label)
-        return self._name
-
-    @ property
     def unsafe_raw_name(self):
-        if (self._label is None):
-            raise ValueError
         return self._label
 
     @ staticmethod
