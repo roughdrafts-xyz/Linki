@@ -23,41 +23,43 @@ def get_file_editor():
 
 def test_loads_drafts():
     with get_file_editor() as editor:
-        editor._path.joinpath('hello_world.md').write_text('Hello World')
+        path = Path(editor.repo.path)
+        path.joinpath('hello_world.md').write_text('Hello World')
         editor.load_drafts()
-        assert editor._drafts.get_draft(Label('hello_world.md')) is not None
+        assert editor.repo.drafts.get_draft(
+            Label('hello_world.md')) is not None
 
 
 @given(an_article())
 def test_does_copy(update: Article):
     with get_file_editor() as r_editor, get_file_editor() as l_editor:
-        article = r_editor._articles.merge_article(update)
-        r_editor._titles.set_title(article)
+        article = r_editor.repo.articles.merge_article(update)
+        r_editor.repo.titles.set_title(article)
 
-        l_editor.copy_articles(r_editor._articles)
+        l_editor.copy_articles(r_editor.repo.articles)
         test = TestCase()
 
-        test.assertCountEqual(r_editor._articles.get_articles(),
-                              l_editor._articles.get_articles())
+        test.assertCountEqual(r_editor.repo.articles.get_articles(),
+                              l_editor.repo.articles.get_articles())
 
-        l_editor.copy_titles(r_editor._titles)
+        l_editor.copy_titles(r_editor.repo.titles)
 
-        test.assertCountEqual(r_editor._titles.get_titles(),
-                              l_editor._titles.get_titles())
+        test.assertCountEqual(r_editor.repo.titles.get_titles(),
+                              l_editor.repo.titles.get_titles())
 
 
 @given(an_article())
 def test_does_unload_titles(update: Article):
     with get_file_editor() as r_editor, get_file_editor() as l_editor:
-        article = r_editor._articles.merge_article(update)
-        r_editor._titles.set_title(article)
+        article = r_editor.repo.articles.merge_article(update)
+        r_editor.repo.titles.set_title(article)
 
-        l_editor.copy_articles(r_editor._articles)
-        l_editor.copy_titles(r_editor._titles)
+        l_editor.copy_articles(r_editor.repo.articles)
+        l_editor.copy_titles(r_editor.repo.titles)
 
         l_editor.unload_titles()
         test = TestCase()
         test.assertCountEqual(
-            [title.label.name for title in l_editor._titles.get_titles()],
+            [title.label.name for title in l_editor.repo.titles.get_titles()],
             [file.name for file in l_editor.iterfiles()]
         )

@@ -8,20 +8,41 @@ from linki.connection import MemoryConnection
 from linki.draft import Draft, DraftCollection
 
 from linki.editor import Editor
+from linki.repository import Repository
 from linki.testing.strategies.article import an_article
 from linki.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
 from linki.title import Title, TitleCollection
 
 
+class MemoryRepository(Repository):
+    def __init__(self) -> None:
+        pass
+
+    @property
+    def titles(self) -> TitleCollection:
+        connection = MemoryConnection[Title]()
+        return TitleCollection(connection)
+
+    @property
+    def drafts(self) -> DraftCollection:
+        connection = MemoryConnection[Draft]()
+        return DraftCollection(connection)
+
+    @property
+    def articles(self) -> ArticleCollection:
+        connection = MemoryConnection[Article]()
+        return ArticleCollection(connection)
+
+
 @given(a_new_draft())
 def test_get_updates(draft: Draft):
-    titles = TitleCollection(MemoryConnection[Title]())
-    drafts = DraftCollection(MemoryConnection[Draft]())
-    articles = ArticleCollection(MemoryConnection[Article]())
-    editor = Editor(titles, drafts, articles)
+    repo = MemoryRepository()
+    editor = Editor(repo)
 
-    drafts.set_draft(draft)
+    repo.drafts.set_draft(draft)
     draft_count = list(editor.get_updates())
+    print(draft)
+    print(draft_count)
     assert len(draft_count) > 0
 
     test = TestCase()

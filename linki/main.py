@@ -4,7 +4,7 @@ import typer
 from linki.editor import FileCopier, FileEditor
 from linki.inbox import Inbox
 from linki.outbox import Outbox
-from linki.repository import FileRepository, Repository
+from linki.repository import FileRepository
 from linki.viewer import WebView, WebViewConf
 
 app = typer.Typer()
@@ -12,8 +12,7 @@ app = typer.Typer()
 
 @app.command()
 def init(destination: str):
-    path = Path(destination).resolve().as_uri()
-    Repository.create(path)
+    FileRepository.createPath(destination)
     typer.echo(f"Initialized wiki in {destination}.")
 
 

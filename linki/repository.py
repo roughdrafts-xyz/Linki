@@ -99,3 +99,8 @@ class FileRepository(Repository):
     def fromPath(cls, path: str):
         path = Path(path).resolve().as_uri()
         return cls(path)
+
+    @classmethod
+    def createPath(cls, path: str):
+        path = Path(path).resolve().as_uri()
+        return cls.create(path)

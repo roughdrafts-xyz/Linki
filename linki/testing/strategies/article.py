@@ -13,9 +13,16 @@ def a_label(draw: strategies.DrawFn):
 
 
 @strategies.composite
+def some_content(draw: strategies.DrawFn):
+    content = draw(strategies.text(alphabet=string.printable))
+    assume(len(content) > 0)
+    return content
+
+
+@strategies.composite
 def a_new_article(draw: strategies.DrawFn, data: str | None = None) -> Article:
     if (data is None):
-        data = draw(strategies.binary())
+        data = draw(some_content())
     label = draw(a_label())
     return Article(
         label.unsafe_raw_name,
@@ -27,7 +34,7 @@ def a_new_article(draw: strategies.DrawFn, data: str | None = None) -> Article:
 @strategies.composite
 def an_edit_of(draw: strategies.DrawFn, base_article: Article, data: str | None = None):
     if (data is None):
-        data = draw(strategies.binary())
+        data = draw(some_content())
     return Article(
         base_article.label.unsafe_raw_name,
         data,

@@ -1,13 +1,14 @@
+import string
 from hypothesis import strategies
 from linki.draft import Draft
-from linki.testing.strategies.article import a_new_article, an_article, an_edit_of
+from linki.testing.strategies.article import a_new_article, an_article, an_edit_of, some_content
 
 
 @strategies.composite
 def an_update_draft(draw: strategies.DrawFn):
-    base_data = draw(strategies.binary())
+    base_data = draw(some_content())
     base_article = draw(an_article(base_data))
-    new_data = draw(strategies.binary())
+    new_data = draw(some_content())
     new_article = draw(an_edit_of(base_article, new_data))
     return Draft(
         new_article.label,
@@ -18,7 +19,7 @@ def an_update_draft(draw: strategies.DrawFn):
 
 @strategies.composite
 def a_new_draft(draw: strategies.DrawFn):
-    base_data = draw(strategies.binary())
+    base_data = draw(some_content())
     base_article = draw(a_new_article(base_data))
     return Draft(
         base_article.label,
