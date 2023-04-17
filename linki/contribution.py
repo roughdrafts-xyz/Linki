@@ -1,28 +1,23 @@
-from abc import ABC
 from dataclasses import dataclass
-from typing import Iterator
-from urllib.parse import urlparse
-from linki.connection import Connection
-from linki.draft import Draft
-from linki.title import TitleCollection
-from linki.id import LabelID
+from linki.editor import FileCopier
+from linki.repository import Repository
+from linki.url import URL
 
 
 @dataclass
 class Contribution():
-    titles: TitleCollection
-    remote: TitleCollection
+    source: Repository
+    destination: URL
 
-    def announce_updates(self) -> Iterator[Draft]:
-        for title in self.remote.get_titles():
-            current = self.titles.get_title(title.label)
-            editOf = None
-            if (current is not None):
-                editOf = current.article
-            draft = Draft(
-                title.label,
-                title.article.content,
-                editOf
-            )
-            if (draft.should_update()):
-                yield draft
+    def announce_updates(self) -> bool:
+        match self.destination.parsed.scheme:
+            case 'file':
+                destination = self.destination.parsed.path
+                copier = FileCopier(self.source, destination)
+                copier.copy_articles()
+                copier.copy_titles()
+                copier.unload_titles()
+                return True
+            case 'http' | 'https':
+                return True
+        return False

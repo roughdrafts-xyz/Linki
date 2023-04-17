@@ -1,7 +1,7 @@
 from pathlib import Path
 import typer
 
-from linki.editor import FileEditor
+from linki.editor import FileCopier, FileEditor
 from linki.inbox import Inbox
 from linki.repository import Repository
 from linki.viewer import WebView, WebViewConf
@@ -27,11 +27,11 @@ def publish(location: str):
 @app.command()
 def copy(source: str, destination: str):
     path = Path(source).resolve().as_uri()
-    repo = Repository(path)
-    editor = FileEditor.fromPath(destination)
-    articles_count = editor.copy_articles(repo.articles)
-    titles_count = editor.copy_titles(repo.titles)
-    editor.unload_titles()
+    source_repo = Repository(path)
+    copier = FileCopier(source_repo, destination)
+    articles_count = copier.copy_articles()
+    titles_count = copier.copy_titles()
+    copier.unload_titles()
 
     typer.echo(f"Copied {titles_count} titles and {articles_count} articles.")
 

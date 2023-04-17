@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from linki.contribution import Contribution
 from linki.repository import Repository
 from linki.subscription import Subscription
 
@@ -11,7 +12,9 @@ class Outbox():
     def __init__(self, contribs: URLCollection) -> None:
         self.contribs = contribs
 
-    def send_updates(self):
+    def send_updates(self) -> int:
         count = 0
         for contrib in self.contribs.get_urls():
-            pass
+            contribution = Contribution(contrib)
+            contribution.announce_updates()
+        return count

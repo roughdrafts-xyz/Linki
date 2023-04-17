@@ -97,3 +97,18 @@ class FileEditor(Editor):
         for title in self._titles.get_titles():
             self._path.joinpath(title.label.name).write_text(
                 title.article.content)
+
+
+class FileCopier:
+    def __init__(self, source: Repository, destination: str) -> None:
+        self.source = source
+        self.destination = FileEditor.fromPath(destination)
+
+    def copy_articles(self):
+        return self.destination.copy_articles(self.source.articles)
+
+    def copy_titles(self):
+        return self.destination.copy_titles(self.source.titles)
+
+    def unload_titles(self):
+        self.destination.unload_titles()
