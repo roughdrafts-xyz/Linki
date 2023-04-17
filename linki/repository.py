@@ -13,7 +13,7 @@ class RepositoryConnection:
     url: ParseResult
 
     def __init__(self, url: str) -> None:
-        self.url = urlparse(url)
+        self.url = URL(url).parsed
 
     def get_style(self, style: str) -> Connection:
         match self.url.scheme:

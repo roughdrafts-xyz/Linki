@@ -92,7 +92,7 @@ class FileEditor(Editor):
 
 
 class FileCopier:
-    def __init__(self, source: Repository, destination: str) -> None:
+    def __init__(self, source: Repository, destination: str | Path) -> None:
         self.source = source
         self.destination = FileEditor.fromPath(destination)
 

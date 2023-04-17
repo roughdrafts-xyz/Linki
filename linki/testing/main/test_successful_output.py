@@ -1,6 +1,7 @@
 from pathlib import Path
 from typer.testing import CliRunner
 from linki.main import app, inbox, init
+import linki.main
 
 runner = CliRunner()
 

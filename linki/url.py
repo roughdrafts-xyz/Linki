@@ -1,6 +1,9 @@
 from dataclasses import dataclass
-from typing import Iterator
+from pathlib import Path
+from typing import Iterator, Optional
 from urllib.parse import urlparse
+
+import click
 from linki.connection import Connection
 
 from linki.id import LabelID
@@ -11,13 +14,19 @@ class URL():
     valid_schemes = ['file', 'http']
 
     def __init__(self, url: str) -> None:
-        if (not self.is_valid_url(url)):
+        self.url = url
+        if (not self.is_valid_url(self.url)):
+            path = Path(self.url)
+            if (path.exists()):
+                self.url = path.resolve().as_uri()
+
+        if (not self.is_valid_url(self.url)):
             valid_schemes = ', '.join(self.valid_schemes)
             raise ValueError(
                 f'Invalid URL. Must be one of these schemes: {valid_schemes}')
-        self.url = url
-        self.parsed = urlparse(url)
-        self.labelId = LabelID.getLabelID(url)
+
+        self.parsed = urlparse(self.url)
+        self.labelId = LabelID.getLabelID(self.url)
 
     @classmethod
     def is_valid_url(cls, url: str) -> bool:

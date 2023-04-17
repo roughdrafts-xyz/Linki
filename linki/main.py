@@ -4,7 +4,7 @@ import typer
 from linki.editor import FileCopier, FileEditor
 from linki.inbox import Inbox
 from linki.outbox import Outbox
-from linki.repository import FileRepository
+from linki.repository import FileRepository, Repository
 from linki.viewer import WebView, WebViewConf
 
 app = typer.Typer()
@@ -29,9 +29,10 @@ def publish(
 
 
 @app.command()
-def copy(source: str, destination: str):
-    source_repo = FileRepository.fromPath(source)
+def copy(source: str, destination: Path = typer.Argument(Path.cwd())):
+    source_repo = Repository(source)
     copier = FileCopier(source_repo, destination)
+
     articles_count = copier.copy_articles()
     titles_count = copier.copy_titles()
     copier.unload_titles()
@@ -40,12 +41,11 @@ def copy(source: str, destination: str):
 
 
 @app.command()
-def subscribe(url: str, location: str):
+def subscribe(url: str, location: Path = typer.Argument(Path.cwd())):
     repo = FileRepository.fromPath(location)
     subs = repo.subs
-    sub_url = Path(url).resolve().as_uri()
-    subs.add_url(sub_url)
-    typer.echo(f"Subscribed to {str(url)}.")
+    subs.add_url(url)
+    typer.echo(f"Subscribed to {url}.")
 
 
 @app.command()
@@ -93,12 +93,11 @@ def serve(
 
 
 @app.command()
-def contribute(url: str, location: str):
+def contribute(url: str,  location: Path = typer.Argument(Path.cwd())):
     repo = FileRepository.fromPath(location)
     contribs = repo.contribs
-    contrib_url = Path(url).resolve().as_uri()
-    contribs.add_url(contrib_url)
-    typer.echo(f"Contributing to {str(url)}.")
+    contribs.add_url(url)
+    typer.echo(f"Contributing to {url}.")
 
 
 @app.command()
