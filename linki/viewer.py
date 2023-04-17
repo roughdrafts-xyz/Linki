@@ -1,8 +1,6 @@
-from linki.id import ArticleID, Label, LabelID
+from linki.id import Label, LabelID
 from linki.repository import Repository
 from dataclasses import asdict, dataclass
-import json
-from typing import Dict, TypedDict
 import bottle
 bottle.debug(True)
 

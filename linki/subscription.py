@@ -1,11 +1,7 @@
-from abc import ABC
 from dataclasses import dataclass
 from typing import Iterator
-from urllib.parse import urlparse
-from linki.connection import Connection
 from linki.draft import Draft
 from linki.title import TitleCollection
-from linki.id import LabelID
 
 
 @dataclass

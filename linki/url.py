@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Iterator
 from urllib.parse import urlparse
 
-import click
 from linki.connection import Connection
 
 from linki.id import LabelID
@@ -43,8 +42,8 @@ class URLCollection():
         self.subscriptions = connection
 
     def add_url(self, url: str):
-        subURL = URL(url)
-        self.subscriptions[subURL.labelId] = subURL
+        new_url = URL(url)
+        self.subscriptions[new_url.labelId] = new_url
 
     def get_url(self, label: str):
         _id = LabelID(label)

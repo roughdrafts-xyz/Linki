@@ -1,4 +1,3 @@
-import string
 from hypothesis import strategies
 from linki.draft import Draft
 from linki.testing.strategies.article import a_new_article, an_article, an_edit_of, some_content

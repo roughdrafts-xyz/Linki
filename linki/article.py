@@ -1,12 +1,9 @@
-from abc import ABC
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Iterator
 from typing_extensions import Self
-from urllib.parse import urlparse
 
-from linki.connection import Connection, MemoryConnection, PathConnection
-from linki.id import ID, ArticleID, Label
+from linki.connection import Connection
+from linki.id import ArticleID, Label
 
 
 @dataclass

@@ -19,7 +19,6 @@ class Inbox():
     def __init__(self, subs: URLCollection,  titles: TitleCollection) -> None:
         self.subs = subs
         self.titles = titles
-        pass
 
     def get_inbox(self):
         # TODO Optimize. No one likes this many loops.

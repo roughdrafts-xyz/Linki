@@ -2,7 +2,7 @@ from glob import iglob
 from pathlib import Path
 from typing import Iterable
 from linki.article import ArticleCollection
-from linki.draft import Draft, DraftCollection
+from linki.draft import Draft
 from linki.repository import FileRepository, Repository
 from linki.title import TitleCollection
 from linki.id import Label

@@ -1,12 +1,11 @@
 from pathlib import Path
-from typing import cast
-from urllib.parse import ParseResult, urlparse
-from linki.article import Article, ArticleCollection
+from urllib.parse import ParseResult
+from linki.article import ArticleCollection
 from linki.connection import Connection, PathConnection
-from linki.draft import Draft, DraftCollection
-from linki.id import Label, LabelID
+from linki.draft import DraftCollection
+from linki.id import LabelID
 from linki.url import URL, URLCollection
-from linki.title import Title, TitleCollection
+from linki.title import TitleCollection
 
 
 class RepositoryConnection:
