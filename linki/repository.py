@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import cast
 from urllib.parse import ParseResult, urlparse
 from linki.article import Article, ArticleCollection
@@ -93,3 +94,8 @@ class FileRepository(Repository):
     @property
     def path(self) -> str:
         return self.connection.url.path
+
+    @classmethod
+    def fromPath(cls, path: str):
+        path = Path(path).resolve().as_uri()
+        return cls(path)

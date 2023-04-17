@@ -4,7 +4,7 @@ import typer
 from linki.editor import FileCopier, FileEditor
 from linki.inbox import Inbox
 from linki.outbox import Outbox
-from linki.repository import Repository
+from linki.repository import FileRepository, Repository
 from linki.viewer import WebView, WebViewConf
 
 app = typer.Typer()
@@ -27,8 +27,7 @@ def publish(location: str):
 
 @app.command()
 def copy(source: str, destination: str):
-    path = Path(source).resolve().as_uri()
-    source_repo = Repository(path)
+    source_repo = FileRepository.fromPath(source)
     copier = FileCopier(source_repo, destination)
     articles_count = copier.copy_articles()
     titles_count = copier.copy_titles()
@@ -39,8 +38,7 @@ def copy(source: str, destination: str):
 
 @app.command()
 def subscribe(url: str, location: str):
-    path = Path(location).resolve().as_uri()
-    repo = Repository(path)
+    repo = FileRepository.fromPath(location)
     subs = repo.subs
     sub_url = Path(url).resolve().as_uri()
     subs.add_url(sub_url)
@@ -49,8 +47,7 @@ def subscribe(url: str, location: str):
 
 @app.command()
 def subscriptions(location: str):
-    path = Path(location).resolve().as_uri()
-    repo = Repository(path)
+    repo = FileRepository.fromPath(location)
     subs = repo.subs
     typer.echo(f"Subscriptions by priority (highest to lowest)")
     priority = 0
@@ -62,8 +59,7 @@ def subscriptions(location: str):
 
 @app.command()
 def inbox(location: str):
-    path = Path(location).resolve().as_uri()
-    repo = Repository(path)
+    repo = FileRepository.fromPath(location)
     subs = repo.subs
     titles = repo.titles
     inbox = Inbox(subs, titles)
@@ -75,8 +71,7 @@ def inbox(location: str):
 @app.command()
 def serve(location: str):
     print("hi")
-    path = Path(location).resolve().as_uri()
-    repo = Repository(path)
+    repo = FileRepository.fromPath(location)
     viewer = WebView(repo, WebViewConf(
         sub=True,
         api=True,
@@ -88,8 +83,7 @@ def serve(location: str):
 
 @app.command()
 def contribute(url: str, location: str):
-    path = Path(location).resolve().as_uri()
-    repo = Repository(path)
+    repo = FileRepository.fromPath(location)
     contribs = repo.contribs
     contrib_url = Path(url).resolve().as_uri()
     contribs.add_url(contrib_url)
@@ -98,8 +92,7 @@ def contribute(url: str, location: str):
 
 @app.command()
 def contributions(location: str):
-    path = Path(location).resolve().as_uri()
-    repo = Repository(path)
+    repo = FileRepository.fromPath(location)
     contribs = repo.contribs
     typer.echo(f"Contributions by priority (highest to lowest)")
     priority = 0
@@ -112,8 +105,7 @@ def contributions(location: str):
 @app.command()
 def announce(location: str):
     # add subscribers to announcement list or ping subscribers
-    path = Path(location).resolve().as_uri()
-    repo = Repository(path)
+    repo = FileRepository.fromPath(location)
     outbox = Outbox(repo)
     update_count = outbox.send_updates()
     typer.echo(
