@@ -94,3 +94,19 @@ def test_view_subscription_update(tmp_path: Path):
 
 def test_successful_announce():
     pass
+
+
+def test_add_contribution(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    copy.mkdir()
+
+    runner.invoke(app, ["init", str(base)])
+    runner.invoke(app, ["init", str(copy)])
+    res = runner.invoke(app, ["contribute", str(base), str(copy)])
+
+    assert res.stdout == f"Contributing to {str(base)}.\n"
+
+    res = runner.invoke(app, ["contributions", str(copy)])
+    assert res.stdout == f"Contributions by priority (highest to lowest)\n0\tThis Wiki\n1\t{base.resolve().as_uri()}\n"

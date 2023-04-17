@@ -100,7 +100,7 @@ def contributions(location: str):
     path = Path(location).resolve().as_uri()
     repo = Repository(path)
     contribs = repo.contribs
-    typer.echo(f"contributions by priority (highest to lowest)")
+    typer.echo(f"Contributions by priority (highest to lowest)")
     priority = 0
     typer.echo(f'{priority}\tThis Wiki')
     for contrib in contribs.get_urls():
