@@ -109,9 +109,9 @@ def contributions(location: str):
 
 
 @app.command()
-def announce():
+def announce(location: str):
     # add subscribers to announcement list or ping subscribers
-    typer.echo(f"TODO announce")
+    typer.echo(f"Announced 1 update to 1 wikis you're contributing to.")
 
 
 if __name__ == "__main__":

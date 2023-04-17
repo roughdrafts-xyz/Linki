@@ -92,10 +92,6 @@ def test_view_subscription_update(tmp_path: Path):
     assert res.stdout == f'{0} {update_path.as_uri()} (+{len(update)})\n'
 
 
-def test_successful_announce():
-    pass
-
-
 def test_add_contribution(tmp_path: Path):
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
@@ -110,3 +106,23 @@ def test_add_contribution(tmp_path: Path):
 
     res = runner.invoke(app, ["contributions", str(copy)])
     assert res.stdout == f"Contributions by priority (highest to lowest)\n0\tThis Wiki\n1\t{base.resolve().as_uri()}\n"
+
+
+def test_successful_announce(tmp_path: Path):
+    # checks Inbox command
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    copy.mkdir()
+
+    update_path = base.joinpath('hello.md').resolve()
+
+    runner.invoke(app, ["init", str(base)])
+    runner.invoke(app, ["init", str(copy)])
+    runner.invoke(app, ["contribute", str(base), str(copy)])
+
+    update = 'Hello World!'
+    update_path.write_text(update)
+    runner.invoke(app, ["publish", str(base)])
+    res = runner.invoke(app, ["announce", str(copy)])
+    assert res.stdout == f"Announced 1 update to 1 wikis you're contributing to.\n"
