@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import cached_property
 from hashlib import sha224
 from pathlib import Path
 import re
@@ -51,13 +52,15 @@ class LabelID(ID):
 @dataclass
 class Label():
     path: List[str]
-    labelId: LabelID
 
     def __init__(self, path: List[str]) -> None:
         self.path = [self.as_safe_string(crumb) for crumb in path]
         if not (all(map(self.is_valid, self.path))):
             raise AttributeError
-        self.labelId = LabelID.getLabelID(self.path)
+
+    @cached_property
+    def labelId(self):
+        return LabelID.getLabelID(self.path)
 
     @property
     def name(self) -> str:
