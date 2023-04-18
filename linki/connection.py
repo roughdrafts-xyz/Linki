@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 import pickle
 from typing import Dict, Iterator, MutableMapping, TypeVar
@@ -6,7 +5,6 @@ from urllib.error import HTTPError
 from urllib.parse import ParseResult
 from urllib.request import urlopen
 
-from dacite import from_dict
 
 from linki.id import ID
 from linki.article import Article
@@ -118,7 +116,7 @@ class ROWebConnection(Connection[VT]):
         self.style = style
 
     def __setitem__(self, __key: ID, __value: VT) -> None:
-        raise NotImplementedError
+        pass
 
     def __getitem__(self, __key: ID) -> Title | Article:
         try:
@@ -129,7 +127,7 @@ class ROWebConnection(Connection[VT]):
             raise KeyError
 
     def __delitem__(self, __key: ID) -> None:
-        raise NotImplementedError
+        pass
 
     def __iter__(self) -> Iterator[ID]:
         res = urlopen(self.url).read()

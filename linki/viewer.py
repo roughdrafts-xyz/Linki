@@ -1,5 +1,5 @@
 import pickle
-from linki.id import Label, LabelID
+from linki.id import ID, Label
 from linki.repository import Repository
 from dataclasses import asdict, dataclass
 import bottle
@@ -38,18 +38,17 @@ class WebView:
         return template
 
     def handle_api(self, style: str, label: str):
-        label_id = None
+        item_id = None
         match style:
             case 'titles':
-                _label = Label(label)
-                label_id = _label.labelId
+                item_id = Label(label).labelId
             case 'articles':
-                label_id = LabelID(label)
+                item_id = ID(label)
 
-        if (label_id is None):
+        if (item_id is None):
             raise bottle.HTTPError(404, f'style not found: {style}')
 
-        item = self.repo.get_item(style, label_id)
+        item = self.repo.get_item(style, item_id)
 
         if (item is None):
             raise bottle.HTTPError(404, f'label not found: {label}')

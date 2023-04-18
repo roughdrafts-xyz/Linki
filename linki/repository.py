@@ -3,7 +3,7 @@ from urllib.parse import ParseResult
 from linki.article import ArticleCollection
 from linki.connection import ROWebConnection, Connection, PathConnection
 from linki.draft import DraftCollection
-from linki.id import LabelID
+from linki.id import ID
 from linki.url import URL, URLCollection
 from linki.title import TitleCollection
 
@@ -46,13 +46,13 @@ class Repository:
     def __init__(self, url: str) -> None:
         self.connection = RepositoryConnection(url)
 
-    def get_item(self, style: str, label_id: LabelID):
+    def get_item(self, style: str, item_id: ID):
         connection = self.connection.get_style(style)
+        return connection.get(item_id)
         if (connection is None):
             return None
-        if (label_id not in connection):
+        if (item_id not in connection):
             return None
-        return connection.get(label_id)
 
     @property
     def titles(self) -> TitleCollection:

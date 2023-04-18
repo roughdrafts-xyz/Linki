@@ -1,36 +1,36 @@
 
-from typing import List
+from typing import Dict, List
 from unittest import TestCase
 
 from hypothesis import given
-from linki.article import Article, ArticleCollection
-from linki.connection import MemoryConnection
-from linki.draft import Draft, DraftCollection
+from linki.article import Article
+from linki.connection import Connection, MemoryConnection
+from linki.draft import Draft
 
 from linki.editor import Editor
-from linki.repository import Repository
+from linki.repository import Repository, RepositoryConnection
 from linki.testing.strategies.article import an_article
 from linki.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
-from linki.title import Title, TitleCollection
+
+
+class MemoryRepoConnection(RepositoryConnection):
+    def __init__(self) -> None:
+        self.connections: Dict[str, MemoryConnection] = dict()
+
+    def get_style(self, style: str) -> Connection:
+        conn = self.connections.get(style)
+        if conn is None:
+            conn = MemoryConnection()
+            self.connections[style] = conn
+        return conn
 
 
 class MemoryRepository(Repository):
     def __init__(self) -> None:
-        self._titles = TitleCollection(MemoryConnection[Title]())
-        self._drafts = DraftCollection(MemoryConnection[Draft]())
-        self._articles = ArticleCollection(MemoryConnection[Article]())
+        self.connection = MemoryRepoConnection()
 
-    @property
-    def titles(self) -> TitleCollection:
-        return self._titles
-
-    @property
-    def drafts(self) -> DraftCollection:
-        return self._drafts
-
-    @property
-    def articles(self) -> ArticleCollection:
-        return self._articles
+    def clear(self):
+        self.__init__()
 
 
 @given(a_new_draft())
