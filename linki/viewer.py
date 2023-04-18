@@ -67,7 +67,7 @@ class WebView:
             raise bottle.HTTPError(404, f'style not found: {style}')
 
         if (label is None):
-            return self.handle_iter(output, style)
+            return self.handle_many(output, style)
         return self.handle_single(output, style, label)
 
     def convert_path(self, style: str, label: str):
@@ -96,13 +96,11 @@ class WebView:
             case 'api':
                 return asdict(item)
             case 'w':
-                if (style == 'titles'):
-                    item = item.article
                 item.content = pypandoc.convert_text(
                     item.content, format='markdown', to='html')
                 return self.one_tmpl.render({'item': item})
 
-    def handle_iter(self, output: str, style: str):
+    def handle_many(self, output: str, style: str):
         if style not in self.styles:
             raise bottle.HTTPError(404, f'style not found: {style}')
         iter_item = list(self.repo.iter_item(style))
@@ -114,8 +112,6 @@ class WebView:
             case 'count':
                 return f"{self.repo.get_count(style)}"
             case 'w':
-                if style == 'titles':
-                    iter_item = [title.article for title in iter_item]
                 return self.many_tmpl.render({'items': iter_item, 'style': style.capitalize()})
 
     def handle_announce(self):
