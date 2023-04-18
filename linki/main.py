@@ -108,12 +108,13 @@ def serve(
 
 @app.command(hidden=True)
 def install_pandoc():
-    pandoc = pypandoc.get_pandoc_path()
-    if (pandoc is not None):
-        typer.echo("Pandoc is already installed.")
-        return None
-    pypandoc.ensure_pandoc_installed()
-    typer.echo("Pandoc installed successfully.")
+    try:
+        pandoc = pypandoc.get_pandoc_path()
+        if (pandoc is not None):
+            typer.echo("Pandoc is already installed.")
+    except OSError:
+        pypandoc.ensure_pandoc_installed()
+        typer.echo("Pandoc installed successfully.")
 
 
 @app.command()
