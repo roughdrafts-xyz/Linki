@@ -1,1 +1,12 @@
-<p>{{get('items')}}</p>
+% rebase('base.html')
+<main>
+    <header>
+        <h1>{{style}}</h1>
+    </header>
+    <ul>
+        % for item in items:
+        <li>{{item}}</li>
+        % end
+    </ul>
+
+</main>

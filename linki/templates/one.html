@@ -1,49 +1,16 @@
-<!DOCTYPE html>
-<html>
+% rebase('base.html')
+<main>
+    <header>
+        <h1>{{item.label.name}}</h1>
+        <p>#{{item.articleId}}</p>
+        <nav>
+            % for crumb in item.label.parents:
+            <li>{{crumb}}</li>
+            % end
+        </nav>
+    </header>
+    <article>
+        {{!item.content}}
+    </article>
 
-<head>
-    <meta name="color-scheme" content="dark light">
-    <style>
-        main {
-            min-width: 50ch;
-            max-width: 75ch;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        header h1 {
-            font-size: 1.5rem;
-        }
-
-        nav {
-            list-style: none;
-            display: flex;
-        }
-
-        nav li::after {
-            content: '/';
-        }
-    </style>
-
-</head>
-
-<body>
-    <main>
-        <header>
-            <h1>{{item.label.name}}</h1>
-            <p>#{{item.articleId}}</p>
-            <nav>
-                % for crumb in item.label.parents:
-                <li>{{crumb}}</li>
-                % end
-            </nav>
-        </header>
-        <article>
-            {{!item.content}}
-        </article>
-
-    </main>
-
-</body>
-
-</html>
+</main>

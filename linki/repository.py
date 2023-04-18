@@ -53,11 +53,11 @@ class Repository:
             return None
         return connection.get(item_id)
 
-    def iter_item(self, style: str) -> Iterable[ID]:
+    def iter_item(self, style: str) -> Iterable:
         connection = self.connection.get_style(style)
         if (connection is None):
             return []
-        return connection.keys()
+        return connection.values()
 
     def get_count(self, style: str):
         connection = self.connection.get_style(style)
