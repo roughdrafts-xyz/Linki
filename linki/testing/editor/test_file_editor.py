@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 
 from hypothesis import given
-from linki.article import Article
+from linki.article import SimpleArticle
 
 from linki.editor import FileEditor
 from linki.repository import Repository
@@ -31,7 +31,7 @@ def test_loads_drafts():
 
 
 @given(an_article())
-def test_does_copy(update: Article):
+def test_does_copy(update: SimpleArticle):
     with get_file_editor() as r_editor, get_file_editor() as l_editor:
         article = r_editor.repo.articles.merge_article(update)
         r_editor.repo.titles.set_title(article)
@@ -49,7 +49,7 @@ def test_does_copy(update: Article):
 
 
 @given(an_article())
-def test_does_unload_titles(update: Article):
+def test_does_unload_titles(update: SimpleArticle):
     with get_file_editor() as r_editor, get_file_editor() as l_editor:
         article = r_editor.repo.articles.merge_article(update)
         r_editor.repo.titles.set_title(article)

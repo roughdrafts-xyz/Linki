@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
 from typing import Iterator
-from linki.article import Article
+from linki.article import SimpleArticle
 from linki.connection import Connection
 
 from linki.id import SimpleLabel
@@ -11,7 +11,7 @@ from linki.id import SimpleLabel
 class Draft:
     label: SimpleLabel
     content: str
-    editOf: Article | None = None
+    editOf: SimpleArticle | None = None
 
     def should_update(self) -> bool:
         if (self.editOf is None):
@@ -21,15 +21,15 @@ class Draft:
         return label_different or content_different
 
     @classmethod
-    def fromArticle(cls, article: Article) -> 'Draft':
+    def fromArticle(cls, article: SimpleArticle) -> 'Draft':
         return cls(
             article.label,
             article.content,
             article
         )
 
-    def asArticle(self) -> Article:
-        return Article(
+    def asArticle(self) -> SimpleArticle:
+        return SimpleArticle(
             self.label.unsafe_raw_name,
             self.content,
             self.editOf

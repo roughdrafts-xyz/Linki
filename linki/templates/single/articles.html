@@ -23,6 +23,10 @@
         nav li::after {
             content: '/';
         }
+
+        nav li:last-child {
+            display: none;
+        }
     </style>
 
 </head>
@@ -34,7 +38,7 @@
             <p>#{{item.articleId}}</p>
             <nav>
                 % for crumb in item.label.path:
-                <li>{{item}}</li>
+                <li>{{crumb}}</li>
                 % end
             </nav>
         </header>

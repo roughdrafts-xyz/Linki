@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Iterator
-from linki.article import Article
+from linki.article import SimpleArticle
 
 from linki.id import SimpleLabel
 
@@ -8,10 +8,10 @@ from linki.id import SimpleLabel
 @dataclass
 class Title():
     label: SimpleLabel
-    article: Article
+    article: SimpleArticle
 
     @classmethod
-    def fromArticle(cls, article: Article) -> 'Title':
+    def fromArticle(cls, article: SimpleArticle) -> 'Title':
         return cls(
             article.label,
             article
@@ -22,7 +22,7 @@ class TitleCollection():
     def __init__(self, connection) -> None:
         self.titles = connection
 
-    def set_title(self, article: Article | None) -> Title | None:
+    def set_title(self, article: SimpleArticle | None) -> Title | None:
         if (article is None):
             return None
         title = Title.fromArticle(article)

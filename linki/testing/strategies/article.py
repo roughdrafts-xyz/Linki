@@ -1,6 +1,6 @@
 import string
 from hypothesis import assume, strategies
-from linki.article import Article
+from linki.article import SimpleArticle
 
 from linki.id import SimpleLabel
 
@@ -20,11 +20,11 @@ def some_content(draw: strategies.DrawFn):
 
 
 @strategies.composite
-def a_new_article(draw: strategies.DrawFn, data: str | None = None) -> Article:
+def a_new_article(draw: strategies.DrawFn, data: str | None = None) -> SimpleArticle:
     if (data is None):
         data = draw(some_content())
     label = draw(a_label())
-    return Article(
+    return SimpleArticle(
         label.unsafe_raw_name,
         data,
         None
@@ -32,10 +32,10 @@ def a_new_article(draw: strategies.DrawFn, data: str | None = None) -> Article:
 
 
 @strategies.composite
-def an_edit_of(draw: strategies.DrawFn, base_article: Article, data: str | None = None):
+def an_edit_of(draw: strategies.DrawFn, base_article: SimpleArticle, data: str | None = None):
     if (data is None):
         data = draw(some_content())
-    return Article(
+    return SimpleArticle(
         base_article.label.unsafe_raw_name,
         data,
         base_article

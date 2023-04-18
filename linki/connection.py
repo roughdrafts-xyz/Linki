@@ -7,7 +7,7 @@ from urllib.request import urlopen
 
 
 from linki.id import ID
-from linki.article import Article
+from linki.article import SimpleArticle
 from linki.title import Title
 
 VT = TypeVar('VT')
@@ -118,7 +118,7 @@ class ROWebConnection(Connection[VT]):
     def __setitem__(self, __key: ID, __value: VT) -> None:
         pass
 
-    def __getitem__(self, __key: ID) -> Title | Article:
+    def __getitem__(self, __key: ID) -> Title | SimpleArticle:
         try:
             url = f"{self.url}{__key}"
             res = urlopen(url).read()
