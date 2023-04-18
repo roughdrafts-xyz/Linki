@@ -2,7 +2,6 @@ from linki.contribution import Contribution
 from linki.repository import Repository
 
 
-
 class Outbox():
     def __init__(self, repo: Repository) -> None:
         self.repo = repo

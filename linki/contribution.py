@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 from linki.editor import FileCopier
 from linki.repository import Repository
 from linki.url import URL
@@ -19,5 +21,9 @@ class Contribution():
                 copier.unload_titles()
                 return True
             case 'http' | 'https':
-                return True
+                data = urlencode({'url': self.destination.url})
+                request = Request(self.destination.url, str.encode(data))
+                res = urlopen(request).read()
+                if (res == "0"):
+                    return True
         return False

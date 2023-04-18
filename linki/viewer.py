@@ -103,7 +103,7 @@ class WebView:
     def handle_announce(self):
         url = bottle.request.forms.get('url')  # type: ignore
         if (URL(url).labelId not in self.repo.subs.urls):
-            return "0"
+            return "1"
 
         destination = Editor(self.repo)
         source = Repository(url)
@@ -111,7 +111,7 @@ class WebView:
 
         copier.copy_articles()
         copier.copy_titles()
-        return "1"
+        return "0"
 
     def run(self, host: str, port: int):
         self.app.run(host=host, port=port, reloader=self.conf.debug)
