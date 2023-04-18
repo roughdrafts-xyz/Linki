@@ -48,7 +48,8 @@ class DraftCollection(ABC):
         return self.drafts.get(label.labelId, None)
 
     def get_drafts(self) -> Iterator[Draft]:
-        return self.drafts.values().__iter__()
+        for item in self.drafts.values():
+            yield item
 
     def clear_draft(self, label: Label) -> bool:
         if (label.labelId in self.drafts):

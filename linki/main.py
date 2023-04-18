@@ -82,7 +82,7 @@ def inbox(
     inbox = Inbox(subs, titles)
     for update in inbox.get_inbox():
         typer.echo(
-            f"{update.rowId} {update.url.url}/{update.label.name} ({update.size:+n})")
+            f"{update.rowId} {update.url.url}{update.label.name} ({update.size:+n})")
 
 
 @app.command()

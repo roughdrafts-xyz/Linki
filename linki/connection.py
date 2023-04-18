@@ -7,8 +7,6 @@ from urllib.request import urlopen
 
 
 from linki.id import ID
-from linki.article import Article
-from linki.title import Title
 
 VT = TypeVar('VT')
 
@@ -118,7 +116,7 @@ class ROWebConnection(Connection[VT]):
     def __setitem__(self, __key: ID, __value: VT) -> None:
         pass
 
-    def __getitem__(self, __key: ID) -> Title | Article:
+    def __getitem__(self, __key: ID) -> 'Title | Article':  # type: ignore
         try:
             url = f"{self.url}{__key}"
             res = urlopen(url).read()
@@ -131,7 +129,13 @@ class ROWebConnection(Connection[VT]):
 
     def __iter__(self) -> Iterator[ID]:
         res = urlopen(self.url).read()
-        return pickle.loads(res)
+        unpickle = pickle.loads(res)
+        for item in unpickle:
+            if (self.style == 'articles'):
+                yield item.articleId
+
+            if (self.style == 'titles'):
+                yield item.label.labelId
 
     def __len__(self) -> int:
         res = urlopen(self.count_url).read()

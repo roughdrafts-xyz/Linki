@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Iterator, cast
 from linki.article import Article
+from linki.connection import Connection
 
 from linki.id import Label
 
@@ -13,7 +14,7 @@ class Title(Article):
 
 
 class TitleCollection():
-    def __init__(self, connection) -> None:
+    def __init__(self, connection: Connection[Title]) -> None:
         self.titles = connection
 
     def set_title(self, article: Article | None) -> Title | None:
@@ -29,7 +30,8 @@ class TitleCollection():
         return self.titles[title.labelId]
 
     def get_titles(self) -> Iterator[Title]:
-        return self.titles.values().__iter__()
+        for item in self.titles.values():
+            yield item
 
     def clear_title(self, title: Label) -> None:
         if (title.labelId in self.titles):
