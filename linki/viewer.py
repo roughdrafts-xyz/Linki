@@ -112,7 +112,17 @@ class WebView:
             case 'count':
                 return f"{self.repo.get_count(style)}"
             case 'w':
-                return self.many_tmpl.render({'items': iter_item, 'style': style.capitalize()})
+                for item in iter_item:
+                    if (style == 'titles'):
+                        item.web_id = item.label.labelId
+                    else:
+                        item.web_id = item.articleId
+
+                return self.many_tmpl.render({
+                    'items': iter_item,
+                    'style': style.capitalize(),
+                    'style_root': f"/w/{style}/"
+                })
 
     def handle_announce(self):
         url = bottle.request.forms.get('url')  # type: ignore

@@ -5,7 +5,11 @@
     </header>
     <ul>
         % for item in items:
-        <li>{{item}}</li>
+        <li>
+            <a href="{{f" {style_root}{item.web_id}"}}">
+                {{'/'.join(item.label.path)}}
+            </a>
+        </li>
         % end
     </ul>
 
