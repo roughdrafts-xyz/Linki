@@ -37,7 +37,8 @@ def publish(
 
 @app.command()
 def copy(source: str, destination: Path = typer.Argument(Path.cwd(), file_okay=False)):
-    init(destination, True)
+    if (not destination.exists()):
+        init(destination, True)
     source_repo = Repository(source)
     copier = FileCopier(source_repo, destination)
 
