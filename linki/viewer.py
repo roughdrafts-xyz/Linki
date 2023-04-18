@@ -37,27 +37,18 @@ class WebView:
             self.single_templates = dict()
             self.iter_templates = dict()
             single_lookup = [
-                Path(__file__).resolve().joinpath('templates', 'single')]
+                Path(__file__).resolve().joinpath('..', 'templates', 'single')]
             iter_lookup = [
-                Path(__file__).resolve().joinpath('templates', 'iter')]
+                Path(__file__).resolve().joinpath('..', 'templates', 'iter')]
             for style in self.styles:
+                style_name = f"{style}.html"
                 self.single_templates[style] = bottle.SimpleTemplate(
-                    name=style, lookup=single_lookup)
+                    name=style_name, lookup=single_lookup)
                 self.single_templates[style].prepare()
 
                 self.iter_templates[style] = bottle.SimpleTemplate(
-                    name=style, lookup=iter_lookup)
+                    name=style_name, lookup=iter_lookup)
                 self.iter_templates[style].prepare()
-
-    def handle_web(self, style: str, label: str):
-        item = self.handle_single('api', style, label)
-        template = None
-        match style:
-            case 'titles':
-                template = 'titles'
-            case 'articles':
-                template = 'articles'
-        return template
 
     def handle(self, output: str, style: str, label: str | None = None):
         unsupported = bottle.HTTPError(400, f'{output} not supported.')
@@ -71,7 +62,8 @@ class WebView:
             case 'w':
                 if (not self.conf.web):
                     raise unsupported
-                raise NotImplementedError
+            case _:
+                raise unsupported
 
         if style not in self.styles:
             raise bottle.HTTPError(404, f'style not found: {style}')
@@ -106,21 +98,21 @@ class WebView:
             case 'api':
                 return asdict(item)
             case 'w':
-                return self.single_templates[style].render(item)
+                return self.single_templates[style].render({'item': item})
 
     def handle_iter(self, output: str, style: str):
         if style not in self.styles:
             raise bottle.HTTPError(404, f'style not found: {style}')
-        iter_item = self.repo.iter_item(style)
+        iter_item = list(self.repo.iter_item(style))
         match output:
             case 'pickles':
                 return pickle.dumps(iter_item)
             case 'api':
-                return {style: list(iter_item)}
+                return {style: iter_item}
             case 'count':
                 return f"{self.repo.get_count(style)}"
             case 'w':
-                return self.iter_templates[style].render(iter_item)
+                return self.iter_templates[style].render({'items': iter_item})
 
     def handle_announce(self):
         url = bottle.request.forms.get('url')  # type: ignore
