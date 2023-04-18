@@ -82,16 +82,20 @@ def serve(
     location: Path = typer.Argument(Path.cwd()),
     api: bool = typer.Option(True),
     web: bool = typer.Option(True),
-    subscribe: bool = typer.Option(True)
+    subscribe: bool = typer.Option(True),
+    debug: bool = typer.Option(False, hidden=True),
+    host: str = typer.Option('localhost'),
+    port: int = typer.Option(8080)
 ):
     repo = FileRepository.fromPath(location)
     viewer = WebView(repo, WebViewConf(
         sub=subscribe,
         api=api,
-        web=web
+        web=web,
+        debug=debug
     ))
 
-    viewer.run(host='localhost', port=8080)
+    viewer.run(host, port)
 
 
 @app.command()

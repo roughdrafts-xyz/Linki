@@ -6,7 +6,6 @@ from dataclasses import asdict, dataclass
 import bottle
 
 from linki.url import URL
-bottle.debug(True)
 
 
 @dataclass(kw_only=True)
@@ -14,6 +13,7 @@ class WebViewConf:
     sub: bool = False
     api: bool = False
     web: bool = False
+    debug: bool = False
 
 
 class WebView:
@@ -21,6 +21,7 @@ class WebView:
         self.app = bottle.Bottle()
         self.repo = repo
         self.conf = conf
+        bottle.debug(self.conf.debug)
         self.app.route('/<output>/<style>/<label:path>',
                        'GET', self.handle)
         self.app.route('/<output>/<style>/',
@@ -100,7 +101,7 @@ class WebView:
                 return f"{self.repo.get_count(style)}"
 
     def handle_announce(self):
-        url = bottle.request.forms.get('url')
+        url = bottle.request.forms.get('url')  # type: ignore
         if (URL(url).labelId not in self.repo.subs.urls):
             return "0"
 
@@ -113,4 +114,4 @@ class WebView:
         return "1"
 
     def run(self, host: str, port: int):
-        self.app.run(host=host, port=port, reloader=True)
+        self.app.run(host=host, port=port, reloader=self.conf.debug)
