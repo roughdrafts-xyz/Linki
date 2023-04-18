@@ -25,7 +25,7 @@ class URL():
                 f'Invalid URL. Must be one of these schemes: {valid_schemes}')
 
         self.parsed = urlparse(self.url)
-        self.labelId = LabelID.getLabelID(self.url)
+        self.labelId = LabelID.getLabelID([self.url])
 
     @classmethod
     def is_valid_url(cls, url: str) -> bool:

@@ -12,12 +12,10 @@ class Subscription():
     def get_updates(self) -> Iterator[Draft]:
         for title in self.remote.get_titles():
             current = self.titles.get_title(title.label)
-            editOf = None
-            if (current is not None):
-                editOf = current.article
+            editOf = current
             draft = Draft(
                 title.label,
-                title.article.content,
+                title.content,
                 editOf
             )
             if (draft.should_update()):

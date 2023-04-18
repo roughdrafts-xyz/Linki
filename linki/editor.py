@@ -45,9 +45,9 @@ class Editor():
         count = 0
         for title in titles.get_titles():
             _title = self.repo.titles.get_title(title.label)
-            if (_title is title):
+            if (_title == title):
                 continue
-            self.repo.titles.set_title(title.article)
+            self.repo.titles.set_title(title)
             count += 1
         return count
 
@@ -76,13 +76,10 @@ class FileEditor(Editor):
             rel_file = file.relative_to(self.repo.path)
             title = PathLabel(rel_file)
             editOf = self.repo.titles.get_title(title)
-            _editOf = None
-            if (editOf is not None):
-                _editOf = editOf.article
             _draft = Draft(
                 title,
                 file.read_text(),
-                _editOf
+                editOf
             )
             self.repo.drafts.set_draft(_draft)
 
@@ -91,7 +88,7 @@ class FileEditor(Editor):
         for title in self.repo.titles.get_titles():
             unload = path.joinpath(*title.label.parents)
             unload.mkdir(parents=True, exist_ok=True)
-            unload.joinpath(title.label.name).write_text(title.article.content)
+            unload.joinpath(title.label.name).write_text(title.content)
 
 
 class Copier:

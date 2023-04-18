@@ -1,21 +1,15 @@
 from dataclasses import dataclass
-from typing import Iterator
+from typing import Iterator, cast
 from linki.article import Article
 
 from linki.id import Label
 
 
 @dataclass
-class Title():
-    label: Label
-    article: Article
-
+class Title(Article):
     @classmethod
     def fromArticle(cls, article: Article) -> 'Title':
-        return cls(
-            article.label,
-            article
-        )
+        return cast(cls, article)
 
 
 class TitleCollection():
