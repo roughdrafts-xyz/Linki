@@ -28,7 +28,7 @@ class WebView:
         self.app.route('/<output>/<style>',
                        'GET', self.handle)
         if (self.conf.sub):
-            self.app.route('/announce', 'POST', self.handle)
+            self.app.route('/announce', 'POST', self.handle_announce)
 
     def handle_web(self, style: str, label: str):
         item = self.handle_single('api', style, label)
@@ -100,18 +100,17 @@ class WebView:
                 return f"{self.repo.get_count(style)}"
 
     def handle_announce(self):
-        url = bottle.request.forms.getter('url')
-        url = URL(url)
-        if (url not in self.repo.subs.urls.values()):
-            return False
+        url = bottle.request.forms.get('url')
+        if (URL(url).labelId not in self.repo.subs.urls):
+            return "0"
 
         destination = Editor(self.repo)
-        source = Repository(url.url)
+        source = Repository(url)
         copier = Copier(source, destination)
 
         copier.copy_articles()
         copier.copy_titles()
-        return True
+        return "1"
 
     def run(self, host: str, port: int):
         self.app.run(host=host, port=port, reloader=True)
