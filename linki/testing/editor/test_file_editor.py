@@ -23,12 +23,14 @@ def get_file_editor():
 
 def test_loads_drafts():
     with get_file_editor() as editor:
-        Path(editor.repo.path).joinpath('folder').mkdir()
-        path = Path(editor.repo.path).joinpath('folder', 'hello_world.md')
+        editor_path = Path(editor.repo.path)
+        editor_path.joinpath('folder').mkdir()
+        path = editor_path.joinpath('folder', 'hello_world.md')
         path.write_text('Hello World')
         editor.load_drafts()
+        trunc_path = path.relative_to(editor_path)
         assert editor.repo.drafts.get_draft(
-            PathLabel(path)) is not None
+            PathLabel(trunc_path)) is not None
 
 
 @given(an_article())

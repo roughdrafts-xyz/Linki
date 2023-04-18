@@ -73,7 +73,8 @@ class FileEditor(Editor):
 
     def load_drafts(self):
         for file in self.iterfiles():
-            title = PathLabel(file)
+            rel_file = file.relative_to(self.repo.path)
+            title = PathLabel(rel_file)
             editOf = self.repo.titles.get_title(title)
             _editOf = None
             if (editOf is not None):
