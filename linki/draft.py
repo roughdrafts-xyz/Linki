@@ -4,7 +4,7 @@ from typing import Iterator
 from linki.article import Article
 from linki.connection import Connection
 
-from linki.id import Label, SimpleLabel
+from linki.id import Label
 
 
 @dataclass
@@ -50,7 +50,7 @@ class DraftCollection(ABC):
     def get_drafts(self) -> Iterator[Draft]:
         return self.drafts.values().__iter__()
 
-    def clear_draft(self, label: SimpleLabel) -> bool:
+    def clear_draft(self, label: Label) -> bool:
         if (label.labelId in self.drafts):
             del self.drafts[label.labelId]
             return True

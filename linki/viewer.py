@@ -3,7 +3,7 @@ import pickle
 
 import pypandoc
 from linki.editor import Copier, Editor
-from linki.id import SimpleLabel, LabelID
+from linki.id import Label, LabelID
 from linki.repository import Repository
 from dataclasses import asdict, dataclass
 import bottle
@@ -78,7 +78,7 @@ class WebView:
         item_id = None
         match style:
             case 'titles':
-                item_id = SimpleLabel(label).labelId
+                item_id = Label(label.split('/')).labelId
             case _:
                 raise bottle.HTTPError(404, f'pathed style not found: {style}')
         return item_id

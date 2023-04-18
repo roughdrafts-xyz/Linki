@@ -3,7 +3,7 @@ from linki.repository import Repository
 from linki.subscription import Subscription
 
 from linki.title import TitleCollection
-from linki.id import SimpleLabel
+from linki.id import Label
 from linki.url import URL, URLCollection
 
 
@@ -11,7 +11,7 @@ from linki.url import URL, URLCollection
 class InboxRow():
     rowId: int
     url: URL
-    label: SimpleLabel
+    label: Label
     size: int
 
 
