@@ -1,10 +1,10 @@
 import pytest
 from linki.connection import Connection, MemoryConnection, PathConnection
-from linki.id import Label
+from linki.id import SimpleLabel
 
 
 def do_test(connection: Connection):
-    key = Label('key').labelId
+    key = SimpleLabel('key').labelId
 
     # Don't get a non-existent key
     with pytest.raises(KeyError):

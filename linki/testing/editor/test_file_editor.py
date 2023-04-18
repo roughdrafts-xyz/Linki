@@ -10,7 +10,7 @@ from linki.article import Article
 from linki.editor import FileEditor
 from linki.repository import Repository
 from linki.testing.strategies.article import an_article
-from linki.id import Label
+from linki.id import SimpleLabel
 
 
 @contextmanager
@@ -27,7 +27,7 @@ def test_loads_drafts():
         path.joinpath('hello_world.md').write_text('Hello World')
         editor.load_drafts()
         assert editor.repo.drafts.get_draft(
-            Label('hello_world.md')) is not None
+            SimpleLabel('hello_world.md')) is not None
 
 
 @given(an_article())

@@ -2,12 +2,12 @@ from dataclasses import dataclass
 from typing import Iterator
 from linki.article import Article
 
-from linki.id import Label
+from linki.id import SimpleLabel
 
 
 @dataclass
 class Title():
-    label: Label
+    label: SimpleLabel
     article: Article
 
     @classmethod
@@ -29,7 +29,7 @@ class TitleCollection():
         self.titles[title.label.labelId] = title
         return title
 
-    def get_title(self, title: Label) -> Title | None:
+    def get_title(self, title: SimpleLabel) -> Title | None:
         if (title.labelId not in self.titles):
             return None
         return self.titles[title.labelId]
@@ -37,6 +37,6 @@ class TitleCollection():
     def get_titles(self) -> Iterator[Title]:
         return self.titles.values().__iter__()
 
-    def clear_title(self, title: Label) -> None:
+    def clear_title(self, title: SimpleLabel) -> None:
         if (title.labelId in self.titles):
             del self.titles[title.labelId]

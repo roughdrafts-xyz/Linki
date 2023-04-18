@@ -5,7 +5,7 @@ from linki.article import ArticleCollection
 from linki.draft import Draft
 from linki.repository import FileRepository, Repository
 from linki.title import TitleCollection
-from linki.id import Label
+from linki.id import SimpleLabel
 
 
 class Editor():
@@ -73,7 +73,7 @@ class FileEditor(Editor):
 
     def load_drafts(self):
         for file in self.iterfiles():
-            title = Label(file.name)
+            title = SimpleLabel(file.name)
             editOf = self.repo.titles.get_title(title)
             _editOf = None
             if (editOf is not None):

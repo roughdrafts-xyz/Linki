@@ -4,12 +4,12 @@ from typing import Iterator
 from linki.article import Article
 from linki.connection import Connection
 
-from linki.id import Label
+from linki.id import SimpleLabel
 
 
 @dataclass
 class Draft:
-    label: Label
+    label: SimpleLabel
     content: str
     editOf: Article | None = None
 
@@ -44,13 +44,13 @@ class DraftCollection(ABC):
         self.drafts[draft.label.labelId] = draft
         return draft
 
-    def get_draft(self, label: Label) -> Draft | None:
+    def get_draft(self, label: SimpleLabel) -> Draft | None:
         return self.drafts.get(label.labelId, None)
 
     def get_drafts(self) -> Iterator[Draft]:
         return self.drafts.values().__iter__()
 
-    def clear_draft(self, label: Label) -> bool:
+    def clear_draft(self, label: SimpleLabel) -> bool:
         if (label.labelId in self.drafts):
             del self.drafts[label.labelId]
             return True

@@ -2,18 +2,18 @@ from dataclasses import dataclass
 from typing import Iterator
 from typing_extensions import Self
 
-from linki.id import ArticleID, Label
+from linki.id import ArticleID, SimpleLabel
 
 
 @dataclass
 class Article():
     articleId: ArticleID
-    label: Label
+    label: SimpleLabel
     content: str
     editOf: Self | None
 
     def __init__(self, label: str, content: str, editOf: Self | None = None) -> None:
-        self.label = Label(label)
+        self.label = SimpleLabel(label)
         self.content = content
         self.editOf = editOf
         self.articleId = ArticleID.getArticleID(

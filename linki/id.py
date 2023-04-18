@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from hashlib import sha224
+from pathlib import Path
 import re
+from typing import List
 
 SHA224 = re.compile(r'[a-f0-9]{56}')
 
@@ -25,7 +27,7 @@ class ArticleID(ID):
     @classmethod
     def getArticleID(cls, label, content, editOf) -> 'ArticleID':
         if (editOf is None):
-            _editOf = str.encode(BlankArticleID)
+            _editOf = b''
         else:
             _editOf = str.encode(editOf.articleId)
         _label = str.encode(label.name)
@@ -39,9 +41,6 @@ class ArticleID(ID):
         ).hexdigest())
 
 
-BlankArticleID = ArticleID(sha224(b'BlankArticleID').hexdigest())
-
-
 class LabelID(ID):
     @classmethod
     def getLabelID(cls, name: str) -> 'LabelID':
@@ -51,13 +50,15 @@ class LabelID(ID):
 @dataclass
 class Label():
     name: str
+    path: List[str]
     labelId: LabelID
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, path: List[str]) -> None:
         if (not self.is_valid(name)):
             raise AttributeError
         self._label = name
         self.name = self.as_safe_string(name)
+        self.path = path
         self.labelId = LabelID.getLabelID(self.name)
 
     @classmethod
@@ -91,3 +92,19 @@ class Label():
 
     def __hash__(self) -> int:
         return hash(self.labelId)
+
+
+@dataclass
+class SimpleLabel(Label):
+    name: str
+    path: List[str]
+    labelId: LabelID
+
+    def __init__(self, name: str) -> None:
+        super().__init__(name, [])
+
+
+@dataclass
+class PathLabel(Label):
+    def __init__(self, path: Path) -> None:
+        super().__init__(path.name)

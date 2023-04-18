@@ -2,14 +2,14 @@ import string
 from hypothesis import assume, strategies
 from linki.article import Article
 
-from linki.id import Label
+from linki.id import SimpleLabel
 
 
 @strategies.composite
 def a_label(draw: strategies.DrawFn):
     label = draw(strategies.text(alphabet=string.printable))
-    assume(Label.is_valid(label))
-    return Label(label)
+    assume(SimpleLabel.is_valid(label))
+    return SimpleLabel(label)
 
 
 @strategies.composite
