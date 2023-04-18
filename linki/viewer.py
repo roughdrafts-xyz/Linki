@@ -1,8 +1,11 @@
 import pickle
+from linki.editor import Copier, Editor, FileCopier
 from linki.id import ID, Label, LabelID
 from linki.repository import Repository
 from dataclasses import asdict, dataclass
 import bottle
+
+from linki.url import URL
 bottle.debug(True)
 
 
@@ -97,7 +100,18 @@ class WebView:
                 return f"{self.repo.get_count(style)}"
 
     def handle_announce(self):
-        return "Announce"
+        url = bottle.request.forms.getter('url')
+        url = URL(url)
+        if (url not in self.repo.subs.urls.values()):
+            return False
+
+        destination = Editor(self.repo)
+        source = Repository(url.url)
+        copier = Copier(source, destination)
+
+        copier.copy_articles()
+        copier.copy_titles()
+        return True
 
     def run(self, host: str, port: int):
         self.app.run(host=host, port=port, reloader=True)

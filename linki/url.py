@@ -39,16 +39,16 @@ class URL():
 
 class URLCollection():
     def __init__(self, connection: Connection[URL]) -> None:
-        self.subscriptions = connection
+        self.urls = connection
 
     def add_url(self, url: str):
         new_url = URL(url)
-        self.subscriptions[new_url.labelId] = new_url
+        self.urls[new_url.labelId] = new_url
 
     def get_url(self, label: str):
         _id = LabelID(label)
-        return self.subscriptions.get(_id)
+        return self.urls.get(_id)
 
     def get_urls(self) -> Iterator[URL]:
-        for url in self.subscriptions.values():
+        for url in self.urls.values():
             yield url

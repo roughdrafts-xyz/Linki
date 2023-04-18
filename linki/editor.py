@@ -91,16 +91,27 @@ class FileEditor(Editor):
             path.joinpath(title.label.name).write_text(title.article.content)
 
 
-class FileCopier:
-    def __init__(self, source: Repository, destination: str | Path) -> None:
+class Copier:
+    source: Repository
+    destination: Editor
+
+    def __init__(self, source: Repository, destination: Editor) -> None:
         self.source = source
-        self.destination = FileEditor.fromPath(destination)
+        self.destination = destination
 
     def copy_articles(self):
         return self.destination.copy_articles(self.source.articles)
 
     def copy_titles(self):
         return self.destination.copy_titles(self.source.titles)
+
+
+class FileCopier(Copier):
+    destination: FileEditor
+
+    def __init__(self, source: Repository, destination: str | Path) -> None:
+        self.source = source
+        self.destination = FileEditor.fromPath(destination)
 
     def unload_titles(self):
         self.destination.unload_titles()
