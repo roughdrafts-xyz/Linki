@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 import pypandoc
 import typer
 
@@ -92,17 +93,23 @@ def serve(
     subscribe: bool = typer.Option(True),
     debug: bool = typer.Option(False, hidden=True),
     host: str = typer.Option('localhost'),
-    port: int = typer.Option(8080)
+    port: int = typer.Option(8080),
+    home: Optional[Path] = typer.Option(None)
 ):
     try:
         if (web):
             pypandoc.get_pandoc_path()
+        home_str = None
+        if (home):
+            home = home.resolve().relative_to(Path.cwd().resolve())
+            home_str = str(home)
         repo = FileRepository.fromPath(location)
         viewer = WebView(repo, WebViewConf(
             sub=subscribe,
             api=api,
             web=web,
-            debug=debug
+            debug=debug,
+            home=home_str
         ))
 
         viewer.run(host, port)

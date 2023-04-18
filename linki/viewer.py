@@ -17,6 +17,7 @@ class WebViewConf:
     api: bool = False
     web: bool = False
     debug: bool = False
+    home: str | None = None
 
 
 class WebView:
@@ -27,6 +28,7 @@ class WebView:
         self.repo = repo
         self.conf = conf
         bottle.debug(self.conf.debug)
+        self.app.route('/', 'GET', self.handle_home)
         self.app.route('/<output>/<style>/<label:path>',
                        'GET', self.handle)
         self.app.route('/<output>/<style>/',
@@ -47,6 +49,9 @@ class WebView:
 
             self.one_tmpl.prepare()
             self.many_tmpl.prepare()
+
+    def handle_home(self):
+        return self.handle('w', 'titles', self.conf.home)
 
     def handle(self, output: str, style: str, label: str | None = None):
         unsupported = bottle.HTTPError(400, f'{output} not supported.')
