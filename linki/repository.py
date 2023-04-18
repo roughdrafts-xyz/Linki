@@ -23,8 +23,6 @@ class RepositoryConnection:
             case 'ssh':
                 raise NotImplementedError
             case 'http' | 'https':
-                if (style not in ['articles', 'titles']):
-                    raise NotImplementedError
                 return ROWebConnection(self.url, style)
             case _:
                 raise NotImplementedError

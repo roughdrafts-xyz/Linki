@@ -1,4 +1,5 @@
 from pathlib import Path
+import pypandoc
 import typer
 
 from linki.editor import FileCopier, FileEditor
@@ -87,15 +88,32 @@ def serve(
     host: str = typer.Option('localhost'),
     port: int = typer.Option(8080)
 ):
-    repo = FileRepository.fromPath(location)
-    viewer = WebView(repo, WebViewConf(
-        sub=subscribe,
-        api=api,
-        web=web,
-        debug=debug
-    ))
+    try:
+        if (web):
+            pandoc = pypandoc.get_pandoc_path()
+        repo = FileRepository.fromPath(location)
+        viewer = WebView(repo, WebViewConf(
+            sub=subscribe,
+            api=api,
+            web=web,
+            debug=debug
+        ))
 
-    viewer.run(host, port)
+        viewer.run(host, port)
+    except OSError:
+        typer.echo(
+            "Pandoc not found. Run with --no-web or install pandoc with linki install-pandoc.")
+        typer.Exit()
+
+
+@app.command(hidden=True)
+def install_pandoc():
+    pandoc = pypandoc.get_pandoc_path()
+    if (pandoc is not None):
+        typer.echo("Pandoc is already installed.")
+        return None
+    pypandoc.ensure_pandoc_installed()
+    typer.echo("Pandoc installed successfully.")
 
 
 @app.command()
