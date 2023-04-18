@@ -66,6 +66,10 @@ class Label():
     def name(self) -> str:
         return self.path[-1]
 
+    @property
+    def parents(self) -> List[str]:
+        return self.path[:-1]
+
     @classmethod
     def is_valid(cls, string: str) -> bool:
         if type(string) is not str:

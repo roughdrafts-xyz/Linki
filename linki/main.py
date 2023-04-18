@@ -15,10 +15,14 @@ app = typer.Typer(
 
 @app.command()
 def init(
-    destination: Path = typer.Argument(Path.cwd())
+    destination: Path = typer.Argument(Path.cwd()),
+    silent: bool = typer.Option(False)
 ):
+    if (not destination.exists()):
+        destination.mkdir()
     FileRepository.createPath(destination)
-    typer.echo(f"Initialized wiki in {destination}.")
+    if (not silent):
+        typer.echo(f"Initialized wiki in {destination}.")
 
 
 @app.command()
@@ -32,7 +36,8 @@ def publish(
 
 
 @app.command()
-def copy(source: str, destination: Path = typer.Argument(Path.cwd())):
+def copy(source: str, destination: Path = typer.Argument(Path.cwd(), file_okay=False)):
+    init(destination, True)
     source_repo = Repository(source)
     copier = FileCopier(source_repo, destination)
 

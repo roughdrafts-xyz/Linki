@@ -1,6 +1,6 @@
 from pathlib import Path
 from typer.testing import CliRunner
-from linki.main import app
+from linki.main import app, copy as copy_cmd
 
 runner = CliRunner()
 
@@ -39,20 +39,20 @@ def test_create_local_copy(tmp_path: Path):
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
     base.mkdir()
-    copy.mkdir()
+    base.joinpath('folder').mkdir()
+
     res = runner.invoke(app, ["init", str(base)])
     assert res.stdout == f"Initialized wiki in {str(base)}.\n"
-    res = runner.invoke(app, ["init", str(copy)])
-    assert res.stdout == f"Initialized wiki in {str(copy)}.\n"
-    base.joinpath('hello_world.md').write_text('Hello World')
+    base.joinpath('folder', 'hello_world.md').write_text('Hello World')
     res = runner.invoke(app, ["publish", str(base)])
     assert res.stdout == f"Published 1 drafts.\n"
+
     res = runner.invoke(app, ["copy", str(base), str(copy)])
     x = 1
     y = 1
     assert res.stdout == f"Copied {x} titles and {y} articles.\n"
 
-    content = copy.joinpath('hello_world.md').read_text()
+    content = copy.joinpath('folder', 'hello_world.md').read_text()
     assert content == "Hello World"
 
 

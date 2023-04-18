@@ -89,7 +89,9 @@ class FileEditor(Editor):
     def unload_titles(self):
         path = Path(self.repo.path)
         for title in self.repo.titles.get_titles():
-            path.joinpath(title.label.name).write_text(title.article.content)
+            unload = path.joinpath(*title.label.parents)
+            unload.mkdir(parents=True, exist_ok=True)
+            unload.joinpath(title.label.name).write_text(title.article.content)
 
 
 class Copier:
