@@ -1,5 +1,7 @@
 from pathlib import Path
 import pickle
+
+import pypandoc
 from linki.editor import Copier, Editor
 from linki.id import Label, LabelID
 from linki.repository import Repository
@@ -98,6 +100,8 @@ class WebView:
             case 'api':
                 return asdict(item)
             case 'w':
+                item.content = pypandoc.convert_text(
+                    item.content, format='markdown', to='html')
                 return self.single_templates[style].render({'item': item})
 
     def handle_iter(self, output: str, style: str):
