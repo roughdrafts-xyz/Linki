@@ -32,7 +32,7 @@ class ArticleCollection():
     def __init__(self, connection) -> None:
         self.articles = connection
 
-    def merge_article(self, article: SimpleArticle | None) -> SimpleArticle | None:
+    def merge_article(self, article: Article | None) -> Article | None:
         if (article is None):
             return None
         self.articles[article.articleId] = article

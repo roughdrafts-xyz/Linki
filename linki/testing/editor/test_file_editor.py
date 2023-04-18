@@ -10,7 +10,7 @@ from linki.article import SimpleArticle
 from linki.editor import FileEditor
 from linki.repository import Repository
 from linki.testing.strategies.article import an_article
-from linki.id import SimpleLabel
+from linki.id import PathLabel
 
 
 @contextmanager
@@ -23,11 +23,12 @@ def get_file_editor():
 
 def test_loads_drafts():
     with get_file_editor() as editor:
-        path = Path(editor.repo.path)
-        path.joinpath('hello_world.md').write_text('Hello World')
+        Path(editor.repo.path).joinpath('folder').mkdir()
+        path = Path(editor.repo.path).joinpath('folder', 'hello_world.md')
+        path.write_text('Hello World')
         editor.load_drafts()
         assert editor.repo.drafts.get_draft(
-            SimpleLabel('hello_world.md')) is not None
+            PathLabel(path)) is not None
 
 
 @given(an_article())

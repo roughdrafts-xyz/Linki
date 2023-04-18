@@ -1,17 +1,17 @@
 from abc import ABC
 from dataclasses import dataclass
 from typing import Iterator
-from linki.article import SimpleArticle
+from linki.article import Article, SimpleArticle
 from linki.connection import Connection
 
-from linki.id import SimpleLabel
+from linki.id import Label, SimpleLabel
 
 
 @dataclass
 class Draft:
-    label: SimpleLabel
+    label: Label
     content: str
-    editOf: SimpleArticle | None = None
+    editOf: Article | None = None
 
     def should_update(self) -> bool:
         if (self.editOf is None):
@@ -28,9 +28,9 @@ class Draft:
             article
         )
 
-    def asArticle(self) -> SimpleArticle:
-        return SimpleArticle(
-            self.label.unsafe_raw_name,
+    def asArticle(self) -> Article:
+        return Article(
+            self.label,
             self.content,
             self.editOf
         )
@@ -44,7 +44,7 @@ class DraftCollection(ABC):
         self.drafts[draft.label.labelId] = draft
         return draft
 
-    def get_draft(self, label: SimpleLabel) -> Draft | None:
+    def get_draft(self, label: Label) -> Draft | None:
         return self.drafts.get(label.labelId, None)
 
     def get_drafts(self) -> Iterator[Draft]:
