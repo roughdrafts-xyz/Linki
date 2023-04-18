@@ -96,10 +96,6 @@ class Label():
 
 @dataclass
 class SimpleLabel(Label):
-    name: str
-    path: List[str]
-    labelId: LabelID
-
     def __init__(self, name: str) -> None:
         super().__init__(name, [])
 
@@ -107,4 +103,4 @@ class SimpleLabel(Label):
 @dataclass
 class PathLabel(Label):
     def __init__(self, path: Path) -> None:
-        super().__init__(path.name)
+        super().__init__(path.name, list(path.parts))
