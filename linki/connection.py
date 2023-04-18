@@ -112,7 +112,7 @@ class ROWebConnection(Connection[VT]):
         if (style not in ['titles', 'articles']):
             raise NotImplementedError
         self.url = f'{url.geturl()}pickles/{style}/'
-        self.len_url = f'{url.geturl()}len/{style}/'
+        self.count_url = f'{url.geturl()}count/{style}/'
         self.style = style
 
     def __setitem__(self, __key: ID, __value: VT) -> None:
@@ -134,5 +134,5 @@ class ROWebConnection(Connection[VT]):
         return pickle.loads(res)
 
     def __len__(self) -> int:
-        res = urlopen(self.len_url).read()
+        res = urlopen(self.count_url).read()
         return res

@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Iterable
 from urllib.parse import ParseResult
 from linki.article import ArticleCollection
 from linki.connection import ROWebConnection, Connection, PathConnection
@@ -48,11 +49,23 @@ class Repository:
 
     def get_item(self, style: str, item_id: ID):
         connection = self.connection.get_style(style)
-        return connection.get(item_id)
         if (connection is None):
             return None
         if (item_id not in connection):
             return None
+        return connection.get(item_id)
+
+    def iter_item(self, style: str) -> Iterable[ID]:
+        connection = self.connection.get_style(style)
+        if (connection is None):
+            return []
+        return connection.keys()
+
+    def get_count(self, style: str):
+        connection = self.connection.get_style(style)
+        if (connection is None):
+            return 0
+        return len(connection.keys())
 
     @property
     def titles(self) -> TitleCollection:
