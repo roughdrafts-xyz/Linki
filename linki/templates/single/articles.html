@@ -33,9 +33,9 @@
             <h1>{{item.label.name}}</h1>
             <p>#{{item.articleId}}</p>
             <nav>
-                <li>bread</li>
-                <li>crumb</li>
-                <li>trail</li>
+                % for crumb in item.label.path:
+                <li>{{item}}</li>
+                % end
             </nav>
         </header>
         <article>

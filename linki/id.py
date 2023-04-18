@@ -43,23 +43,25 @@ class ArticleID(ID):
 
 class LabelID(ID):
     @classmethod
-    def getLabelID(cls, name: str) -> 'LabelID':
-        return cls(sha224(str.encode(name)).hexdigest())
+    def getLabelID(cls, path: List[str]) -> 'LabelID':
+        package = b''.join([str.encode(crumb) for crumb in path])
+        return cls(sha224(package).hexdigest())
 
 
 @dataclass
 class Label():
-    name: str
     path: List[str]
     labelId: LabelID
 
-    def __init__(self, name: str, path: List[str]) -> None:
-        if (not self.is_valid(name)):
+    def __init__(self, path: List[str]) -> None:
+        self.path = [self.as_safe_string(crumb) for crumb in path]
+        if not (all(map(self.is_valid, self.path))):
             raise AttributeError
-        self._label = name
-        self.name = self.as_safe_string(name)
-        self.path = path
-        self.labelId = LabelID.getLabelID(self.name)
+        self.labelId = LabelID.getLabelID(self.path)
+
+    @property
+    def name(self) -> str:
+        return self.path[-1]
 
     @classmethod
     def is_valid(cls, string: str) -> bool:
@@ -74,10 +76,6 @@ class Label():
             (len(safe_str) > 0)
         )
 
-    @ property
-    def unsafe_raw_name(self):
-        return self._label
-
     @ staticmethod
     def as_safe_string(string: str) -> str:
         _str = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", "-", string)
@@ -88,7 +86,7 @@ class Label():
         return _str
 
     def __repr__(self) -> str:
-        return f"Label({self.unsafe_raw_name})"
+        return f"Label({self.path})"
 
     def __hash__(self) -> int:
         return hash(self.labelId)
@@ -97,10 +95,12 @@ class Label():
 @dataclass
 class SimpleLabel(Label):
     def __init__(self, name: str) -> None:
-        super().__init__(name, [])
+        self.unsafe_raw_name = name
+        super().__init__([name])
 
 
 @dataclass
 class PathLabel(Label):
     def __init__(self, path: Path) -> None:
-        super().__init__(path.name, list(path.parts))
+        self.path_obj = path
+        super().__init__(list(path.parts))
