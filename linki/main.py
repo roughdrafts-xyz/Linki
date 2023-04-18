@@ -90,7 +90,7 @@ def serve(
 ):
     try:
         if (web):
-            pandoc = pypandoc.get_pandoc_path()
+            pypandoc.get_pandoc_path()
         repo = FileRepository.fromPath(location)
         viewer = WebView(repo, WebViewConf(
             sub=subscribe,
@@ -102,7 +102,7 @@ def serve(
         viewer.run(host, port)
     except OSError:
         typer.echo(
-            "Pandoc not found. Run with --no-web or install pandoc with linki install-pandoc.")
+            "Pandoc not found. Run using linki serve --no-web or install pandoc with linki install-pandoc.")
         typer.Exit()
 
 
