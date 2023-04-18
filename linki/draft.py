@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
 from typing import Iterator
-from linki.article import Article, SimpleArticle
+from linki.article import Article
 from linki.connection import Connection
 
 from linki.id import Label, SimpleLabel
@@ -21,7 +21,7 @@ class Draft:
         return label_different or content_different
 
     @classmethod
-    def fromArticle(cls, article: SimpleArticle) -> 'Draft':
+    def fromArticle(cls, article: Article) -> 'Draft':
         return cls(
             article.label,
             article.content,

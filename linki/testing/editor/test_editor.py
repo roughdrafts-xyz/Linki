@@ -3,7 +3,7 @@ from typing import Dict, List
 from unittest import TestCase
 
 from hypothesis import given
-from linki.article import SimpleArticle
+from linki.article import Article
 from linki.connection import Connection, MemoryConnection
 from linki.draft import Draft
 
@@ -120,7 +120,7 @@ def test_does_publish_some_drafts(some_drafts: List[Draft]):
 
 
 @given(an_article())
-def test_does_copy(update: SimpleArticle):
+def test_does_copy(update: Article):
     r_repo = MemoryRepository()
     r_articles = r_repo.articles
     r_titles = r_repo.titles
