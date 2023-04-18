@@ -1,6 +1,7 @@
+from pathlib import Path
 import pickle
-from linki.editor import Copier, Editor, FileCopier
-from linki.id import ID, Label, LabelID
+from linki.editor import Copier, Editor
+from linki.id import Label, LabelID
 from linki.repository import Repository
 from dataclasses import asdict, dataclass
 import bottle
@@ -17,6 +18,8 @@ class WebViewConf:
 
 
 class WebView:
+    styles = ['titles', 'articles']
+
     def __init__(self, repo: Repository, conf: WebViewConf) -> None:
         self.app = bottle.Bottle()
         self.repo = repo
@@ -30,6 +33,21 @@ class WebView:
                        'GET', self.handle)
         if (self.conf.sub):
             self.app.route('/announce', 'POST', self.handle_announce)
+        if (self.conf.web):
+            self.single_templates = dict()
+            self.iter_templates = dict()
+            single_lookup = [
+                Path(__file__).resolve().joinpath('templates', 'single')]
+            iter_lookup = [
+                Path(__file__).resolve().joinpath('templates', 'iter')]
+            for style in self.styles:
+                self.single_templates[style] = bottle.SimpleTemplate(
+                    name=style, lookup=single_lookup)
+                self.single_templates[style].prepare()
+
+                self.iter_templates[style] = bottle.SimpleTemplate(
+                    name=style, lookup=iter_lookup)
+                self.iter_templates[style].prepare()
 
     def handle_web(self, style: str, label: str):
         item = self.handle_single('api', style, label)
@@ -55,7 +73,7 @@ class WebView:
                     raise unsupported
                 raise NotImplementedError
 
-        if style not in ['titles', 'articles']:
+        if style not in self.styles:
             raise bottle.HTTPError(404, f'style not found: {style}')
 
         if (label is None):
@@ -87,9 +105,11 @@ class WebView:
                 return pickle.dumps(item)
             case 'api':
                 return asdict(item)
+            case 'w':
+                return self.single_templates[style].render(item)
 
     def handle_iter(self, output: str, style: str):
-        if style not in ['titles', 'articles']:
+        if style not in self.styles:
             raise bottle.HTTPError(404, f'style not found: {style}')
         iter_item = self.repo.iter_item(style)
         match output:
@@ -99,6 +119,8 @@ class WebView:
                 return {style: list(iter_item)}
             case 'count':
                 return f"{self.repo.get_count(style)}"
+            case 'w':
+                return self.iter_templates[style].render(iter_item)
 
     def handle_announce(self):
         url = bottle.request.forms.get('url')  # type: ignore

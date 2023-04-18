@@ -143,7 +143,6 @@ def contributions(
 def announce(
     location: Path = typer.Argument(Path.cwd()),
 ):
-    # add subscribers to announcement list or ping subscribers
     repo = FileRepository.fromPath(location)
     outbox = Outbox(repo)
     update_count = outbox.send_updates()
