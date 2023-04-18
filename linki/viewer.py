@@ -38,19 +38,15 @@ class WebView:
         if (self.conf.web):
             self.single_templates = dict()
             self.iter_templates = dict()
-            single_lookup = [
-                Path(__file__).resolve().joinpath('..', 'templates', 'single')]
-            iter_lookup = [
-                Path(__file__).resolve().joinpath('..', 'templates', 'iter')]
-            for style in self.styles:
-                style_name = f"{style}.html"
-                self.single_templates[style] = bottle.SimpleTemplate(
-                    name=style_name, lookup=single_lookup)
-                self.single_templates[style].prepare()
+            lookup = [
+                Path(__file__).resolve().joinpath('..', 'templates')]
+            self.one_tmpl = bottle.SimpleTemplate(
+                name='one.html', lookup=lookup)
+            self.many_tmpl = bottle.SimpleTemplate(
+                name='many.html', lookup=lookup)
 
-                self.iter_templates[style] = bottle.SimpleTemplate(
-                    name=style_name, lookup=iter_lookup)
-                self.iter_templates[style].prepare()
+            self.one_tmpl.prepare()
+            self.many_tmpl.prepare()
 
     def handle(self, output: str, style: str, label: str | None = None):
         unsupported = bottle.HTTPError(400, f'{output} not supported.')
@@ -100,9 +96,11 @@ class WebView:
             case 'api':
                 return asdict(item)
             case 'w':
+                if (style == 'titles'):
+                    item = item.article
                 item.content = pypandoc.convert_text(
                     item.content, format='markdown', to='html')
-                return self.single_templates[style].render({'item': item})
+                return self.one_tmpl.render({'item': item})
 
     def handle_iter(self, output: str, style: str):
         if style not in self.styles:
@@ -116,7 +114,7 @@ class WebView:
             case 'count':
                 return f"{self.repo.get_count(style)}"
             case 'w':
-                return self.iter_templates[style].render({'items': iter_item})
+                return self.many_tmpl.render({'items': iter_item})
 
     def handle_announce(self):
         url = bottle.request.forms.get('url')  # type: ignore
