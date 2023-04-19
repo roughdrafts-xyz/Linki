@@ -29,6 +29,7 @@ class Editor():
             count += 1
             article = self.repo.articles.merge_article(draft.asArticle())
             self.repo.titles.set_title(article)
+            self.repo.drafts.clear_draft(draft.label)
         return count
 
     def copy_articles(self, articles: ArticleCollection):
