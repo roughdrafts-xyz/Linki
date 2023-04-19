@@ -24,16 +24,14 @@ class Editor():
             if isClear:
                 self.repo.titles.clear_title(title.label)
 
-        count = 0
-        to_clear = []
+        published = []
         for draft in self.get_updates():
-            count += 1
             article = self.repo.articles.merge_article(draft.asArticle())
             self.repo.titles.set_title(article)
-            to_clear.append(draft.label)
-        for label in to_clear:
+            published.append(draft.label)
+        for label in published:
             self.repo.drafts.clear_draft(label)
-        return count
+        return len(published)
 
     def copy_articles(self, articles: ArticleCollection):
         count = 0
