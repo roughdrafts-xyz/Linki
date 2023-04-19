@@ -32,3 +32,4 @@ class Inbox():
                 if (update.editOf is not None):
                     size -= len(update.editOf.content)
                 yield InboxRow(count, sub, update.label, size)
+                count += 1

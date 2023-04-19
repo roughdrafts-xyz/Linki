@@ -1,6 +1,6 @@
 from pathlib import Path
 from typer.testing import CliRunner
-from linki.main import app, copy as copy_cmd, publish
+from linki.main import app
 
 runner = CliRunner()
 
