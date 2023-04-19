@@ -55,9 +55,10 @@ def test_does_publish_new_draft(draft: Draft):
 
     repo.drafts.set_draft(draft)
 
+    draft_count = [draft.label for draft in repo.drafts.get_drafts()]
+
     editor.publish_drafts()
 
-    draft_count = [draft.label for draft in repo.drafts.get_drafts()]
     title_count = [title.label for title in repo.titles.get_titles()]
 
     test = TestCase()
@@ -71,10 +72,11 @@ def test_does_publish_draft(draft: Draft):
 
     repo.drafts.set_draft(draft)
 
+    update_count = [draft.label for draft in editor.get_updates()]
+
     editor.publish_drafts()
 
     title_count = [title.label for title in repo.titles.get_titles()]
-    update_count = [draft.label for draft in editor.get_updates()]
 
     test = TestCase()
     test.assertCountEqual(title_count, update_count)
@@ -89,11 +91,12 @@ def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
     for draft in some_drafts:
         repo.drafts.set_draft(draft)
 
+    draft_count = [draft.label for draft in repo.drafts.get_drafts()]
+    update_count = [draft.label for draft in editor.get_updates()]
+
     editor.publish_drafts()
 
-    draft_count = [draft.label for draft in repo.drafts.get_drafts()]
     title_count = [title.label for title in repo.titles.get_titles()]
-    update_count = [draft.label for draft in editor.get_updates()]
 
     test = TestCase()
     test.assertCountEqual(title_count, draft_count)
@@ -110,9 +113,10 @@ def test_does_publish_some_drafts(some_drafts: List[Draft]):
     for draft in some_drafts:
         repo.drafts.set_draft(draft)
 
+    update_count = [draft.label for draft in editor.get_updates()]
+
     editor.publish_drafts()
 
-    update_count = [draft.label for draft in editor.get_updates()]
     title_count = [title.label for title in repo.titles.get_titles()]
 
     test = TestCase()

@@ -56,3 +56,6 @@ class DraftCollection(ABC):
             del self.drafts[label.labelId]
             return True
         return False
+
+    def clear_drafts(self) -> None:
+        self.drafts.clear()
