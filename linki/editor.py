@@ -1,4 +1,3 @@
-from collections import Counter
 from glob import iglob
 from pathlib import Path
 from typing import Iterable

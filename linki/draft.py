@@ -1,5 +1,5 @@
 from abc import ABC
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Iterator
 from linki.article import Article
 from linki.connection import Connection

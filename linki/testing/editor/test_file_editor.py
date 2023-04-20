@@ -1,6 +1,5 @@
 
 from contextlib import contextmanager
-from dataclasses import asdict
 from pathlib import Path
 import shutil
 from tempfile import TemporaryDirectory
@@ -16,7 +15,7 @@ from linki.editor import FileEditor
 from linki.repository import Repository
 from linki.testing.strategies.article import an_article
 from linki.id import Label, PathLabel, SimpleLabel
-from linki.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
+from linki.testing.strategies.draft import a_draft, some_drafts, some_new_drafts
 from linki.title import Title, TitleCollection
 
 test = TestCase()

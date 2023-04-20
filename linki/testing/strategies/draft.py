@@ -1,6 +1,6 @@
-from hypothesis import assume, strategies
+from hypothesis import strategies
 from linki.draft import Draft
-from linki.testing.strategies.article import an_article, some_content
+from linki.testing.strategies.article import an_article
 
 
 @strategies.composite

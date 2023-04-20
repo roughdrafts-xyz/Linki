@@ -1,9 +1,8 @@
 
-from dataclasses import asdict
 from typing import Dict, List
 from unittest import TestCase
 
-from hypothesis import assume, given
+from hypothesis import given
 from linki.article import Article
 from linki.connection import Connection, MemoryConnection
 from linki.draft import Draft
