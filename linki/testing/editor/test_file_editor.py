@@ -71,23 +71,6 @@ def test_does_unload_titles(update: Article):
         )
 
 
-@given(a_draft())
-def test_does_publish_draft(draft: Draft):
-    with get_file_editor() as editor:
-        repo = editor.repo
-
-        repo.drafts.set_draft(draft)
-
-        update_count = [draft.label for draft in editor.get_updates()]
-
-        editor.publish_drafts()
-
-        title_count = [title.label for title in repo.titles.get_titles()]
-
-        test = TestCase()
-        test.assertCountEqual(title_count, update_count)
-
-
 @given(some_new_drafts(2))
 def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
     some_drafts = list(some_drafts)
@@ -139,5 +122,33 @@ def test_does_publish_changed_drafts(article: Article, draft: Draft):
         draft.editOf = article
         repo.drafts.set_draft(draft)
 
+        assume(draft.should_update())
+        assert editor.publish_drafts() == 1
+
+
+def do_load_draft(editor: FileEditor, draft: Draft):
+    p = editor.repo.path.joinpath(*draft.label.parents)
+    p.mkdir(exist_ok=True, parents=True)
+    p.joinpath(draft.label.name).write_text(draft.content)
+
+    editor.load_drafts()
+
+
+@given(a_draft())
+def test_does_publish_draft(draft: Draft):
+    with get_file_editor() as editor:
+        assume(draft.should_update())
+        do_load_draft(editor, draft)
+        assert editor.publish_drafts() == 1
+
+
+@given(a_draft())
+def test_does_publish_changed_draft_path(draft: Draft):
+    with get_file_editor() as editor:
+        draft.label.path = ['initial'] + draft.label.path
+        do_load_draft(editor, draft)
+        assert editor.publish_drafts() == 1
+
+        draft.label.path[0] = 'changed'
         assume(draft.should_update())
         assert editor.publish_drafts() == 1
