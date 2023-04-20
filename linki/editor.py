@@ -19,11 +19,6 @@ class Editor():
                 yield _draft
 
     def publish_drafts(self) -> int:
-        for title in self.repo.titles.get_titles():
-            isClear = self.repo.drafts.get_draft(title.label) is None
-            if isClear:
-                self.repo.titles.clear_title(title.label)
-
         published = []
         for draft in self.get_updates():
             article = self.repo.articles.merge_article(draft.asArticle())
@@ -65,12 +60,15 @@ class FileEditor(Editor):
         repo = FileRepository(path.as_uri())
         return cls(repo)
 
+    def iterdir(self):
+        return map(Path, iglob(f'{self.repo.path}/**', recursive=True))
+
     def iterfiles(self):
         # Path.rglob doesn't handle avoiding hidden folders well.
         #
         # Using the more correct root_dir=self.path breaks for a
         # reason I don't care to research at the moment.
-        glob = map(Path, iglob(f'{self.repo.path}/**', recursive=True))
+        glob = self.iterdir()
         return (_glob.resolve() for _glob in glob if _glob.is_file())
 
     def get_edit_of(self, file: Path):

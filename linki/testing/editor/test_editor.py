@@ -2,7 +2,7 @@
 from typing import Dict, List
 from unittest import TestCase
 
-from hypothesis import given
+from hypothesis import assume, given
 from linki.article import Article
 from linki.connection import Connection, MemoryConnection
 from linki.draft import Draft
@@ -145,3 +145,19 @@ def test_does_copy(update: Article):
 
     test.assertCountEqual(r_titles.get_titles(),
                           repo.titles.get_titles())
+
+
+@given(a_draft())
+def test_does_publish_changed_draft_path(draft: Draft):
+    repo = MemoryRepository()
+    editor = Editor(repo)
+
+    draft.label.path = ['initial'] + draft.label.path
+    assume(draft.should_update())
+    repo.drafts.set_draft(draft)
+    assert editor.publish_drafts() == 1
+
+    draft.label.path[0] = 'changed'
+    assume(draft.should_update())
+    repo.drafts.set_draft(draft)
+    assert editor.publish_drafts() == 1

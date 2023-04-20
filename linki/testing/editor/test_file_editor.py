@@ -1,6 +1,8 @@
 
 from contextlib import contextmanager
+from dataclasses import asdict
 from pathlib import Path
+import shutil
 from tempfile import TemporaryDirectory
 from typing import List
 from unittest import TestCase
@@ -127,6 +129,12 @@ def test_does_publish_changed_drafts(article: Article, draft: Draft):
 
 
 def do_load_draft(editor: FileEditor, draft: Draft):
+    for file in editor.repo.path.iterdir():
+        if (file.is_file()):
+            file.unlink()
+        if (file.is_dir() and file.name != '.linki'):
+            shutil.rmtree(file)
+
     p = editor.repo.path.joinpath(*draft.label.parents)
     p.mkdir(exist_ok=True, parents=True)
     p.joinpath(draft.label.name).write_text(draft.content)
@@ -146,9 +154,11 @@ def test_does_publish_draft(draft: Draft):
 def test_does_publish_changed_draft_path(draft: Draft):
     with get_file_editor() as editor:
         draft.label.path = ['initial'] + draft.label.path
+        assume(draft.should_update())
         do_load_draft(editor, draft)
         assert editor.publish_drafts() == 1
 
         draft.label.path[0] = 'changed'
         assume(draft.should_update())
+        do_load_draft(editor, draft)
         assert editor.publish_drafts() == 1
