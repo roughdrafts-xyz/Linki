@@ -1,10 +1,11 @@
+from collections import Counter
 from glob import iglob
 from pathlib import Path
 from typing import Iterable
 from linki.article import ArticleCollection
 from linki.draft import Draft
 from linki.repository import FileRepository, Repository
-from linki.title import TitleCollection
+from linki.title import Redirect, TitleCollection
 from linki.id import PathLabel
 
 
@@ -18,12 +19,26 @@ class Editor():
             if (_draft.should_update()):
                 yield _draft
 
+    def merge_title(self, draft):
+        self.repo.articles.merge_article(draft)
+        self.repo.titles.set_title(draft)
+        return draft
+
     def publish_drafts(self) -> int:
         published = []
+        changed = []
         for draft in self.get_updates():
-            article = self.repo.articles.merge_article(draft.asArticle())
-            self.repo.titles.set_title(article)
+            article = self.merge_title(draft)
             published.append(draft.label)
+            if (article.editOf is not None):
+                if (article.label != article.editOf.label):
+                    redirect = Redirect(
+                        article.editOf,
+                        article.label
+                    )
+                    article = self.merge_title(redirect)
+                    changed.append(redirect.label)
+
         for label in published:
             self.repo.drafts.clear_draft(label)
         return len(published)
@@ -34,17 +49,19 @@ class Editor():
             if (self.repo.articles.has_article(article_id)):
                 continue
             article = articles.get_article(article_id)
+            if (article is None):
+                continue
             self.repo.articles.merge_article(article)
             count += 1
         return count
 
     def copy_titles(self, titles: TitleCollection):
         count = 0
-        for title in titles.get_titles():
-            _title = self.repo.titles.get_title(title.label)
-            if (_title == title):
+        for n_title in titles.get_titles():
+            o_title = self.repo.titles.get_title(n_title.label)
+            if (o_title == n_title):
                 continue
-            self.repo.titles.set_title(title)
+            self.repo.titles.set_title(n_title)
             count += 1
         return count
 
@@ -96,6 +113,13 @@ class FileEditor(Editor):
 
     def unload_titles(self):
         for title in self.repo.titles.get_titles():
+            if (title.editOf is not None):
+                prev = self.repo.path.joinpath(*title.editOf.label.path)
+                prev.unlink()
+                for crumb in prev.parents:
+                    if (crumb == self.repo.path):
+                        break
+                    crumb.rmdir()
             unload = self.repo.path.joinpath(*title.label.parents)
             unload.mkdir(parents=True, exist_ok=True)
             unload.joinpath(title.label.name).write_text(title.content)

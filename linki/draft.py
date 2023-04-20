@@ -1,5 +1,5 @@
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Iterator
 from linki.article import Article
 from linki.connection import Connection
@@ -8,7 +8,7 @@ from linki.id import Label
 
 
 @dataclass
-class Draft:
+class Draft(Article):
     label: Label
     content: str
     editOf: Article | None = None
@@ -25,14 +25,7 @@ class Draft:
         return cls(
             article.label,
             article.content,
-            article
-        )
-
-    def asArticle(self) -> Article:
-        return Article(
-            self.label,
-            self.content,
-            self.editOf
+            article.editOf
         )
 
 

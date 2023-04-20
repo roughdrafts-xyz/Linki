@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Iterator
 from typing_extensions import Self
+from linki.connection import Connection
 
 from linki.id import ArticleID, Label, SimpleLabel
 
@@ -29,16 +30,14 @@ class SimpleArticle(Article):
 
 
 class ArticleCollection():
-    def __init__(self, connection) -> None:
+    def __init__(self, connection: Connection[Article]) -> None:
         self.articles = connection
 
-    def merge_article(self, article: Article | None) -> Article | None:
-        if (article is None):
-            return None
+    def merge_article(self, article: Article) -> Article:
         self.articles[article.articleId] = article
         return article
 
-    def get_article(self, articleId: ArticleID) -> SimpleArticle | None:
+    def get_article(self, articleId: ArticleID) -> Article | None:
         if (self.has_article(articleId)):
             return self.articles[articleId]
         return None
