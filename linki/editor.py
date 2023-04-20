@@ -41,6 +41,8 @@ class Editor():
 
         for label in published:
             self.repo.drafts.clear_draft(label)
+        for label in changed:
+            self.repo.drafts.clear_draft(label)
         return len(published)
 
     def copy_articles(self, articles: ArticleCollection):

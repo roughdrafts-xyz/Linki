@@ -99,6 +99,8 @@ def test_does_publish_changed_drafts(article: Article, draft: Draft):
 
         assume(draft.should_update())
         assert editor.publish_drafts() == 1
+        assert draft.label in [
+            title.label for title in editor.repo.titles.get_titles()]
 
 
 @given(a_draft())
@@ -107,18 +109,30 @@ def test_does_publish_draft(draft: Draft):
         assume(draft.should_update())
         do_load_draft(editor, draft)
         assert editor.publish_drafts() == 1
+        assert draft.label in [
+            title.label for title in editor.repo.titles.get_titles()]
 
 
 @given(a_draft())
 def test_does_publish_changed_draft_path(draft: Draft):
     with get_file_editor() as editor:
         draft.label.path = ['initial'] + draft.label.path
+        init = draft.label
         do_load_draft(editor, draft)
         assert editor.publish_drafts() == 1
+        test.assertCountEqual(
+            [title.label for title in editor.repo.titles.get_titles()],
+            [init]
+        )
 
         draft.label.path[0] = 'changed'
+        changed = draft.label
         do_load_draft(editor, draft)
         assert editor.publish_drafts() == 1
+        test.assertCountEqual(
+            [title.label for title in editor.repo.titles.get_titles()],
+            [init, changed]
+        )
 
 
 @given(some_new_drafts(2))
@@ -126,7 +140,10 @@ def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
     some_drafts = list(some_drafts)
     with get_file_editor() as editor:
         do_load_drafts(editor, some_drafts)
-        assert editor.publish_drafts() == 2
+        assert 0 < editor.publish_drafts() <= 2
+        titles = [title.label for title in editor.repo.titles.get_titles()]
+        for draft in some_drafts:
+            assert draft.label in titles
 
 
 @given(some_drafts(2))
@@ -134,4 +151,7 @@ def test_does_publish_some_drafts(some_drafts: List[Draft]):
     some_drafts = list(some_drafts)
     with get_file_editor() as editor:
         do_load_drafts(editor, some_drafts)
-        assert editor.publish_drafts() == 2
+        assert 0 < editor.publish_drafts() <= 2
+        titles = [title.label for title in editor.repo.titles.get_titles()]
+        for draft in some_drafts:
+            assert draft.label in titles

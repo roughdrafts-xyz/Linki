@@ -12,6 +12,8 @@ from linki.repository import Repository, RepositoryConnection
 from linki.testing.strategies.article import an_article
 from linki.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
 
+test = TestCase()
+
 
 class MemoryRepoConnection(RepositoryConnection):
     def __init__(self) -> None:
@@ -40,11 +42,7 @@ def test_get_updates(draft: Draft):
 
     repo.drafts.set_draft(draft)
     draft_count = list(editor.get_updates())
-    print(draft)
-    print(draft_count)
-    assert len(draft_count) > 0
-
-    test = TestCase()
+    assert len(draft_count) == 1
     test.assertCountEqual([draft], draft_count)
 
 
@@ -54,15 +52,11 @@ def test_does_publish_new_draft(draft: Draft):
     editor = Editor(repo)
 
     repo.drafts.set_draft(draft)
-
-    draft_count = [draft.label for draft in repo.drafts.get_drafts()]
-
-    editor.publish_drafts()
-
-    title_count = [title.label for title in repo.titles.get_titles()]
-
-    test = TestCase()
-    test.assertCountEqual(title_count, draft_count)
+    assert editor.publish_drafts() == 1
+    test.assertCountEqual(
+        [title.label for title in repo.titles.get_titles()],
+        [draft.label]
+    )
 
 
 @given(a_draft())
@@ -71,15 +65,9 @@ def test_does_publish_draft(draft: Draft):
     editor = Editor(repo)
 
     repo.drafts.set_draft(draft)
-
-    update_count = [draft.label for draft in editor.get_updates()]
-
-    editor.publish_drafts()
-
-    title_count = [title.label for title in repo.titles.get_titles()]
-
-    test = TestCase()
-    test.assertCountEqual(title_count, update_count)
+    assert editor.publish_drafts() == 1
+    assert draft.label in [title.label for title in repo.titles.get_titles()]
+    # editOf can create two titles instead of just one. (New Title and Redirect)
 
 
 @given(some_new_drafts(2))
@@ -91,17 +79,11 @@ def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
     for draft in some_drafts:
         repo.drafts.set_draft(draft)
 
-    draft_count = [draft.label for draft in repo.drafts.get_drafts()]
-    update_count = [draft.label for draft in editor.get_updates()]
-
-    editor.publish_drafts()
-
-    title_count = [title.label for title in repo.titles.get_titles()]
-
-    test = TestCase()
-    test.assertCountEqual(title_count, draft_count)
-    test.assertCountEqual(title_count, update_count)
-    test.assertCountEqual(draft_count, update_count)
+    updates = editor.publish_drafts()
+    assert 0 < updates <= 2
+    titles = [title.label for title in repo.titles.get_titles()]
+    for draft in some_drafts:
+        assert draft.label in titles
 
 
 @given(some_drafts(2))
@@ -112,39 +94,29 @@ def test_does_publish_some_drafts(some_drafts: List[Draft]):
 
     for draft in some_drafts:
         repo.drafts.set_draft(draft)
-
-    update_count = [draft.label for draft in editor.get_updates()]
-
-    editor.publish_drafts()
-
-    title_count = [title.label for title in repo.titles.get_titles()]
-
-    test = TestCase()
-    test.assertCountEqual(title_count, update_count)
+    updates = editor.publish_drafts()
+    assert 0 < updates <= 2
+    titles = [title.label for title in repo.titles.get_titles()]
+    for draft in some_drafts:
+        assert draft.label in titles
 
 
 @given(an_article())
 def test_does_copy(update: Article):
     r_repo = MemoryRepository()
-    r_articles = r_repo.articles
-    r_titles = r_repo.titles
+    l_repo = MemoryRepository()
+    l_editor = Editor(l_repo)
 
-    repo = MemoryRepository()
-    editor = Editor(repo)
+    article = r_repo.articles.merge_article(update)
+    r_repo.titles.set_title(article)
 
-    article = r_articles.merge_article(update)
-    r_titles.set_title(article)
+    assert l_editor.copy_articles(r_repo.articles) == 1
+    assert l_editor.copy_titles(r_repo.titles) == 1
 
-    editor.copy_articles(r_articles)
-    test = TestCase()
-
-    test.assertCountEqual(r_articles.get_articles(),
-                          repo.articles.get_articles())
-
-    editor.copy_titles(r_titles)
-
-    test.assertCountEqual(r_titles.get_titles(),
-                          repo.titles.get_titles())
+    test.assertCountEqual(r_repo.articles.get_articles(),
+                          l_repo.articles.get_articles())
+    test.assertCountEqual(r_repo.titles.get_titles(),
+                          l_repo.titles.get_titles())
 
 
 @given(a_draft())
@@ -153,11 +125,21 @@ def test_does_publish_changed_draft_path(draft: Draft):
     editor = Editor(repo)
 
     draft.label.path = ['initial'] + draft.label.path
+    init = draft.label
     assume(draft.should_update())
     repo.drafts.set_draft(draft)
     assert editor.publish_drafts() == 1
+    test.assertCountEqual(
+        [title.label for title in repo.titles.get_titles()],
+        [init]
+    )
 
     draft.label.path[0] = 'changed'
+    changed = draft.label
     assume(draft.should_update())
     repo.drafts.set_draft(draft)
     assert editor.publish_drafts() == 1
+    test.assertCountEqual(
+        [title.label for title in repo.titles.get_titles()],
+        [init, changed]
+    )
