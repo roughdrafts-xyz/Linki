@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 from typing import List
 from unittest import TestCase
 
-from hypothesis import given
+from hypothesis import assume, given
 from linki.article import Article
 from linki.draft import Draft
 
@@ -139,4 +139,5 @@ def test_does_publish_changed_drafts(article: Article, draft: Draft):
         draft.editOf = article
         repo.drafts.set_draft(draft)
 
+        assume(draft.should_update())
         assert editor.publish_drafts() == 1
