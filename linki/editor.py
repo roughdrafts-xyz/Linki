@@ -122,6 +122,7 @@ class FileEditor(Editor):
                     if (crumb == self.repo.path):
                         break
                     crumb.rmdir()
+                continue
             unload = self.repo.path.joinpath(*title.label.parents)
             unload.mkdir(parents=True, exist_ok=True)
             unload.joinpath(title.label.name).write_text(title.content)
