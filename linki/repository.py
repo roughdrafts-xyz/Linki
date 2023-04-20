@@ -104,8 +104,8 @@ class FileRepository(Repository):
             raise ValueError
 
     @property
-    def path(self) -> str:
-        return self.connection.url.path
+    def path(self) -> Path:
+        return Path(self.connection.url.path)
 
     @classmethod
     def fromPath(cls, path: str | Path):

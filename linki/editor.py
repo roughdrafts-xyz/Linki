@@ -73,22 +73,31 @@ class FileEditor(Editor):
         glob = map(Path, iglob(f'{self.repo.path}/**', recursive=True))
         return (_glob.resolve() for _glob in glob if _glob.is_file())
 
+    def get_edit_of(self, file: Path):
+        file = file.relative_to(self.repo.path)
+        for title in self.repo.titles.get_titles():
+            if (
+                file.read_text() == title.content or
+                file.parts == title.label.path
+            ):
+                return title
+        return None
+
     def load_drafts(self):
         for file in self.iterfiles():
-            rel_file = file.relative_to(self.repo.path)
-            title = PathLabel(rel_file)
-            editOf = self.repo.titles.get_title(title)
+            editOf = self.get_edit_of(file)
+            label = PathLabel(file.relative_to(self.repo.path))
             _draft = Draft(
-                title,
+                label,
                 file.read_text(),
                 editOf
             )
+
             self.repo.drafts.set_draft(_draft)
 
     def unload_titles(self):
-        path = Path(self.repo.path)
         for title in self.repo.titles.get_titles():
-            unload = path.joinpath(*title.label.parents)
+            unload = self.repo.path.joinpath(*title.label.parents)
             unload.mkdir(parents=True, exist_ok=True)
             unload.joinpath(title.label.name).write_text(title.content)
 

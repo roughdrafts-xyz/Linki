@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest import TestCase
 
-from linki.main import app
+from linki.main import app, copy as copyCMD
 from typer.testing import CliRunner
 
 runner = CliRunner()
@@ -37,7 +37,7 @@ def test_copy_changed_paths(tmp_path: Path):
     assert res.stdout == f"Published {1} drafts.\n"
 
     copy = tmp_path.joinpath('copy').resolve()
-    # TODO Initial Copy
+    # Initial Copy
     runner.invoke(app, ["copy", str(source), str(copy)])
 
     s_folder = s_folder.rename(source / 'folder2').resolve()
@@ -46,8 +46,9 @@ def test_copy_changed_paths(tmp_path: Path):
 
     assert res.stdout == f"Published {1} drafts.\n"
 
-    # TODO Update Copy
-    runner.invoke(app, ["copy", str(source), str(copy)])
+    # Update Copy
+    # runner.invoke(app, ["copy", str(source), str(copy)])
+    copyCMD(str(source), copy)
 
     test = TestCase()
     s_files = [f.relative_to(source)

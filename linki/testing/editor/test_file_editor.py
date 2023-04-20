@@ -2,15 +2,18 @@
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import List
 from unittest import TestCase
 
 from hypothesis import given
 from linki.article import Article
+from linki.draft import Draft
 
 from linki.editor import FileEditor
 from linki.repository import Repository
 from linki.testing.strategies.article import an_article
 from linki.id import PathLabel
+from linki.testing.strategies.draft import a_draft, some_drafts, some_new_drafts
 
 
 @contextmanager
@@ -66,3 +69,74 @@ def test_does_unload_titles(update: Article):
             [title.label.name for title in l_editor.repo.titles.get_titles()],
             [file.name for file in l_editor.iterfiles()]
         )
+
+
+@given(a_draft())
+def test_does_publish_draft(draft: Draft):
+    with get_file_editor() as editor:
+        repo = editor.repo
+
+        repo.drafts.set_draft(draft)
+
+        update_count = [draft.label for draft in editor.get_updates()]
+
+        editor.publish_drafts()
+
+        title_count = [title.label for title in repo.titles.get_titles()]
+
+        test = TestCase()
+        test.assertCountEqual(title_count, update_count)
+
+
+@given(some_new_drafts(2))
+def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
+    some_drafts = list(some_drafts)
+    with get_file_editor() as editor:
+        repo = editor.repo
+
+        for draft in some_drafts:
+            repo.drafts.set_draft(draft)
+
+        draft_count = [draft.label for draft in repo.drafts.get_drafts()]
+        update_count = [draft.label for draft in editor.get_updates()]
+
+        editor.publish_drafts()
+
+        title_count = [title.label for title in repo.titles.get_titles()]
+
+        test = TestCase()
+        test.assertCountEqual(title_count, draft_count)
+        test.assertCountEqual(title_count, update_count)
+        test.assertCountEqual(draft_count, update_count)
+
+
+@given(some_drafts(2))
+def test_does_publish_some_drafts(some_drafts: List[Draft]):
+    some_drafts = list(some_drafts)
+    with get_file_editor() as editor:
+        repo = editor.repo
+
+        for draft in some_drafts:
+            repo.drafts.set_draft(draft)
+
+        update_count = [draft.label for draft in editor.get_updates()]
+
+        editor.publish_drafts()
+
+        title_count = [title.label for title in repo.titles.get_titles()]
+
+        test = TestCase()
+        test.assertCountEqual(title_count, update_count)
+
+
+@given(an_article(), a_draft())
+def test_does_publish_changed_drafts(article: Article, draft: Draft):
+    with get_file_editor() as editor:
+        repo = editor.repo
+
+        repo.articles.merge_article(article)
+        repo.titles.set_title(article)
+        draft.editOf = article
+        repo.drafts.set_draft(draft)
+
+        assert editor.publish_drafts() == 1
