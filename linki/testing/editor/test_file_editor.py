@@ -18,6 +18,21 @@ from linki.id import PathLabel
 from linki.testing.strategies.draft import a_draft, some_drafts, some_new_drafts
 
 
+def do_load_draft(editor: FileEditor, draft: Draft):
+    assume(draft.should_update())
+    for file in editor.repo.path.iterdir():
+        if (file.is_file()):
+            file.unlink()
+        if (file.is_dir() and file.name != '.linki'):
+            shutil.rmtree(file)
+
+    p = editor.repo.path.joinpath(*draft.label.parents)
+    p.mkdir(exist_ok=True, parents=True)
+    p.joinpath(draft.label.name).write_text(draft.content)
+
+    editor.load_drafts()
+
+
 @contextmanager
 def get_file_editor():
     with TemporaryDirectory() as _dir:
@@ -38,29 +53,25 @@ def test_loads_drafts():
             PathLabel(trunc_path)) is not None
 
 
-@given(an_article())
-def test_does_copy(update: Article):
+@given(a_draft())
+def test_does_copy(update: Draft):
     with get_file_editor() as r_editor, get_file_editor() as l_editor:
-        article = r_editor.repo.articles.merge_article(update)
-        r_editor.repo.titles.set_title(article)
+        do_load_draft(r_editor, update)
 
-        l_editor.copy_articles(r_editor.repo.articles)
+        assert l_editor.copy_articles(r_editor.repo.articles) > 0
+        assert l_editor.copy_titles(r_editor.repo.titles) > 0
         test = TestCase()
 
         test.assertCountEqual(r_editor.repo.articles.get_articles(),
                               l_editor.repo.articles.get_articles())
-
-        l_editor.copy_titles(r_editor.repo.titles)
-
         test.assertCountEqual(r_editor.repo.titles.get_titles(),
                               l_editor.repo.titles.get_titles())
 
 
-@given(an_article())
-def test_does_unload_titles(update: Article):
+@given(a_draft())
+def test_does_unload_titles(update: Draft):
     with get_file_editor() as r_editor, get_file_editor() as l_editor:
-        article = r_editor.repo.articles.merge_article(update)
-        r_editor.repo.titles.set_title(article)
+        do_load_draft(r_editor, update)
 
         l_editor.copy_articles(r_editor.repo.articles)
         l_editor.copy_titles(r_editor.repo.titles)
@@ -68,7 +79,7 @@ def test_does_unload_titles(update: Article):
         l_editor.unload_titles()
         test = TestCase()
         test.assertCountEqual(
-            [title.label.name for title in l_editor.repo.titles.get_titles()],
+            [file.name for file in r_editor.iterfiles()],
             [file.name for file in l_editor.iterfiles()]
         )
 
@@ -128,20 +139,6 @@ def test_does_publish_changed_drafts(article: Article, draft: Draft):
         assert editor.publish_drafts() == 1
 
 
-def do_load_draft(editor: FileEditor, draft: Draft):
-    for file in editor.repo.path.iterdir():
-        if (file.is_file()):
-            file.unlink()
-        if (file.is_dir() and file.name != '.linki'):
-            shutil.rmtree(file)
-
-    p = editor.repo.path.joinpath(*draft.label.parents)
-    p.mkdir(exist_ok=True, parents=True)
-    p.joinpath(draft.label.name).write_text(draft.content)
-
-    editor.load_drafts()
-
-
 @given(a_draft())
 def test_does_publish_draft(draft: Draft):
     with get_file_editor() as editor:
@@ -154,11 +151,9 @@ def test_does_publish_draft(draft: Draft):
 def test_does_publish_changed_draft_path(draft: Draft):
     with get_file_editor() as editor:
         draft.label.path = ['initial'] + draft.label.path
-        assume(draft.should_update())
         do_load_draft(editor, draft)
         assert editor.publish_drafts() == 1
 
         draft.label.path[0] = 'changed'
-        assume(draft.should_update())
         do_load_draft(editor, draft)
         assert editor.publish_drafts() == 1
