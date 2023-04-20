@@ -17,20 +17,28 @@ from linki.testing.strategies.article import an_article
 from linki.id import PathLabel
 from linki.testing.strategies.draft import a_draft, some_drafts, some_new_drafts
 
+test = TestCase()
 
-def do_load_draft(editor: FileEditor, draft: Draft):
-    assume(draft.should_update())
+
+def do_load_drafts(editor: FileEditor, drafts: List[Draft]):
     for file in editor.repo.path.iterdir():
         if (file.is_file()):
             file.unlink()
         if (file.is_dir() and file.name != '.linki'):
             shutil.rmtree(file)
 
-    p = editor.repo.path.joinpath(*draft.label.parents)
-    p.mkdir(exist_ok=True, parents=True)
-    p.joinpath(draft.label.name).write_text(draft.content)
+    for draft in drafts:
+        assume(draft.should_update())
+        p = editor.repo.path.joinpath(*draft.label.parents)
+        p.mkdir(exist_ok=True, parents=True)
+        p.joinpath(draft.label.name).write_text(draft.content)
 
     editor.load_drafts()
+
+
+def do_load_draft(editor: FileEditor, draft: Draft):
+    do_load_drafts(editor, [draft])
+    return editor.repo.path.joinpath(*draft.label.path)
 
 
 @contextmanager
@@ -41,16 +49,13 @@ def get_file_editor():
         yield FileEditor.fromPath(_dir)
 
 
-def test_loads_drafts():
+@given(a_draft())
+def test_loads_drafts(draft: Draft):
     with get_file_editor() as editor:
-        editor_path = Path(editor.repo.path)
-        editor_path.joinpath('folder').mkdir()
-        path = editor_path.joinpath('folder', 'hello_world.md')
-        path.write_text('Hello World')
-        editor.load_drafts()
-        trunc_path = path.relative_to(editor_path)
+        path = do_load_draft(editor, draft)
+        trunc_path = path.relative_to(editor.repo.path)
         assert editor.repo.drafts.get_draft(
-            PathLabel(trunc_path)) is not None
+            PathLabel(trunc_path)) == draft
 
 
 @given(a_draft())
@@ -60,7 +65,6 @@ def test_does_copy(update: Draft):
 
         assert l_editor.copy_articles(r_editor.repo.articles) > 0
         assert l_editor.copy_titles(r_editor.repo.titles) > 0
-        test = TestCase()
 
         test.assertCountEqual(r_editor.repo.articles.get_articles(),
                               l_editor.repo.articles.get_articles())
@@ -77,52 +81,10 @@ def test_does_unload_titles(update: Draft):
         l_editor.copy_titles(r_editor.repo.titles)
 
         l_editor.unload_titles()
-        test = TestCase()
         test.assertCountEqual(
             [file.name for file in r_editor.iterfiles()],
             [file.name for file in l_editor.iterfiles()]
         )
-
-
-@given(some_new_drafts(2))
-def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
-    some_drafts = list(some_drafts)
-    with get_file_editor() as editor:
-        repo = editor.repo
-
-        for draft in some_drafts:
-            repo.drafts.set_draft(draft)
-
-        draft_count = [draft.label for draft in repo.drafts.get_drafts()]
-        update_count = [draft.label for draft in editor.get_updates()]
-
-        editor.publish_drafts()
-
-        title_count = [title.label for title in repo.titles.get_titles()]
-
-        test = TestCase()
-        test.assertCountEqual(title_count, draft_count)
-        test.assertCountEqual(title_count, update_count)
-        test.assertCountEqual(draft_count, update_count)
-
-
-@given(some_drafts(2))
-def test_does_publish_some_drafts(some_drafts: List[Draft]):
-    some_drafts = list(some_drafts)
-    with get_file_editor() as editor:
-        repo = editor.repo
-
-        for draft in some_drafts:
-            repo.drafts.set_draft(draft)
-
-        update_count = [draft.label for draft in editor.get_updates()]
-
-        editor.publish_drafts()
-
-        title_count = [title.label for title in repo.titles.get_titles()]
-
-        test = TestCase()
-        test.assertCountEqual(title_count, update_count)
 
 
 @given(an_article(), a_draft())
@@ -157,3 +119,19 @@ def test_does_publish_changed_draft_path(draft: Draft):
         draft.label.path[0] = 'changed'
         do_load_draft(editor, draft)
         assert editor.publish_drafts() == 1
+
+
+@given(some_new_drafts(2))
+def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
+    some_drafts = list(some_drafts)
+    with get_file_editor() as editor:
+        do_load_drafts(editor, some_drafts)
+        assert editor.publish_drafts() == 2
+
+
+@given(some_drafts(2))
+def test_does_publish_some_drafts(some_drafts: List[Draft]):
+    some_drafts = list(some_drafts)
+    with get_file_editor() as editor:
+        do_load_drafts(editor, some_drafts)
+        assert editor.publish_drafts() == 2

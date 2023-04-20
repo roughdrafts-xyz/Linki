@@ -78,13 +78,13 @@ class FileEditor(Editor):
         return cls(repo)
 
     def iterdir(self):
-        return map(Path, iglob(f'{self.repo.path}/**', recursive=True))
-
-    def iterfiles(self):
         # Path.rglob doesn't handle avoiding hidden folders well.
         #
         # Using the more correct root_dir=self.path breaks for a
         # reason I don't care to research at the moment.
+        return map(Path, iglob(f'{self.repo.path}/**', recursive=True))
+
+    def iterfiles(self):
         glob = self.iterdir()
         return (_glob.resolve() for _glob in glob if _glob.is_file())
 

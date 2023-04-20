@@ -1,6 +1,6 @@
 import string
 from hypothesis import assume, strategies
-from linki.article import SimpleArticle
+from linki.article import Article, Article
 
 from linki.id import SimpleLabel
 
@@ -20,40 +20,19 @@ def some_content(draw: strategies.DrawFn):
 
 
 @strategies.composite
-def a_new_article(draw: strategies.DrawFn, data: str | None = None) -> SimpleArticle:
-    if (data is None):
-        data = draw(some_content())
+def an_article(draw: strategies.DrawFn, editOf: Article | None = None) -> Article:
     label = draw(a_label())
-    return SimpleArticle(
-        label.unsafe_raw_name,
+    data = draw(some_content())
+    article = Article(
+        label,
         data,
-        None
+        editOf
     )
-
-
-@strategies.composite
-def an_edit_of(draw: strategies.DrawFn, base_article: SimpleArticle, data: str | None = None):
-    if (data is None):
-        data = draw(some_content())
-    return SimpleArticle(
-        base_article.label.unsafe_raw_name,
-        data,
-        base_article
-    )
-
-
-@strategies.composite
-def an_article(draw: strategies.DrawFn, data: str | None = None):
-    if (data is not None):
-        article = a_new_article(data)
-        update = an_edit_of(draw(article), data)
-        article = strategies.one_of(article, update)
-    else:
-        article = a_new_article(data)
-        update = an_edit_of(draw(article), data)
-        new_update = an_edit_of(draw(article))
-        article = strategies.one_of(article, update, new_update)
-    article = draw(article)
+    if (editOf is not None):
+        assume(
+            article.label != editOf.label or
+            article.content != editOf.content
+        )
     return article
 
 

@@ -98,15 +98,18 @@ class Label():
     def __hash__(self) -> int:
         return hash(self.labelId)
 
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, Label):
+            return False
+        return self.labelId == __value.labelId
 
-@dataclass
+
 class SimpleLabel(Label):
     def __init__(self, name: str) -> None:
         self.unsafe_raw_name = name
         super().__init__([name])
 
 
-@dataclass
 class PathLabel(Label):
     def __init__(self, path: Path) -> None:
         self.path_obj = path
