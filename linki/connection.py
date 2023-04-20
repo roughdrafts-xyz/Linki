@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 import pickle
 from typing import Dict, Iterator, MutableMapping, TypeVar
@@ -23,7 +24,7 @@ class MemoryConnection(Connection[VT]):
         self.store[__key] = __value
 
     def __getitem__(self, __key: ID) -> VT:
-        return self.store[__key]
+        return copy.deepcopy(self.store[__key])
 
     def __delitem__(self, __key: ID) -> None:
         del self.store[__key]
