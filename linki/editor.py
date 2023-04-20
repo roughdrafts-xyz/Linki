@@ -5,7 +5,7 @@ from typing import Iterable
 from linki.article import ArticleCollection
 from linki.draft import Draft
 from linki.repository import FileRepository, Repository
-from linki.title import Redirect, TitleCollection
+from linki.title import Title, TitleCollection
 from linki.id import PathLabel
 
 
@@ -32,12 +32,12 @@ class Editor():
             published.append(draft.label)
             if (article.editOf is not None):
                 if (article.label != article.editOf.label):
-                    redirect = Redirect(
+                    redirect = Title.createRedirect(
                         article.editOf,
                         article.label
                     )
-                    article = self.merge_title(redirect)
-                    changed.append(redirect.label)
+                    self.merge_title(redirect)
+                    changed.append(article.label)
 
         for label in published:
             self.repo.drafts.clear_draft(label)

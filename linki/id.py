@@ -101,7 +101,7 @@ class Label():
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, Label):
             return False
-        return self.labelId == __value.labelId
+        return self.__hash__() == __value.__hash__()
 
 
 class SimpleLabel(Label):

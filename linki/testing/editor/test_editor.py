@@ -1,4 +1,5 @@
 
+from dataclasses import asdict
 from typing import Dict, List
 from unittest import TestCase
 
@@ -8,6 +9,7 @@ from linki.connection import Connection, MemoryConnection
 from linki.draft import Draft
 
 from linki.editor import Editor
+from linki.id import Label
 from linki.repository import Repository, RepositoryConnection
 from linki.testing.strategies.article import an_article
 from linki.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
@@ -119,27 +121,45 @@ def test_does_copy(update: Article):
                           l_repo.titles.get_titles())
 
 
-@given(a_draft())
+@given(a_new_draft())
 def test_does_publish_changed_draft_path(draft: Draft):
     repo = MemoryRepository()
     editor = Editor(repo)
 
-    draft.label.path = ['initial'] + draft.label.path
-    init = draft.label
-    assume(draft.should_update())
-    repo.drafts.set_draft(draft)
+    o_draft = Draft.fromArticle(draft)
+    n_draft = Draft.fromArticle(draft)
+    z_draft = Draft.fromArticle(draft)
+
+    o_draft.label = Label(['initial'] + o_draft.label.path)
+    n_draft.label = Label(['changed'] + n_draft.label.path)
+    z_draft.label = Label(['final_z'] + z_draft.label.path)
+    n_draft.editOf = o_draft
+    z_draft.editOf = n_draft
+
+    repo.drafts.set_draft(o_draft)
     assert editor.publish_drafts() == 1
     test.assertCountEqual(
         [title.label for title in repo.titles.get_titles()],
-        [init]
+        [o_draft.label]
     )
 
-    draft.label.path[0] = 'changed'
-    changed = draft.label
-    assume(draft.should_update())
-    repo.drafts.set_draft(draft)
+    repo.drafts.set_draft(n_draft)
     assert editor.publish_drafts() == 1
     test.assertCountEqual(
         [title.label for title in repo.titles.get_titles()],
-        [init, changed]
+        [o_draft.label, n_draft.label]
     )
+    g_o_draft = repo.titles.get_title(o_draft.label)
+    assert g_o_draft is not None
+    assert g_o_draft.redirect == n_draft.label
+
+    repo.drafts.set_draft(z_draft)
+    assert editor.publish_drafts() == 1
+    test.assertCountEqual(
+        [title.label for title in repo.titles.get_titles()],
+        [o_draft.label, n_draft.label, z_draft.label]
+    )
+
+    g_n_draft = repo.titles.get_title(n_draft.label)
+    assert g_n_draft is not None
+    assert g_n_draft.redirect == z_draft.label

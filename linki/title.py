@@ -1,5 +1,5 @@
-from dataclasses import asdict, dataclass
-from typing import Iterator, cast
+from dataclasses import dataclass
+from typing import Iterator
 from linki.article import Article
 from linki.connection import Connection
 
@@ -8,8 +8,8 @@ from linki.id import Label
 
 @dataclass
 class Title(Article):
-    redirect: Label | None = None
     editOf: Article | None = None
+    redirect: Label | None = None
 
     @classmethod
     def fromArticle(cls, article: Article) -> 'Title':
@@ -19,31 +19,25 @@ class Title(Article):
             article.editOf
         )
 
-
-class Redirect(Title):
-    redirect: Label
-    editOf: Title
-
-    def __init__(self, editOf: Title, redirect: Label):
-        self.redirect = redirect
-        self.editOf = editOf
-
-    @property
-    def content(self) -> str:
-        path_string = ','.join(self.redirect.path)
-        return f'[redirect:{path_string}#{self.redirect.labelId}]'
-
-    @property
-    def label(self) -> Label:
-        return self.editOf.label
+    @classmethod
+    def createRedirect(cls, editOf: Article, redirect: Label) -> 'Title':
+        path_string = ','.join(redirect.path)
+        content = f'[redirect:{path_string}#{redirect.labelId}]'
+        return cls(
+            label=editOf.label,
+            content=content,
+            editOf=editOf,
+            redirect=redirect
+        )
 
 
 class TitleCollection():
     def __init__(self, connection: Connection[Title]) -> None:
         self.titles = connection
 
-    def set_title(self, article: Article) -> Title:
-        title = Title.fromArticle(article)
+    def set_title(self, title: Title | Article) -> Title:
+        if (not isinstance(title, Title)):
+            title = Title.fromArticle(title)
         self.titles[title.label.labelId] = title
         return title
 

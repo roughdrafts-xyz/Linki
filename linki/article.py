@@ -4,7 +4,7 @@ from typing import Iterator
 from typing_extensions import Self
 from linki.connection import Connection
 
-from linki.id import ArticleID, Label, SimpleLabel
+from linki.id import ArticleID, Label
 
 
 @dataclass
@@ -17,16 +17,6 @@ class Article():
     def articleId(self) -> ArticleID:
         return ArticleID.getArticleID(
             self.label, self.content, self.editOf)
-
-
-@dataclass
-class SimpleArticle(Article):
-    label: SimpleLabel
-
-    def __init__(self, name: str, content: str, editOf: Article | None) -> None:
-        self.label = SimpleLabel(name)
-        self.content = content
-        self.editOf = editOf
 
 
 class ArticleCollection():
