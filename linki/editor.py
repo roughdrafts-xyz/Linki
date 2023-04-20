@@ -72,10 +72,11 @@ class FileEditor(Editor):
         return (_glob.resolve() for _glob in glob if _glob.is_file())
 
     def get_edit_of(self, file: Path):
+        content = file.read_text()
         file = file.relative_to(self.repo.path)
         for title in self.repo.titles.get_titles():
             if (
-                file.read_text() == title.content or
+                content == title.content or
                 file.parts == title.label.path
             ):
                 return title
