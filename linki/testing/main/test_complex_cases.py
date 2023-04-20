@@ -1,4 +1,6 @@
 from pathlib import Path
+from unittest import TestCase
+
 from linki.main import app
 from typer.testing import CliRunner
 
@@ -6,30 +8,50 @@ runner = CliRunner()
 
 
 def test_publish_changed_paths(tmp_path: Path):
-    runner.invoke(app, ["init", str(tmp_path)])
-    path = tmp_path.joinpath('hello_world.md')
-    path.write_text('Hello World')
-    runner.invoke(app, ["publish", str(tmp_path)])
-    tmp_path.joinpath('folder').mkdir()
-    path = path.replace(tmp_path / 'folder' / 'hello_world.md')
-    res = runner.invoke(app, ["publish", str(tmp_path)])
+    source = tmp_path.joinpath('source').resolve()
+    runner.invoke(app, ["init", str(source)])
+    s_folder = source.joinpath('folder').resolve()
+    s_folder.mkdir()
+
+    s_file = s_folder.joinpath('hello_world.md')
+    s_file.write_text('Hello World')
+    res = runner.invoke(app, ["publish", str(source)])
+    assert res.stdout == f"Published {1} drafts.\n"
+
+    s_folder = s_folder.rename(source / 'folder2').resolve()
+    print(s_folder)
+    res = runner.invoke(app, ["publish", str(source)])
+
     assert res.stdout == f"Published {1} drafts.\n"
 
 
 def test_copy_changed_paths(tmp_path: Path):
-    runner.invoke(app, ["init", str(tmp_path)])
-    folder = tmp_path.joinpath('folder')
-    folder.mkdir()
+    source = tmp_path.joinpath('source').resolve()
+    runner.invoke(app, ["init", str(source)])
+    s_folder = source.joinpath('folder').resolve()
+    s_folder.mkdir()
 
-    file = folder.joinpath('hello_world.md')
-    file.write_text('Hello World')
-    runner.invoke(app, ["publish", str(tmp_path)])
+    s_file = s_folder.joinpath('hello_world.md')
+    s_file.write_text('Hello World')
+    res = runner.invoke(app, ["publish", str(source)])
+    assert res.stdout == f"Published {1} drafts.\n"
 
-    # Initial Copy
+    copy = tmp_path.joinpath('copy').resolve()
+    # TODO Initial Copy
+    runner.invoke(app, ["copy", str(source), str(copy)])
 
-    folder = folder.rename(tmp_path / 'folder2')
-    res = runner.invoke(app, ["publish", str(tmp_path)])
+    s_folder = s_folder.rename(source / 'folder2').resolve()
+    print(s_folder)
+    res = runner.invoke(app, ["publish", str(source)])
 
     assert res.stdout == f"Published {1} drafts.\n"
 
-    # Update Copy
+    # TODO Update Copy
+    runner.invoke(app, ["copy", str(source), str(copy)])
+
+    test = TestCase()
+    s_files = [f.relative_to(source)
+               for f in source.iterdir()]
+    c_files = [f.relative_to(copy)
+               for f in copy.iterdir()]
+    test.assertCountEqual(s_files, c_files)
