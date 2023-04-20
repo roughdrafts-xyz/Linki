@@ -113,8 +113,8 @@ class FileEditor(Editor):
 
     def unload_titles(self):
         for title in self.repo.titles.get_titles():
-            if (title.editOf is not None):
-                prev = self.repo.path.joinpath(*title.editOf.label.path)
+            if (title.redirect is not None):
+                prev = self.repo.path.joinpath(*title.label.path)
                 prev.unlink()
                 for crumb in prev.parents:
                     if (crumb == self.repo.path):
