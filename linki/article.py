@@ -18,6 +18,14 @@ class Article():
         return ArticleID.getArticleID(
             self.label, self.content, self.editOf)
 
+    def __hash__(self) -> int:
+        return hash(self.articleId)
+
+    def __eq__(self, __value: object) -> bool:
+        if (isinstance(__value, Article)):
+            return self.articleId == __value.articleId
+        return False
+
 
 class ArticleCollection():
     def __init__(self, connection: Connection[Article]) -> None:

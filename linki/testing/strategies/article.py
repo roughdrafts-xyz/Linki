@@ -1,3 +1,4 @@
+from operator import xor
 import string
 from hypothesis import assume, strategies
 from linki.article import Article, Article
@@ -16,7 +17,7 @@ def a_label(draw: strategies.DrawFn):
 def some_content(draw: strategies.DrawFn):
     content = draw(strategies.text(alphabet=string.printable))
     assume(len(content) > 0)
-    return content
+    return content.replace('\r\n', '\n').replace('\r', '\n')
 
 
 @strategies.composite
@@ -30,8 +31,10 @@ def an_article(draw: strategies.DrawFn, editOf: Article | None = None) -> Articl
     )
     if (editOf is not None):
         assume(
-            article.label != editOf.label or
-            article.content != editOf.content
+            xor(
+                article.label != editOf.label,
+                article.content != editOf.content
+            )
         )
     return article
 

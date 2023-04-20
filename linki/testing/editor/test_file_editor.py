@@ -8,14 +8,16 @@ from typing import List
 from unittest import TestCase
 
 from hypothesis import assume, given
-from linki.article import Article
+from linki.article import Article, ArticleCollection
+from linki.connection import MemoryConnection
 from linki.draft import Draft
 
 from linki.editor import FileEditor
 from linki.repository import Repository
 from linki.testing.strategies.article import an_article
 from linki.id import PathLabel
-from linki.testing.strategies.draft import a_draft, some_drafts, some_new_drafts
+from linki.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
+from linki.title import Title, TitleCollection
 
 test = TestCase()
 
@@ -32,6 +34,18 @@ def do_load_drafts(editor: FileEditor, drafts: List[Draft]):
         p = editor.repo.path.joinpath(*draft.label.parents)
         p.mkdir(exist_ok=True, parents=True)
         p.joinpath(draft.label.name).write_text(draft.content)
+        if (draft.editOf is not None):
+            artColl = ArticleCollection(MemoryConnection[Article]())
+            titColl = TitleCollection(MemoryConnection[Title]())
+
+            article = draft.editOf
+            titColl.set_title(article)
+            editor.copy_titles(titColl)
+
+            while (article is not None):
+                artColl.merge_article(article)
+                article = article.editOf
+            editor.copy_articles(artColl)
 
     editor.load_drafts()
 
@@ -53,9 +67,10 @@ def get_file_editor():
 def test_loads_drafts(draft: Draft):
     with get_file_editor() as editor:
         path = do_load_draft(editor, draft)
-        trunc_path = path.relative_to(editor.repo.path)
-        assert editor.repo.drafts.get_draft(
-            PathLabel(trunc_path)) == draft
+        trunc_path = PathLabel(path.relative_to(editor.repo.path))
+        p_draft = editor.repo.drafts.get_draft(trunc_path)
+        print(p_draft)
+        assert draft == p_draft
 
 
 @given(a_draft())

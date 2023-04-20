@@ -113,7 +113,7 @@ class WebView:
             case 'pickles':
                 return pickle.dumps(iter_item)
             case 'api':
-                return {style: iter_item}
+                return {style: [asdict(item) for item in iter_item]}
             case 'count':
                 return f"{self.repo.get_count(style)}"
             case 'w':

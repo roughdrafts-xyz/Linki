@@ -162,4 +162,5 @@ def test_does_publish_changed_draft_path(draft: Draft):
 
     g_n_draft = repo.titles.get_title(n_draft.label)
     assert g_n_draft is not None
+    assert g_o_draft.redirect == n_draft.label
     assert g_n_draft.redirect == z_draft.label

@@ -96,7 +96,7 @@ class FileEditor(Editor):
         for title in self.repo.titles.get_titles():
             if (
                 content == title.content or
-                file.parts == title.label.path
+                PathLabel(file) == title.label
             ):
                 return title
         return None
