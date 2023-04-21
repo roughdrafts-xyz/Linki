@@ -13,7 +13,8 @@ from linki.url import URL
 
 @dataclass(kw_only=True)
 class WebViewConf:
-    sub: bool = False
+    copy: bool = False
+    contribute: bool = False
     api: bool = False
     web: bool = False
     debug: bool = False
@@ -35,8 +36,8 @@ class WebView:
                        'GET', self.handle)
         self.app.route('/<output>/<style>',
                        'GET', self.handle)
-        if (self.conf.sub):
-            self.app.route('/announce', 'POST', self.handle_announce)
+        if (self.conf.contribute):
+            self.app.route('/contribute', 'POST', self.handle_contribution)
         if (self.conf.web):
             self.single_templates = dict()
             self.iter_templates = dict()
@@ -56,8 +57,8 @@ class WebView:
     def handle(self, output: str, style: str, label: str | None = None):
         unsupported = bottle.HTTPError(400, f'{output} not supported.')
         match output:
-            case 'count' | 'pickles':
-                if (not self.conf.sub):
+            case 'count' | 'copy':
+                if (not self.conf.copy):
                     raise unsupported
             case 'api':
                 if (not self.conf.api):
@@ -96,7 +97,7 @@ class WebView:
             raise bottle.HTTPError(404, f'label not found: {label}')
 
         match output:
-            case 'pickles':
+            case 'copy':
                 return pickle.dumps(item)
             case 'api':
                 return asdict(item)
@@ -110,7 +111,7 @@ class WebView:
             raise bottle.HTTPError(404, f'style not found: {style}')
         iter_item = list(self.repo.iter_item(style))
         match output:
-            case 'pickles':
+            case 'copy':
                 return pickle.dumps(iter_item)
             case 'api':
                 return {style: [asdict(item) for item in iter_item]}
@@ -129,7 +130,7 @@ class WebView:
                     'style_root': f"/w/{style}/"
                 })
 
-    def handle_announce(self):
+    def handle_contribution(self):
         url = bottle.request.forms.get('url')  # type: ignore
         if (URL(url).labelId not in self.repo.subs.urls):
             return "1"
