@@ -128,11 +128,11 @@ def do_handle_copy(viewer: WebView, article: Article):
     def one_article():
         res: bytes = viewer.handle(
             output, 'articles', article.articleId)  # type: ignore
-        return pickle.loads(res)
+        return Article.fromStream(res)
 
     def many_articles():
         res: bytes = viewer.handle(output, 'articles')  # type: ignore
-        return pickle.loads(res)
+        return ArticleCollection.fromStream(res)
 
     assert article == one_article()
 
@@ -143,16 +143,16 @@ def do_handle_copy(viewer: WebView, article: Article):
     def one_title_id():
         res: bytes = viewer.handle(
             output, 'titles', article.label.labelId)  # type: ignore
-        return pickle.loads(res)
+        return Title.fromStream(res)
 
     def one_title_path():
         res: bytes = viewer.handle(
             output, 'titles', '/'.join(article.label.path))  # type: ignore
-        return pickle.loads(res)
+        return Title.fromStream(res)
 
     def many_titles():
         res: bytes = viewer.handle(output, 'titles')  # type: ignore
-        return pickle.loads(res)
+        return TitleCollection.fromStream(res)
 
     titles = TitleCollection(MemoryConnection[Title]())
     titles.set_title(title)
