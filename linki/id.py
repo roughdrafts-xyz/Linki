@@ -5,6 +5,8 @@ from pathlib import Path
 import re
 from typing import List
 
+import msgspec
+
 SHA224 = re.compile(r'[a-f0-9]{56}')
 
 
@@ -49,14 +51,23 @@ class LabelID(ID):
         return cls(sha224(package).hexdigest())
 
 
-@dataclass
-class Label():
+class Label(msgspec.Struct, kw_only=True, dict=True):
     path: List[str]
 
-    def __init__(self, path: List[str]) -> None:
-        self.path = [self.as_safe_string(crumb) for crumb in path]
-        if not (all(map(self.is_valid, self.path))):
-            raise AttributeError
+    @classmethod
+    def fromUnsafeString(cls, unsafe_raw_name: str):
+        label = cls(path=[unsafe_raw_name])
+        label.clean_path()
+        return label
+
+    @classmethod
+    def fromPath(cls, path: Path, root: Path | None = None):
+        if root is not None:
+            root = root.resolve()
+            path = path.relative_to(root)
+        label = cls(path=list(path.parts))
+        label.clean_path()
+        return label
 
     @cached_property
     def labelId(self):
@@ -69,6 +80,11 @@ class Label():
     @property
     def parents(self) -> List[str]:
         return self.path[:-1]
+
+    def clean_path(self) -> None:
+        self.path = [self.as_safe_string(crumb) for crumb in self.path]
+        if not (all(map(self.is_valid, self.path))):
+            raise AttributeError
 
     @classmethod
     def is_valid(cls, string: str) -> bool:
@@ -91,30 +107,10 @@ class Label():
             s = '-'
         return s
 
-    def __repr__(self) -> str:
-        return f"Label({self.path})"
 
-    def __hash__(self) -> int:
-        return hash(self.labelId)
-
-    def __eq__(self, __value: object) -> bool:
-        if not isinstance(__value, Label):
-            return False
-        return str(self.labelId) == str(__value.labelId)
+def SimpleLabel(name: str):
+    return Label.fromUnsafeString(name)
 
 
-class SimpleLabel(Label):
-    def __init__(self, name: str) -> None:
-        self.unsafe_raw_name = name
-        super().__init__([name])
-
-
-class PathLabel(Label):
-    def __init__(self, path: Path, root: Path | None = None) -> None:
-        if root is None:
-            self.path_obj = path
-        else:
-            root = root.resolve()
-            path = path.resolve()
-            self.path_obj = path.relative_to(root)
-        super().__init__(list(self.path_obj.parts))
+def PathLabel(path: Path, root: Path | None = None):
+    return Label.fromPath(path, root)

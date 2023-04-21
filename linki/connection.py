@@ -1,10 +1,14 @@
 import copy
+from dataclasses import is_dataclass
+from io import BytesIO
 from pathlib import Path
 import pickle
-from typing import Dict, Iterator, MutableMapping, TypeVar
+from typing import Dict, Iterator, List, MutableMapping, TypeVar
 from urllib.error import HTTPError
 from urllib.parse import ParseResult
 from urllib.request import urlopen
+
+import msgspec
 
 
 from linki.id import ID
@@ -35,12 +39,15 @@ class MemoryConnection(Connection[VT]):
     def __len__(self) -> int:
         return self.store.__len__()
 
-    def toStream(self):
-        return pickle.dumps(self)
+    def toStream(self) -> bytes:
+        items = [self.store[label] for label in self.store]
+        if (any([not isinstance(item, msgspec.Struct) for item in items])):
+            raise AttributeError
+        encode = msgspec.msgpack.encode(items)
+        return encode
 
-    @staticmethod
-    def fromStream(stream: bytes):
-        return pickle.loads(stream)
+    def toFile(self) -> BytesIO:
+        return BytesIO(self.toStream())
 
 
 class PathConnection(Connection[VT]):

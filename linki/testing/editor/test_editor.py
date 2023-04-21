@@ -118,9 +118,9 @@ def test_does_publish_changed_draft_path(draft: Draft):
     n_draft = Draft.fromArticle(draft)
     z_draft = Draft.fromArticle(draft)
 
-    o_draft.label = Label(['initial'] + o_draft.label.path)
-    n_draft.label = Label(['changed'] + n_draft.label.path)
-    z_draft.label = Label(['final_z'] + z_draft.label.path)
+    o_draft.label = Label(path=['initial'] + o_draft.label.path)
+    n_draft.label = Label(path=['changed'] + n_draft.label.path)
+    z_draft.label = Label(path=['final_z'] + z_draft.label.path)
     n_draft.editOf = o_draft
     z_draft.editOf = n_draft
 

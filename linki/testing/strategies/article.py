@@ -9,14 +9,12 @@ from linki.id import SimpleLabel
 @strategies.composite
 def a_label(draw: strategies.DrawFn):
     label = draw(strategies.text(alphabet=string.printable))
-    assume(SimpleLabel.is_valid(label))
     return SimpleLabel(label)
 
 
 @strategies.composite
 def some_content(draw: strategies.DrawFn):
     content = draw(strategies.text(alphabet=string.printable))
-    assume(len(content) > 0)
     return content.replace('\r\n', '\n').replace('\r', '\n')
 
 

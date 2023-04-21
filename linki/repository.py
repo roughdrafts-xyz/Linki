@@ -1,12 +1,14 @@
 from pathlib import Path
-from typing import Dict, Iterable
+from typing import Dict, Iterable, List
 from urllib.parse import ParseResult
-from linki.article import ArticleCollection
+
+import msgspec
+from linki.article import Article, ArticleCollection
 from linki.connection import MemoryConnection, ROWebConnection, Connection, PathConnection
 from linki.draft import DraftCollection
 from linki.id import ID
 from linki.url import URL, URLCollection
-from linki.title import TitleCollection
+from linki.title import Title, TitleCollection
 
 
 class RepositoryConnection:
@@ -128,7 +130,7 @@ class MemoryRepoConnection(RepositoryConnection):
         if conn is None:
             conn = MemoryConnection()
             self.connections[style] = conn
-        return conn
+        return self.connections[style]
 
 
 class TemporaryRepository(Repository):
@@ -136,13 +138,24 @@ class TemporaryRepository(Repository):
         self.connection = MemoryRepoConnection()
 
     @classmethod
-    def fromStreams(cls, **streams):
+    def fromStreams(cls, **streams: bytes):
         repo = cls()
         for stream in streams:
             if stream not in cls.styles:
                 continue
-            s_conn = MemoryConnection.fromStream(streams[stream])
+            style = None
+            if (stream == 'articles'):
+                style = Article
+            if (stream == 'titles'):
+                style = Title
+            if (style is None):
+                continue
+            items = msgspec.msgpack.decode(streams[stream], type=List[style])
             d_conn = repo.connection.get_style(stream)
-            for item in s_conn:
-                d_conn[item] = s_conn[item]
+            if (stream == 'articles'):
+                for item in items:
+                    d_conn[item.articleId] = item
+            if (stream == 'titles'):
+                for item in items:
+                    d_conn[item.label.labelId] = item
         return repo

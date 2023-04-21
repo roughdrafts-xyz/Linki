@@ -1,8 +1,8 @@
 import copy
 from dataclasses import asdict
+from io import BytesIO
 import pickle
-from typing import Dict
-from boddle import boddle
+from typing import Dict, List
 import bottle
 
 from hypothesis import given
@@ -13,6 +13,8 @@ from linki.testing.editor.test_editor import MemoryRepository
 from linki.testing.strategies.article import an_article
 from linki.title import Title, TitleCollection
 from linki.viewer import WebView, WebViewConf
+
+from werkzeug.test import Client
 
 
 @given(an_article())
@@ -46,17 +48,7 @@ def test_does_handle_web(article: Article):
     do_handle_web(viewer, article)
 
 
-@given(an_article())
-def test_does_handle_contribute(article: Article):
-    def compare_res(self: bottle.HTTPResponse, __value: object):
-        if (not isinstance(__value, bottle.HTTPResponse)):
-            return False
-
-        return (
-            self.body == __value.body and
-            self.status_code == __value.status_code
-        )
-    bottle.HTTPResponse.__eq__ = compare_res
+def setup_contribute(article) -> Dict[str, MemoryConnection]:
     article_conn = MemoryConnection[Article]()
     title_conn = MemoryConnection[Title]()
     articles = ArticleCollection(article_conn)
@@ -64,37 +56,62 @@ def test_does_handle_contribute(article: Article):
 
     articles.merge_article(article)
     titles.set_title(article)
-
-    pak_contents: Dict[str, bytes] = {
-        'titles': title_conn.toStream(),
-        'articles': article_conn.toStream()
+    return {
+        'titles': title_conn,
+        'articles': article_conn
     }
 
-    with boddle(params={
-        'url': 'https://localhost:8080/',
-        'titles': pak_contents.get('titles'),
-        'articles': pak_contents.get('articles')
-    }):
-        viewer = get_memory_server()
-        viewer.repo.subs.add_url('https://localhost:8080/')
-        res = viewer.handle_contribution()
-        expected = bottle.HTTPResponse('/updates', 201)
-        assert res == expected
-        assert title_conn == viewer.repo.get_collection('titles')
-        assert article_conn == viewer.repo.get_collection('articles')
 
-    with boddle(params={
-        'url': 'https://localhost:8888/',
-        'titles': pak_contents.get('titles'),
-        'articles': pak_contents.get('articles')
-    }):
-        viewer = get_memory_server()
-        viewer.repo.subs.add_url('https://localhost:8080/')
-        res = viewer.handle_contribution()
-        expected = bottle.HTTPResponse('', 403)
-        assert res == expected
-        assert title_conn != viewer.repo.get_collection('titles')
-        assert article_conn != viewer.repo.get_collection('articles')
+@given(an_article())
+def test_does_handle_legit_contribute(article: Article):
+    conns = setup_contribute(article)
+    articles = conns['articles']
+    titles = conns['titles']
+
+    pak_contents: Dict[str, BytesIO] = {
+        'articles': articles.toFile(),
+        'titles': titles.toFile(),
+    }
+
+    viewer = get_memory_server()
+    url = 'https://localhost:8080/'
+    viewer.repo.subs.add_url(url)
+
+    client = Client(viewer.app)
+    res = client.post('/contribute', data={
+        'url': url,
+        'titles': (pak_contents['titles'], 'titles'),
+        'articles': (pak_contents['articles'], 'articles')
+    })
+
+    assert res.status_code == 201
+    assert res.text == '/updates'
+
+    assert titles == viewer.repo.get_collection('titles')
+    assert articles == viewer.repo.get_collection('articles')
+
+
+@given(an_article())
+def test_does_handle_not_legit_contribute(article: Article):
+    conns = setup_contribute(article)
+    articles = conns['articles']
+    titles = conns['titles']
+
+    pak_contents: Dict[str, bytes] = {
+        'articles': articles.toStream(),
+        'titles': titles.toStream(),
+    }
+    viewer = get_memory_server()
+    viewer.repo.subs.add_url('https://localhost:8080/')
+
+    client = Client(viewer.app)
+    res = client.post('/contribute', data={
+        'url': url
+    })
+    assert res.status_code == 200
+    assert res.text == '/updates'
+    assert title_conn != viewer.repo.get_collection('titles')
+    assert article_conn != viewer.repo.get_collection('articles')
 
     # TODO - Requires configuration options
     # handles contributions from illegal users
@@ -113,7 +130,8 @@ def get_memory_server():
     viewer = WebView(repo, WebViewConf(
         web=True,
         api=True,
-        copy=True
+        copy=True,
+        contribute=True
     ))
     return viewer
 

@@ -1,3 +1,4 @@
+from io import BytesIO
 from pathlib import Path
 import pickle
 
@@ -84,7 +85,7 @@ class WebView:
         item_id = None
         match style:
             case 'titles':
-                item_id = Label(label.split('/')).labelId
+                item_id = Label(path=label.split('/')).labelId
             case _:
                 raise bottle.HTTPError(404, f'pathed style not found: {style}')
         return item_id
@@ -137,13 +138,22 @@ class WebView:
 
     def handle_contribution(self):
         req: bottle.FormsDict = bottle.request.params  # type: ignore
+        files: bottle.FormsDict = bottle.request.files  # type: ignore
         url = req.get('url')
         if (url == 'https://localhost:8080/'):
-            titles = req.get('titles')
-            articles = req.get('articles')
+            f_titles: bottle.FileUpload | None = files.get('titles')
+            f_articles: bottle.FileUpload | None = files.get('articles')
+            if (f_articles is None or f_titles is None):
+                return bottle.HTTPError(500)
+
+            c_titles: bottle.FileUpload = f_titles
+            c_articles: bottle.FileUpload = f_articles
+
+            b_titles: BytesIO = c_titles.file
+            b_articles: BytesIO = c_articles.file
             source = TemporaryRepository.fromStreams(
-                titles=titles,
-                articles=articles
+                titles=b_titles.read(),
+                articles=b_articles.read()
             )
 
             destination = Editor(self.repo)
