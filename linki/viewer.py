@@ -1,6 +1,7 @@
 from io import BytesIO
 from pathlib import Path
 import pickle
+import msgspec
 
 import pypandoc
 from linki.article import ArticleCollection
@@ -105,7 +106,7 @@ class WebView:
             case 'copy':
                 return pickle.dumps(item)
             case 'api':
-                return asdict(item)
+                return msgspec.structs.asdict(item)
             case 'w':
                 item.content = pypandoc.convert_text(
                     item.content, format='markdown', to='html')
@@ -119,7 +120,7 @@ class WebView:
             case 'copy':
                 return pickle.dumps(collection)
             case 'api':
-                return {style: [asdict(item) for item in collection.values()]}
+                return {style: [msgspec.structs.asdict(item) for item in collection.values()]}
             case 'count':
                 return f"{self.repo.get_count(style)}"
             case 'w':

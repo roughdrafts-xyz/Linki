@@ -6,6 +6,7 @@ from typing import Dict, List
 import bottle
 
 from hypothesis import given
+import msgspec
 import pypandoc
 from linki.article import Article, ArticleCollection
 from linki.connection import MemoryConnection
@@ -148,13 +149,13 @@ def do_handle_api(viewer: WebView, article: Article):
     viewer.repo.titles.set_title(article)
     title = Title.fromArticle(article)
 
-    expected = asdict(article)
+    expected = msgspec.structs.asdict(article)
     assert viewer.handle(
         output, 'articles', article.articleId) == expected
     assert viewer.handle(
         output, 'articles') == {'articles': [expected]}
 
-    expected = asdict(title)
+    expected = msgspec.structs.asdict(title)
     assert viewer.handle(
         output, 'titles', article.label.labelId) == expected
     assert viewer.handle(
