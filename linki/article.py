@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Iterator
-from typing_extensions import Self
 from linki.connection import Connection
 
 from linki.id import ArticleID, Label
@@ -11,7 +10,7 @@ from linki.id import ArticleID, Label
 class Article():
     label: Label
     content: str
-    editOf: Self | None
+    editOf: 'Article | None'
 
     @cached_property
     def articleId(self) -> ArticleID:

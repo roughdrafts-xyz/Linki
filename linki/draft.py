@@ -1,5 +1,4 @@
 from abc import ABC
-from dataclasses import dataclass
 from typing import Iterator
 from linki.article import Article
 from linki.connection import Connection
@@ -7,11 +6,10 @@ from linki.connection import Connection
 from linki.id import Label
 
 
-@dataclass
 class Draft(Article):
     label: Label
     content: str
-    editOf: Article | None = None
+    editOf: Article | None
 
     def should_update(self) -> bool:
         if (self.editOf is None):
@@ -27,9 +25,6 @@ class Draft(Article):
             article.content,
             article.editOf
         )
-
-    def __hash__(self) -> int:
-        return super().__hash__()
 
 
 class DraftCollection(ABC):

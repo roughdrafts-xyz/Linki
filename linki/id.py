@@ -4,7 +4,6 @@ from hashlib import sha224
 from pathlib import Path
 import re
 from typing import List
-from urllib.parse import quote_plus
 
 SHA224 = re.compile(r'[a-f0-9]{56}')
 

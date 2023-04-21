@@ -3,11 +3,10 @@ from contextlib import contextmanager
 from pathlib import Path
 import shutil
 from tempfile import TemporaryDirectory
-from typing import List, Set
+from typing import Set
 from unittest import TestCase
 
-from hypothesis import HealthCheck, assume, example, given, settings
-import pytest
+from hypothesis import HealthCheck, assume, given, settings
 from linki.article import Article, ArticleCollection
 from linki.connection import MemoryConnection
 from linki.draft import Draft
@@ -148,7 +147,7 @@ def test_does_publish_draft(draft: Draft):
 
 def test_does_publish_changed_draft_path():
     with get_file_editor() as editor:
-        draft = Draft(SimpleLabel('hello'), 'hello')
+        draft = Draft(SimpleLabel('hello'), 'hello', None)
         o_draft = Draft.fromArticle(draft)
         n_draft = Draft.fromArticle(draft)
         z_draft = Draft.fromArticle(draft)

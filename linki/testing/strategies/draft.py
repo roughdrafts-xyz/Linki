@@ -1,7 +1,7 @@
 from typing import Set
 from hypothesis import assume, strategies
 from linki.draft import Draft
-from linki.testing.strategies.article import an_article, some_articles
+from linki.testing.strategies.article import an_article
 
 
 @strategies.composite

@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Iterator
 from linki.article import Article
 from linki.connection import Connection
@@ -6,9 +5,8 @@ from linki.connection import Connection
 from linki.id import Label
 
 
-@dataclass
 class Title(Article):
-    editOf: Article | None = None
+    editOf: Article | None
     redirect: Label | None = None
 
     @classmethod
@@ -23,15 +21,13 @@ class Title(Article):
     def createRedirect(cls, editOf: Article, redirect: Label) -> 'Title':
         path_string = ','.join(redirect.path)
         content = f'[redirect:{path_string}#{redirect.labelId}]'
-        return cls(
+        title = cls(
             label=editOf.label,
             content=content,
             editOf=editOf,
-            redirect=redirect
         )
-
-    def __hash__(self) -> int:
-        return super().__hash__()
+        title.redirect = redirect
+        return title
 
 
 class TitleCollection():

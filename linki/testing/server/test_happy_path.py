@@ -3,7 +3,6 @@ from dataclasses import asdict
 
 from hypothesis import given
 import pypandoc
-import pytest
 from linki.article import Article
 from linki.testing.editor.test_editor import MemoryRepository
 from linki.testing.strategies.article import an_article
