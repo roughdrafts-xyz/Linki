@@ -1,5 +1,6 @@
 import copy
 from dataclasses import asdict
+import pickle
 from typing import Dict
 from boddle import boddle
 import bottle
@@ -64,39 +65,36 @@ def test_does_handle_contribute(article: Article):
     articles.merge_article(article)
     titles.set_title(article)
 
-    pak_contents: Dict[str, MemoryConnection] = {
-        'titles': title_conn,
-        'articles': article_conn
+    pak_contents: Dict[str, bytes] = {
+        'titles': title_conn.toStream(),
+        'articles': article_conn.toStream()
     }
-    update_pak = pak_contents
 
     with boddle(params={
         'url': 'https://localhost:8080/',
-        'update': update_pak
+        'titles': pak_contents.get('titles'),
+        'articles': pak_contents.get('articles')
     }):
         viewer = get_memory_server()
         viewer.repo.subs.add_url('https://localhost:8080/')
         res = viewer.handle_contribution()
         expected = bottle.HTTPResponse('/updates', 201)
         assert res == expected
-        assert pak_contents.get(
-            'titles') == viewer.repo.get_collection('titles')
-        assert pak_contents.get(
-            'articles') == viewer.repo.get_collection('articles')
+        assert title_conn == viewer.repo.get_collection('titles')
+        assert article_conn == viewer.repo.get_collection('articles')
 
     with boddle(params={
         'url': 'https://localhost:8888/',
-        'update': update_pak
+        'titles': pak_contents.get('titles'),
+        'articles': pak_contents.get('articles')
     }):
         viewer = get_memory_server()
         viewer.repo.subs.add_url('https://localhost:8080/')
         res = viewer.handle_contribution()
         expected = bottle.HTTPResponse('', 403)
         assert res == expected
-        assert pak_contents.get(
-            'titles') != viewer.repo.get_collection('titles')
-        assert pak_contents.get(
-            'articles') != viewer.repo.get_collection('articles')
+        assert title_conn != viewer.repo.get_collection('titles')
+        assert article_conn != viewer.repo.get_collection('articles')
 
     # TODO - Requires configuration options
     # handles contributions from illegal users

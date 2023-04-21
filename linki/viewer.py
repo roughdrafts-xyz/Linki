@@ -2,11 +2,15 @@ from pathlib import Path
 import pickle
 
 import pypandoc
+from linki.article import ArticleCollection
+from linki.connection import MemoryConnection
 from linki.editor import Copier, Editor
 from linki.id import Label, LabelID
 from linki.repository import Repository
 from dataclasses import asdict, dataclass
 import bottle
+from linki.testing.editor.test_editor import MemoryRepository
+from linki.title import TitleCollection
 
 from linki.url import URL
 
@@ -132,21 +136,29 @@ class WebView:
                 })
 
     def handle_contribution(self):
-        url = bottle.request.params.get('url')  # type: ignore
+        req: bottle.FormsDict = bottle.request.params  # type: ignore
+        url = req.get('url')
         if (url == 'https://localhost:8080/'):
+            source = MemoryRepository()
+            titles_conn: str = req.get('titles')
+            if (title_conn is not None):
+                titles = pickle.loads(title_conn)
+                for item in titles:
+                    source.titles.set_title(titles[item])
+            article_conn = req.get('articles', type=bytes)
+            if (article_conn is not None):
+                articles = pickle.loads(article_conn)
+                for item in articles:
+                    source.articles.merge_article(articles[item])
+
+            destination = Editor(self.repo)
+            copier = Copier(source, destination)
+
+            copier.copy_articles()
+            copier.copy_titles()
             return bottle.HTTPResponse('/updates', 201)
         else:
             return bottle.HTTPResponse('', 403)
-        if (URL(url).labelId not in self.repo.subs.urls):
-            return "1"
-
-        destination = Editor(self.repo)
-        source = Repository(url)
-        copier = Copier(source, destination)
-
-        copier.copy_articles()
-        copier.copy_titles()
-        return "0"
 
     def run(self, host: str, port: int):
         self.app.run(host=host, port=port, reloader=self.conf.debug)
