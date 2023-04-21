@@ -3,10 +3,11 @@ from contextlib import contextmanager
 from pathlib import Path
 import shutil
 from tempfile import TemporaryDirectory
-from typing import List
+from typing import List, Set
 from unittest import TestCase
 
-from hypothesis import assume, given
+from hypothesis import HealthCheck, assume, example, given, settings
+import pytest
 from linki.article import Article, ArticleCollection
 from linki.connection import MemoryConnection
 from linki.draft import Draft
@@ -18,10 +19,12 @@ from linki.id import Label, PathLabel, SimpleLabel
 from linki.testing.strategies.draft import a_draft, some_drafts, some_new_drafts
 from linki.title import Title, TitleCollection
 
+from random import randint
+
 test = TestCase()
 
 
-def do_load_drafts(editor: FileEditor, drafts: List[Draft], should_update: bool = False):
+def do_load_drafts(editor: FileEditor, drafts: Set[Draft]):
     for file in editor.repo.path.iterdir():
         if (file.is_file()):
             file.unlink()
@@ -29,8 +32,6 @@ def do_load_drafts(editor: FileEditor, drafts: List[Draft], should_update: bool 
             shutil.rmtree(file)
 
     for draft in drafts:
-        if (should_update):
-            assume(draft.should_update())
         p = editor.repo.path.joinpath(*draft.label.parents)
         p.mkdir(exist_ok=True, parents=True)
         p.joinpath(draft.label.name).write_text(draft.content)
@@ -42,6 +43,12 @@ def do_load_drafts(editor: FileEditor, drafts: List[Draft], should_update: bool 
             titColl.set_title(article)
             editor.copy_titles(titColl)
 
+            if draft.label != article.label:
+                if randint(0, 1) == 0:
+                    p = editor.repo.path.joinpath(*article.label.parents)
+                    p.mkdir(exist_ok=True, parents=True)
+                    p.joinpath(article.label.name).write_text(article.content)
+
             while (article is not None):
                 artColl.merge_article(article)
                 article = article.editOf
@@ -51,7 +58,7 @@ def do_load_drafts(editor: FileEditor, drafts: List[Draft], should_update: bool 
 
 
 def do_load_draft(editor: FileEditor, draft: Draft):
-    do_load_drafts(editor, [draft])
+    do_load_drafts(editor, {draft})
     return editor.repo.path.joinpath(*draft.label.path)
 
 
@@ -63,17 +70,24 @@ def get_file_editor():
         yield FileEditor.fromPath(_dir)
 
 
-@given(a_draft())
-def test_loads_drafts(draft: Draft):
+@given(some_drafts(2))
+@settings(suppress_health_check=[HealthCheck.filter_too_much])
+def test_loads_drafts(drafts: Set[Draft]):
     with get_file_editor() as editor:
-        path = do_load_draft(editor, draft)
-        trunc_path = PathLabel(path.relative_to(editor.repo.path))
-        p_draft = editor.repo.drafts.get_draft(trunc_path)
-        assert draft == p_draft
+        do_load_drafts(editor, drafts)
+        all_drafts = list(editor.repo.drafts.get_drafts())
+        compare = [(draft.label, draft.content)
+                   for draft in all_drafts]
+        for draft in drafts:
+            if (draft.editOf is not None):
+                assert draft in all_drafts
+            else:
+                assert (draft.label, draft.content) in compare
 
 
 @given(some_drafts(2))
-def test_does_copy(updates: List[Draft]):
+@settings(suppress_health_check=[HealthCheck.filter_too_much])
+def test_does_copy(updates: Set[Draft]):
     with get_file_editor() as r_editor, get_file_editor() as l_editor:
         do_load_drafts(r_editor, updates)
         r_editor.publish_drafts()
@@ -91,20 +105,19 @@ def test_does_copy(updates: List[Draft]):
                               l_editor.repo.titles.get_titles())
 
 
-@given(a_draft())
-def test_does_unload_titles(update: Draft):
+@given(some_drafts(2))
+@settings(suppress_health_check=[HealthCheck.filter_too_much])
+def test_unload_titles(drafts: Set[Draft]):
     with get_file_editor() as editor:
-        do_load_draft(editor, update)
-
+        do_load_drafts(editor, drafts)
+        editor.publish_drafts()
         editor.unload_titles()
-        files = []
-        for file in editor.iterfiles():
-            parts = file.relative_to(editor.repo.path).parts
-            files.append(list(parts))
-        test.assertCountEqual(
-            files,
-            [update.label.path]
-        )
+        file_labels = [PathLabel(path, editor.repo.path)
+                       for path in editor.iterfiles()]
+        title_labels = [
+            title.label for title in editor.repo.titles.get_titles()]
+        for label in file_labels:
+            assert label in title_labels
 
 
 @given(an_article(), a_draft())
@@ -177,8 +190,7 @@ def test_does_publish_changed_draft_path():
 
 
 @given(some_new_drafts(2))
-def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
-    some_drafts = list(some_drafts)
+def test_does_publish_some_new_drafts(some_drafts: Set[Draft]):
     with get_file_editor() as editor:
         do_load_drafts(editor, some_drafts)
         assert 0 < editor.publish_drafts() <= 2

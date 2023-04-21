@@ -2,7 +2,7 @@
 from typing import Dict, List
 from unittest import TestCase
 
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 from linki.article import Article
 from linki.connection import Connection, MemoryConnection
 from linki.draft import Draft
@@ -88,6 +88,7 @@ def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
 
 
 @given(some_drafts(2))
+@settings(suppress_health_check=[HealthCheck.filter_too_much])
 def test_does_publish_some_drafts(some_drafts: List[Draft]):
     some_drafts = list(some_drafts)
     repo = MemoryRepository()

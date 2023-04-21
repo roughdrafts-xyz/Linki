@@ -4,6 +4,7 @@ from hashlib import sha224
 from pathlib import Path
 import re
 from typing import List
+from urllib.parse import quote_plus
 
 SHA224 = re.compile(r'[a-f0-9]{56}')
 
@@ -85,12 +86,11 @@ class Label():
 
     @ staticmethod
     def as_safe_string(string: str) -> str:
-        _str = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", "-", string)
-        _str = _str.strip()
-        _str = _str.strip('.')
-        if (not _str):
-            _str = "-"
-        return _str
+        s = str(string).strip().replace(" ", "_")
+        s = re.sub(r"(?u)[^-\w.]", "", s)
+        if s in {"", ".", ".."}:
+            s = '-'
+        return s
 
     def __repr__(self) -> str:
         return f"Label({self.path})"
@@ -101,7 +101,7 @@ class Label():
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, Label):
             return False
-        return self.__hash__() == __value.__hash__()
+        return str(self.labelId) == str(__value.labelId)
 
 
 class SimpleLabel(Label):
@@ -111,6 +111,11 @@ class SimpleLabel(Label):
 
 
 class PathLabel(Label):
-    def __init__(self, path: Path) -> None:
-        self.path_obj = path
-        super().__init__(list(path.parts))
+    def __init__(self, path: Path, root: Path | None = None) -> None:
+        if root is None:
+            self.path_obj = path
+        else:
+            root = root.resolve()
+            path = path.resolve()
+            self.path_obj = path.relative_to(root)
+        super().__init__(list(self.path_obj.parts))

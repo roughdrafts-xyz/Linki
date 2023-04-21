@@ -32,8 +32,8 @@ def an_article(draw: strategies.DrawFn, editOf: Article | None = None) -> Articl
     if (editOf is not None):
         assume(
             xor(
-                article.label != editOf.label,
-                article.content != editOf.content
+                article.label == editOf.label,
+                article.content == editOf.content
             )
         )
     return article

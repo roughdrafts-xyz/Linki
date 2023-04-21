@@ -79,11 +79,11 @@ class FileEditor(Editor):
         return cls(repo)
 
     def iterdir(self):
-        # Path.rglob doesn't handle avoiding hidden folders well.
-        #
-        # Using the more correct root_dir=self.path breaks for a
-        # reason I don't care to research at the moment.
-        return map(Path, iglob(f'{self.repo.path}/**', recursive=True))
+        for path in self.repo.path.rglob('*'):
+            if ('.linki' not in path.parts and
+                    path != self.repo.path
+                    ):
+                yield path
 
     def iterfiles(self):
         glob = self.iterdir()
@@ -91,19 +91,21 @@ class FileEditor(Editor):
 
     def get_edit_of(self, file: Path):
         content = file.read_text()
-        file = file.relative_to(self.repo.path)
-        for title in self.repo.titles.get_titles():
-            if (
-                content == title.content or
-                PathLabel(file) == title.label
-            ):
+        path_label = PathLabel(file, self.repo.path)
+        titles = list(self.repo.titles.get_titles())
+        for title in titles:
+            if (path_label == title.label):
+                return title
+        for title in titles:
+            if (content == title.content):
                 return title
         return None
 
     def load_drafts(self):
+        files = list(self.iterfiles())
         for file in self.iterfiles():
             editOf = self.get_edit_of(file)
-            label = PathLabel(file.relative_to(self.repo.path))
+            label = PathLabel(file, self.repo.path)
             _draft = Draft(
                 label,
                 file.read_text(),
@@ -116,11 +118,12 @@ class FileEditor(Editor):
         for title in self.repo.titles.get_titles():
             if (title.redirect is not None):
                 prev = self.repo.path.joinpath(*title.label.path)
-                prev.unlink()
+                prev.unlink(missing_ok=True)
                 for crumb in prev.parents:
                     if (crumb == self.repo.path):
                         break
-                    crumb.rmdir()
+                    if (crumb.exists()):
+                        crumb.rmdir()
                 continue
             unload = self.repo.path.joinpath(*title.label.parents)
             unload.mkdir(parents=True, exist_ok=True)

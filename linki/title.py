@@ -30,6 +30,9 @@ class Title(Article):
             redirect=redirect
         )
 
+    def __hash__(self) -> int:
+        return super().__hash__()
+
 
 class TitleCollection():
     def __init__(self, connection: Connection[Title]) -> None:

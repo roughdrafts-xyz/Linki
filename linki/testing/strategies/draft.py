@@ -1,6 +1,7 @@
-from hypothesis import strategies
+from typing import Set
+from hypothesis import assume, strategies
 from linki.draft import Draft
-from linki.testing.strategies.article import an_article
+from linki.testing.strategies.article import an_article, some_articles
 
 
 @strategies.composite
@@ -24,7 +25,20 @@ def a_draft(draw: strategies.DrawFn):
 
 @strategies.composite
 def some_drafts(draw: strategies.DrawFn, amount: int):
-    return (draw(a_draft()) for _ in range(amount))
+    drafts: Set[Draft] = set()
+    for i in range(amount):
+        draft = draw(a_draft())
+        labels = {_.label for _ in drafts}
+        assume(draft.label not in labels)
+
+        if (draft.editOf is not None):
+            edit_labels = {
+                _.editOf.label for _ in drafts if _.editOf is not None}
+            assume(draft.editOf.label not in edit_labels)
+
+        drafts.add(draft)
+        assume(len(drafts) == i+1)
+    return drafts
 
 
 @strategies.composite

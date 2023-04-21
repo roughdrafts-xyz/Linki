@@ -21,7 +21,7 @@ class MemoryConnection(Connection[VT]):
         self.store: Dict[ID, VT] = dict()
 
     def __setitem__(self, __key: ID, __value: VT) -> None:
-        self.store[__key] = __value
+        self.store[__key] = copy.deepcopy(__value)
 
     def __getitem__(self, __key: ID) -> VT:
         return copy.deepcopy(self.store[__key])

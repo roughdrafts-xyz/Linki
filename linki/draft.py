@@ -28,6 +28,9 @@ class Draft(Article):
             article.editOf
         )
 
+    def __hash__(self) -> int:
+        return super().__hash__()
+
 
 class DraftCollection(ABC):
     def __init__(self, connection: Connection[Draft]) -> None:
