@@ -1,9 +1,8 @@
 import copy
-from dataclasses import is_dataclass
 from io import BytesIO
 from pathlib import Path
 import pickle
-from typing import Dict, Iterator, List, MutableMapping, TypeVar
+from typing import Dict, Iterator, MutableMapping, TypeVar
 from urllib.error import HTTPError
 from urllib.parse import ParseResult
 from urllib.request import urlopen

@@ -28,13 +28,13 @@ def some_drafts(draw: strategies.DrawFn, amount: int):
     drafts: Set[Draft] = set()
     for i in range(amount):
         draft = draw(a_draft())
-        labels = {_.label for _ in drafts}
-        assume(draft.label not in labels)
+        for _ in drafts:
+            assume(draft.label != _.label)
 
         if (draft.editOf is not None):
-            edit_labels = {
-                _.editOf.label for _ in drafts if _.editOf is not None}
-            assume(draft.editOf.label not in edit_labels)
+            for _ in drafts:
+                if _.editOf is not None:
+                    assume(draft.editOf.label != _.editOf.label)
 
         drafts.add(draft)
         assume(len(drafts) == i+1)

@@ -4,17 +4,12 @@ import pickle
 import msgspec
 
 import pypandoc
-from linki.article import ArticleCollection
-from linki.connection import MemoryConnection
 from linki.editor import Copier, Editor
 from linki.id import Label, LabelID
 from linki.repository import Repository, TemporaryRepository
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 import bottle
-from linki.testing.editor.test_editor import MemoryRepository
-from linki.title import TitleCollection
 
-from linki.url import URL
 
 
 @dataclass(kw_only=True)
@@ -86,7 +81,7 @@ class WebView:
         item_id = None
         match style:
             case 'titles':
-                item_id = Label(path=label.split('/')).labelId
+                item_id = Label(label.split('/')).labelId
             case _:
                 raise bottle.HTTPError(404, f'pathed style not found: {style}')
         return item_id

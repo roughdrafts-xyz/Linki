@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from functools import cached_property
 from hashlib import sha224
 from pathlib import Path
@@ -51,13 +50,21 @@ class LabelID(ID):
         return cls(sha224(package).hexdigest())
 
 
-class Label(msgspec.Struct, kw_only=True, dict=True):
+class BaseLabel(msgspec.Struct, kw_only=True, dict=True, frozen=True):
     path: List[str]
 
     @classmethod
     def fromUnsafeString(cls, unsafe_raw_name: str):
-        label = cls(path=[unsafe_raw_name])
-        label.clean_path()
+        label_path = [unsafe_raw_name]
+        label_path = cls.clean_path(label_path)
+        label = cls(path=label_path)
+        return label
+
+    @classmethod
+    def fromUnsafeList(cls, unsafe_list: List[str]):
+        label_path = unsafe_list
+        label_path = cls.clean_path(label_path)
+        label = cls(path=label_path)
         return label
 
     @classmethod
@@ -65,8 +72,9 @@ class Label(msgspec.Struct, kw_only=True, dict=True):
         if root is not None:
             root = root.resolve()
             path = path.relative_to(root)
-        label = cls(path=list(path.parts))
-        label.clean_path()
+        label_path = list(path.parts)
+        label_path = cls.clean_path(label_path)
+        label = cls(path=label_path)
         return label
 
     @cached_property
@@ -81,10 +89,12 @@ class Label(msgspec.Struct, kw_only=True, dict=True):
     def parents(self) -> List[str]:
         return self.path[:-1]
 
-    def clean_path(self) -> None:
-        self.path = [self.as_safe_string(crumb) for crumb in self.path]
-        if not (all(map(self.is_valid, self.path))):
+    @classmethod
+    def clean_path(cls, path: List[str]) -> List[str]:
+        path = [cls.as_safe_string(crumb) for crumb in path]
+        if not (all(map(cls.is_valid, path))):
             raise AttributeError
+        return path
 
     @classmethod
     def is_valid(cls, string: str) -> bool:
@@ -108,9 +118,13 @@ class Label(msgspec.Struct, kw_only=True, dict=True):
         return s
 
 
+def Label(path: List[str]):
+    return BaseLabel.fromUnsafeList(path)
+
+
 def SimpleLabel(name: str):
-    return Label.fromUnsafeString(name)
+    return BaseLabel.fromUnsafeString(name)
 
 
 def PathLabel(path: Path, root: Path | None = None):
-    return Label.fromPath(path, root)
+    return BaseLabel.fromPath(path, root)

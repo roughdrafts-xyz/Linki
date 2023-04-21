@@ -1,9 +1,6 @@
 import copy
-from dataclasses import asdict
 from io import BytesIO
-import pickle
-from typing import Dict, List
-import bottle
+from typing import Dict
 
 from hypothesis import given
 import msgspec
@@ -129,7 +126,6 @@ def test_does_handle_not_legit_contribute(article: Article):
 def test_does_handle_copy(article: Article):
     viewer = get_memory_server()
     do_handle_copy(viewer, article)
-    pass
 
 
 def get_memory_server():
@@ -144,6 +140,7 @@ def get_memory_server():
 
 
 def do_handle_api(viewer: WebView, article: Article):
+    # TODO Make this use the Client
     output = 'api'
     viewer.repo.articles.merge_article(article)
     viewer.repo.titles.set_title(article)
@@ -165,6 +162,7 @@ def do_handle_api(viewer: WebView, article: Article):
 
 
 def do_handle_web(viewer: WebView, article: Article):
+    # TODO Make this use the Client
     output = 'w'
     viewer.repo.articles.merge_article(article)
     viewer.repo.titles.set_title(article)
@@ -191,6 +189,7 @@ def do_handle_web(viewer: WebView, article: Article):
 
 
 def do_handle_copy(viewer: WebView, article: Article):
+    # TODO Make this use the Client
     output = 'copy'
     viewer.repo.articles.merge_article(article)
     viewer.repo.titles.set_title(article)

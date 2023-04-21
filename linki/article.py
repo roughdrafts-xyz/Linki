@@ -1,16 +1,15 @@
-from dataclasses import dataclass
 from functools import cached_property
 import pickle
 from typing import Iterator
 
 import msgspec
-from linki.connection import Connection, MemoryConnection
+from linki.connection import Connection
 
-from linki.id import ArticleID, Label
+from linki.id import ArticleID, BaseLabel
 
 
 class Article(msgspec.Struct, dict=True):
-    label: Label
+    label: BaseLabel
     content: str
     editOf: 'Article | None'
 

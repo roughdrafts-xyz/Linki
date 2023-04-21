@@ -1,10 +1,9 @@
 
-from typing import Dict, List
+from typing import List, Set
 from unittest import TestCase
 
 from hypothesis import HealthCheck, given, settings
 from linki.article import Article
-from linki.connection import Connection, MemoryConnection
 from linki.draft import Draft
 
 from linki.editor import Editor
@@ -77,8 +76,7 @@ def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
 
 @given(some_drafts(2))
 @settings(suppress_health_check=[HealthCheck.filter_too_much])
-def test_does_publish_some_drafts(some_drafts: List[Draft]):
-    some_drafts = list(some_drafts)
+def test_does_publish_some_drafts(some_drafts: Set[Draft]):
     repo = MemoryRepository()
     editor = Editor(repo)
 
@@ -118,9 +116,9 @@ def test_does_publish_changed_draft_path(draft: Draft):
     n_draft = Draft.fromArticle(draft)
     z_draft = Draft.fromArticle(draft)
 
-    o_draft.label = Label(path=['initial'] + o_draft.label.path)
-    n_draft.label = Label(path=['changed'] + n_draft.label.path)
-    z_draft.label = Label(path=['final_z'] + z_draft.label.path)
+    o_draft.label = Label(['initial'] + o_draft.label.path)
+    n_draft.label = Label(['changed'] + n_draft.label.path)
+    z_draft.label = Label(['final_z'] + z_draft.label.path)
     n_draft.editOf = o_draft
     z_draft.editOf = n_draft
 

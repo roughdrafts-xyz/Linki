@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, List
 from urllib.parse import ParseResult
 
 import msgspec

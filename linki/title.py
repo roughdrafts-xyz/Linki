@@ -1,14 +1,14 @@
 import pickle
 from typing import Iterator
 from linki.article import Article
-from linki.connection import Connection, MemoryConnection
+from linki.connection import Connection
 
-from linki.id import Label
+from linki.id import BaseLabel
 
 
 class Title(Article):
     editOf: Article | None
-    redirect: Label | None = None
+    redirect: BaseLabel | None = None
 
     @classmethod
     def fromArticle(cls, article: Article) -> 'Title':
@@ -19,7 +19,7 @@ class Title(Article):
         )
 
     @classmethod
-    def createRedirect(cls, editOf: Article, redirect: Label) -> 'Title':
+    def createRedirect(cls, editOf: Article, redirect: BaseLabel) -> 'Title':
         path_string = ','.join(redirect.path)
         content = f'[redirect:{path_string}#{redirect.labelId}]'
         title = cls(
@@ -41,7 +41,7 @@ class TitleCollection():
         self.titles[title.label.labelId] = title
         return title
 
-    def get_title(self, title: Label) -> Title | None:
+    def get_title(self, title: BaseLabel) -> Title | None:
         if (title.labelId not in self.titles):
             return None
         return self.titles[title.labelId]
@@ -50,7 +50,7 @@ class TitleCollection():
         for item in self.titles.values():
             yield item
 
-    def clear_title(self, title: Label) -> None:
+    def clear_title(self, title: BaseLabel) -> None:
         if (title.labelId in self.titles):
             del self.titles[title.labelId]
 

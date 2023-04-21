@@ -3,11 +3,11 @@ from typing import Iterator
 from linki.article import Article
 from linki.connection import Connection
 
-from linki.id import Label
+from linki.id import BaseLabel
 
 
 class Draft(Article):
-    label: Label
+    label: BaseLabel
     content: str
     editOf: Article | None
 
@@ -35,14 +35,14 @@ class DraftCollection(ABC):
         self.drafts[draft.label.labelId] = draft
         return draft
 
-    def get_draft(self, label: Label) -> Draft | None:
+    def get_draft(self, label: BaseLabel) -> Draft | None:
         return self.drafts.get(label.labelId, None)
 
     def get_drafts(self) -> Iterator[Draft]:
         for item in self.drafts.values():
             yield item
 
-    def clear_draft(self, label: Label) -> bool:
+    def clear_draft(self, label: BaseLabel) -> bool:
         if (label.labelId in self.drafts):
             del self.drafts[label.labelId]
             return True
