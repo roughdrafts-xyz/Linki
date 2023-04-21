@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterable
+from typing import Dict, Iterable
 from urllib.parse import ParseResult
 from linki.article import ArticleCollection
 from linki.connection import MemoryConnection, ROWebConnection, Connection, PathConnection
@@ -117,3 +117,32 @@ class FileRepository(Repository):
     def createPath(cls, path: str | Path):
         path = Path(path).resolve().as_uri()
         return cls.create(path)
+
+
+class MemoryRepoConnection(RepositoryConnection):
+    def __init__(self) -> None:
+        self.connections: Dict[str, MemoryConnection] = dict()
+
+    def get_style(self, style: str) -> Connection:
+        conn = self.connections.get(style)
+        if conn is None:
+            conn = MemoryConnection()
+            self.connections[style] = conn
+        return conn
+
+
+class TemporaryRepository(Repository):
+    def __init__(self) -> None:
+        self.connection = MemoryRepoConnection()
+
+    @classmethod
+    def fromStreams(cls, **streams):
+        repo = cls()
+        for stream in streams:
+            if stream not in cls.styles:
+                continue
+            s_conn = MemoryConnection.fromStream(streams[stream])
+            d_conn = repo.connection.get_style(stream)
+            for item in s_conn:
+                d_conn[item] = s_conn[item]
+        return repo

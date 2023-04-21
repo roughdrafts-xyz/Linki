@@ -6,7 +6,7 @@ from linki.article import ArticleCollection
 from linki.connection import MemoryConnection
 from linki.editor import Copier, Editor
 from linki.id import Label, LabelID
-from linki.repository import Repository
+from linki.repository import Repository, TemporaryRepository
 from dataclasses import asdict, dataclass
 import bottle
 from linki.testing.editor.test_editor import MemoryRepository
@@ -139,17 +139,12 @@ class WebView:
         req: bottle.FormsDict = bottle.request.params  # type: ignore
         url = req.get('url')
         if (url == 'https://localhost:8080/'):
-            source = MemoryRepository()
-            titles_conn: str = req.get('titles')
-            if (title_conn is not None):
-                titles = pickle.loads(title_conn)
-                for item in titles:
-                    source.titles.set_title(titles[item])
-            article_conn = req.get('articles', type=bytes)
-            if (article_conn is not None):
-                articles = pickle.loads(article_conn)
-                for item in articles:
-                    source.articles.merge_article(articles[item])
+            titles = req.get('titles')
+            articles = req.get('articles')
+            source = TemporaryRepository.fromStreams(
+                titles=titles,
+                articles=articles
+            )
 
             destination = Editor(self.repo)
             copier = Copier(source, destination)

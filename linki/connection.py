@@ -13,8 +13,7 @@ VT = TypeVar('VT')
 
 
 class Connection(MutableMapping[ID, VT]):
-    def toStream(self):
-        return pickle.dumps(self)
+    pass
 
 
 class MemoryConnection(Connection[VT]):
@@ -35,6 +34,13 @@ class MemoryConnection(Connection[VT]):
 
     def __len__(self) -> int:
         return self.store.__len__()
+
+    def toStream(self):
+        return pickle.dumps(self)
+
+    @staticmethod
+    def fromStream(stream: bytes):
+        return pickle.loads(stream)
 
 
 class PathConnection(Connection[VT]):

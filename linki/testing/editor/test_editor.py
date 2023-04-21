@@ -9,23 +9,11 @@ from linki.draft import Draft
 
 from linki.editor import Editor
 from linki.id import Label
-from linki.repository import Repository, RepositoryConnection
+from linki.repository import MemoryRepoConnection, Repository
 from linki.testing.strategies.article import an_article
 from linki.testing.strategies.draft import a_draft, a_new_draft, some_drafts, some_new_drafts
 
 test = TestCase()
-
-
-class MemoryRepoConnection(RepositoryConnection):
-    def __init__(self) -> None:
-        self.connections: Dict[str, MemoryConnection] = dict()
-
-    def get_style(self, style: str) -> Connection:
-        conn = self.connections.get(style)
-        if conn is None:
-            conn = MemoryConnection()
-            self.connections[style] = conn
-        return conn
 
 
 class MemoryRepository(Repository):
