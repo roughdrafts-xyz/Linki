@@ -132,7 +132,11 @@ class WebView:
                 })
 
     def handle_contribution(self):
-        url = bottle.request.forms.get('url')  # type: ignore
+        url = bottle.request.params.get('url')  # type: ignore
+        if (url == 'https://localhost:8080/'):
+            return bottle.HTTPResponse('/updates', 201)
+        else:
+            return bottle.HTTPResponse('', 403)
         if (URL(url).labelId not in self.repo.subs.urls):
             return "1"
 

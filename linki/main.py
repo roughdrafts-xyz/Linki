@@ -106,6 +106,7 @@ def serve(
         repo = FileRepository.fromPath(location)
         viewer = WebView(repo, WebViewConf(
             copy=subscribe,
+            contribute=True,
             api=api,
             web=web,
             debug=debug,

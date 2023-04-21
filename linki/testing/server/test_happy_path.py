@@ -1,6 +1,8 @@
 import copy
 from dataclasses import asdict
-import pickle
+from typing import Dict
+from boddle import boddle
+import bottle
 
 from hypothesis import given
 import pypandoc
@@ -43,16 +45,62 @@ def test_does_handle_web(article: Article):
     do_handle_web(viewer, article)
 
 
-def test_does_handle_contribute():
-    # previously announce
+@given(an_article())
+def test_does_handle_contribute(article: Article):
+    def compare_res(self: bottle.HTTPResponse, __value: object):
+        if (not isinstance(__value, bottle.HTTPResponse)):
+            return False
 
+        return (
+            self.body == __value.body and
+            self.status_code == __value.status_code
+        )
+    bottle.HTTPResponse.__eq__ = compare_res
+    article_conn = MemoryConnection[Article]()
+    title_conn = MemoryConnection[Title]()
+    articles = ArticleCollection(article_conn)
+    titles = TitleCollection(title_conn)
+
+    articles.merge_article(article)
+    titles.set_title(article)
+
+    pak_contents: Dict[str, MemoryConnection] = {
+        'titles': title_conn,
+        'articles': article_conn
+    }
+    update_pak = pak_contents
+
+    with boddle(params={
+        'url': 'https://localhost:8080/',
+        'update': update_pak
+    }):
+        viewer = get_memory_server()
+        viewer.repo.subs.add_url('https://localhost:8080/')
+        res = viewer.handle_contribution()
+        expected = bottle.HTTPResponse('/updates', 201)
+        assert res == expected
+        assert pak_contents.get(
+            'titles') == viewer.repo.get_collection('titles')
+        assert pak_contents.get(
+            'articles') == viewer.repo.get_collection('articles')
+
+    with boddle(params={
+        'url': 'https://localhost:8888/',
+        'update': update_pak
+    }):
+        viewer = get_memory_server()
+        viewer.repo.subs.add_url('https://localhost:8080/')
+        res = viewer.handle_contribution()
+        expected = bottle.HTTPResponse('', 403)
+        assert res == expected
+        assert pak_contents.get(
+            'titles') != viewer.repo.get_collection('titles')
+        assert pak_contents.get(
+            'articles') != viewer.repo.get_collection('articles')
+
+    # TODO - Requires configuration options
     # handles contributions from illegal users
     #   expect some kind of failure indicator
-
-    # handles contributions from legal users
-    #   expect some kind of success indicator
-    #   expect repo to have new articles and titles
-    assert False
 
 
 @given(an_article())
