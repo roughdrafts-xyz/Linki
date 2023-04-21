@@ -97,21 +97,27 @@ def test_does_handle_not_legit_contribute(article: Article):
     articles = conns['articles']
     titles = conns['titles']
 
-    pak_contents: Dict[str, bytes] = {
-        'articles': articles.toStream(),
-        'titles': titles.toStream(),
+    pak_contents: Dict[str, BytesIO] = {
+        'articles': articles.toFile(),
+        'titles': titles.toFile(),
     }
+
     viewer = get_memory_server()
-    viewer.repo.subs.add_url('https://localhost:8080/')
+    url = 'https://localhost:8080/'
+    viewer.repo.subs.add_url(url)
 
     client = Client(viewer.app)
     res = client.post('/contribute', data={
-        'url': url
+        'url': 'https://localhost:8888/',
+        'titles': (pak_contents['titles'], 'titles'),
+        'articles': (pak_contents['articles'], 'articles')
     })
-    assert res.status_code == 200
-    assert res.text == '/updates'
-    assert title_conn != viewer.repo.get_collection('titles')
-    assert article_conn != viewer.repo.get_collection('articles')
+
+    assert res.status_code == 403
+    assert res.text == ''
+
+    assert titles != viewer.repo.get_collection('titles')
+    assert articles != viewer.repo.get_collection('articles')
 
     # TODO - Requires configuration options
     # handles contributions from illegal users
