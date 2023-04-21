@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from functools import cached_property
+import pickle
 from typing import Iterator
-from linki.connection import Connection
+from linki.connection import Connection, MemoryConnection
 
 from linki.id import ArticleID, Label
 
@@ -16,6 +17,11 @@ class Article():
     def articleId(self) -> ArticleID:
         return ArticleID.getArticleID(
             self.label, self.content, self.editOf)
+
+    @classmethod
+    def fromStream(cls, stream: bytes):
+        res = pickle.loads(stream)
+        return res
 
     def __hash__(self) -> int:
         return hash(self.articleId)
@@ -45,3 +51,20 @@ class ArticleCollection():
 
     def has_article(self, articleId: ArticleID | None) -> bool:
         return articleId in self.articles
+
+    @classmethod
+    def fromStream(cls, stream: bytes):
+        res = pickle.loads(stream)
+        articles = cls(MemoryConnection[Article]())
+        for article in res:
+            articles.merge_article(article)
+        return articles
+
+    def __hash__(self) -> int:
+        return hash(self.articles)
+
+    def __eq__(self, __value: object) -> bool:
+        if (not isinstance(__value, ArticleCollection)):
+            return False
+
+        return self.articles == __value.articles

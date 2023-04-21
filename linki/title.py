@@ -1,6 +1,7 @@
+import pickle
 from typing import Iterator
 from linki.article import Article
-from linki.connection import Connection
+from linki.connection import Connection, MemoryConnection
 
 from linki.id import Label
 
@@ -52,3 +53,20 @@ class TitleCollection():
     def clear_title(self, title: Label) -> None:
         if (title.labelId in self.titles):
             del self.titles[title.labelId]
+
+    @classmethod
+    def fromStream(cls, stream: bytes):
+        res = pickle.loads(stream)
+        titles = cls(MemoryConnection[Title]())
+        for title in res:
+            titles.set_title(title)
+        return titles
+
+    def __hash__(self) -> int:
+        return hash(self.titles)
+
+    def __eq__(self, __value: object) -> bool:
+        if (not isinstance(__value, TitleCollection)):
+            return False
+
+        return self.titles == __value.titles
