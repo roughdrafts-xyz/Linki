@@ -109,23 +109,24 @@ class WebView:
     def handle_many(self, output: str, style: str):
         if style not in self.styles:
             raise bottle.HTTPError(404, f'style not found: {style}')
-        iter_item = list(self.repo.iter_item(style))
+        collection = self.repo.get_collection(style)
         match output:
             case 'copy':
-                return pickle.dumps(iter_item)
+                return pickle.dumps(collection)
             case 'api':
-                return {style: [asdict(item) for item in iter_item]}
+                return {style: [asdict(item) for item in collection.values()]}
             case 'count':
                 return f"{self.repo.get_count(style)}"
             case 'w':
-                for item in iter_item:
+                items = list(collection.values())
+                for item in items:
                     if (style == 'titles'):
                         item.web_id = item.label.labelId
                     else:
                         item.web_id = item.articleId
 
                 return self.many_tmpl.render({
-                    'items': iter_item,
+                    'items': items,
                     'style': style.capitalize(),
                     'style_root': f"/w/{style}/"
                 })

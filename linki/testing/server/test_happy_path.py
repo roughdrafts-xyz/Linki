@@ -52,7 +52,7 @@ def test_does_handle_contribute():
     # handles contributions from legal users
     #   expect some kind of success indicator
     #   expect repo to have new articles and titles
-    pass
+    assert False
 
 
 @given(an_article())

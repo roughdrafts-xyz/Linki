@@ -57,10 +57,7 @@ class TitleCollection():
     @classmethod
     def fromStream(cls, stream: bytes):
         res = pickle.loads(stream)
-        titles = cls(MemoryConnection[Title]())
-        for title in res:
-            titles.set_title(title)
-        return titles
+        return TitleCollection(res)
 
     def __hash__(self) -> int:
         return hash(self.titles)

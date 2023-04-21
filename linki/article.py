@@ -55,10 +55,7 @@ class ArticleCollection():
     @classmethod
     def fromStream(cls, stream: bytes):
         res = pickle.loads(stream)
-        articles = cls(MemoryConnection[Article]())
-        for article in res:
-            articles.merge_article(article)
-        return articles
+        return ArticleCollection(res)
 
     def __hash__(self) -> int:
         return hash(self.articles)

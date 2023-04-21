@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Iterable
 from urllib.parse import ParseResult
 from linki.article import ArticleCollection
-from linki.connection import ROWebConnection, Connection, PathConnection
+from linki.connection import MemoryConnection, ROWebConnection, Connection, PathConnection
 from linki.draft import DraftCollection
 from linki.id import ID
 from linki.url import URL, URLCollection
@@ -53,11 +53,12 @@ class Repository:
             return None
         return connection.get(item_id)
 
-    def iter_item(self, style: str) -> Iterable:
+    def get_collection(self, style: str):
         connection = self.connection.get_style(style)
-        if (connection is None):
-            return []
-        return connection.values()
+        collection = MemoryConnection()
+        for item in connection:
+            collection[item] = connection[item]
+        return collection
 
     def get_count(self, style: str):
         connection = self.connection.get_style(style)
