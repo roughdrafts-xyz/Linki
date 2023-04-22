@@ -1,44 +1,35 @@
 from abc import ABC
 from typing import Iterator
-from linki.article import Article
+from linki.article import BaseArticle
 from linki.connection import Connection
 
 from linki.id import BaseLabel
 
 
-class Draft(Article):
-    label: BaseLabel
-    content: str
-    editOf: Article | None
-
-    def should_update(self) -> bool:
-        if (self.editOf is None):
-            return True
-        label_different = self.label != self.editOf.label
-        content_different = self.content != self.editOf.content
-        return label_different or content_different
-
-    @classmethod
-    def fromArticle(cls, article: Article) -> 'Draft':
-        return cls(
-            article.label,
-            article.content,
-            article.editOf
-        )
+def Draft(
+    label: BaseLabel,
+    content: str,
+    editOf: 'BaseArticle | None'
+) -> BaseArticle:
+    return BaseArticle(
+        label=label,
+        content=content,
+        editOf=editOf
+    )
 
 
 class DraftCollection(ABC):
-    def __init__(self, connection: Connection[Draft]) -> None:
+    def __init__(self, connection: Connection[BaseArticle]) -> None:
         self.drafts = connection
 
-    def set_draft(self, draft: Draft) -> Draft:
+    def set_draft(self, draft: BaseArticle) -> BaseArticle:
         self.drafts[draft.label.labelId] = draft
         return draft
 
-    def get_draft(self, label: BaseLabel) -> Draft | None:
+    def get_draft(self, label: BaseLabel) -> BaseArticle | None:
         return self.drafts.get(label.labelId, None)
 
-    def get_drafts(self) -> Iterator[Draft]:
+    def get_drafts(self) -> Iterator[BaseArticle]:
         for item in self.drafts.values():
             yield item
 

@@ -7,23 +7,24 @@ from typing import Set
 from unittest import TestCase
 
 from hypothesis import HealthCheck, assume, given, settings
-from linki.article import Article, ArticleCollection
+import msgspec
+from linki.article import Article, BaseArticle, ArticleCollection
 from linki.connection import MemoryConnection
-from linki.draft import Draft
+from linki.draft import BaseArticle
 
 from linki.editor import FileEditor
 from linki.repository import Repository
 from linki.testing.strategies.article import an_article
-from linki.id import Label, PathLabel, SimpleLabel
+from linki.id import BaseLabel, Label, PathLabel, SimpleLabel
 from linki.testing.strategies.draft import a_draft, some_drafts, some_new_drafts
-from linki.title import Title, TitleCollection
+from linki.title import BaseArticle, TitleCollection
 
 from random import randint
 
-test = TestCase()
+case_tester = TestCase()
 
 
-def do_load_drafts(editor: FileEditor, drafts: Set[Draft]):
+def do_load_drafts(editor: FileEditor, drafts: Set[BaseArticle]):
     for file in editor.repo.path.iterdir():
         if (file.is_file()):
             file.unlink()
@@ -35,8 +36,8 @@ def do_load_drafts(editor: FileEditor, drafts: Set[Draft]):
         p.mkdir(exist_ok=True, parents=True)
         p.joinpath(draft.label.name).write_text(draft.content)
         if (draft.editOf is not None):
-            artColl = ArticleCollection(MemoryConnection[Article]())
-            titColl = TitleCollection(MemoryConnection[Title]())
+            artColl = ArticleCollection(MemoryConnection[BaseArticle]())
+            titColl = TitleCollection(MemoryConnection[BaseArticle]())
 
             article = draft.editOf
             titColl.set_title(article)
@@ -56,7 +57,7 @@ def do_load_drafts(editor: FileEditor, drafts: Set[Draft]):
     editor.load_drafts()
 
 
-def do_load_draft(editor: FileEditor, draft: Draft):
+def do_load_draft(editor: FileEditor, draft: BaseArticle):
     do_load_drafts(editor, {draft})
     return editor.repo.path.joinpath(*draft.label.path)
 
@@ -71,22 +72,22 @@ def get_file_editor():
 
 @given(some_drafts(2))
 @settings(suppress_health_check=[HealthCheck.filter_too_much])
-def test_loads_drafts(drafts: Set[Draft]):
+def test_loads_drafts(drafts: Set[BaseArticle]):
     with get_file_editor() as editor:
         do_load_drafts(editor, drafts)
-        all_drafts = list(editor.repo.drafts.get_drafts())
-        compare = [(draft.label, draft.content)
-                   for draft in all_drafts]
+        loaded_edits = set(editor.repo.drafts.get_drafts())
+        loaded_drafts = set((draft.label, draft.content)
+                            for draft in loaded_edits)
         for draft in drafts:
             if (draft.editOf is not None):
-                assert draft in all_drafts
+                assert draft in loaded_edits
             else:
-                assert (draft.label, draft.content) in compare
+                assert (draft.label, draft.content) in loaded_drafts
 
 
 @given(some_drafts(2))
 @settings(suppress_health_check=[HealthCheck.filter_too_much])
-def test_does_copy(updates: Set[Draft]):
+def test_does_copy(updates: Set[BaseArticle]):
     with get_file_editor() as r_editor, get_file_editor() as l_editor:
         do_load_drafts(r_editor, updates)
         r_editor.publish_drafts()
@@ -98,15 +99,15 @@ def test_does_copy(updates: Set[Draft]):
         l_editor.copy_articles(r_editor.repo.articles)
         l_editor.copy_titles(r_editor.repo.titles)
 
-        test.assertCountEqual(r_editor.repo.articles.get_articles(),
-                              l_editor.repo.articles.get_articles())
-        test.assertCountEqual(r_editor.repo.titles.get_titles(),
-                              l_editor.repo.titles.get_titles())
+        case_tester.assertCountEqual(r_editor.repo.articles.get_articles(),
+                                     l_editor.repo.articles.get_articles())
+        case_tester.assertCountEqual(r_editor.repo.titles.get_titles(),
+                                     l_editor.repo.titles.get_titles())
 
 
 @given(some_drafts(2))
 @settings(suppress_health_check=[HealthCheck.filter_too_much])
-def test_unload_titles(drafts: Set[Draft]):
+def test_unload_titles(drafts: Set[BaseArticle]):
     with get_file_editor() as editor:
         do_load_drafts(editor, drafts)
         editor.publish_drafts()
@@ -120,13 +121,13 @@ def test_unload_titles(drafts: Set[Draft]):
 
 
 @given(an_article(), a_draft())
-def test_does_publish_changed_drafts(article: Article, draft: Draft):
+def test_does_publish_changed_drafts(article: BaseArticle, draft: BaseArticle):
     with get_file_editor() as editor:
         repo = editor.repo
 
         repo.articles.merge_article(article)
         repo.titles.set_title(article)
-        draft.editOf = article
+        draft = msgspec.structs.replace(draft, editOf=article)
         repo.drafts.set_draft(draft)
 
         assume(draft.should_update())
@@ -136,7 +137,7 @@ def test_does_publish_changed_drafts(article: Article, draft: Draft):
 
 
 @given(a_draft())
-def test_does_publish_draft(draft: Draft):
+def test_does_publish_draft(draft: BaseArticle):
     with get_file_editor() as editor:
         assume(draft.should_update())
         do_load_draft(editor, draft)
@@ -147,27 +148,24 @@ def test_does_publish_draft(draft: Draft):
 
 def test_does_publish_changed_draft_path():
     with get_file_editor() as editor:
-        draft = Draft(SimpleLabel('hello'), 'hello', None)
-        o_draft = Draft.fromArticle(draft)
-        n_draft = Draft.fromArticle(draft)
-        z_draft = Draft.fromArticle(draft)
-
-        o_draft.label = Label(['initial'] + o_draft.label.path)
-        n_draft.label = Label(['changed'] + n_draft.label.path)
-        z_draft.label = Label(['final_z'] + z_draft.label.path)
-        n_draft.editOf = o_draft
-        z_draft.editOf = n_draft
+        draft = Article(SimpleLabel('hello'), 'hello', None)
+        o_draft = msgspec.structs.replace(
+            draft, label=Label(['initial', *draft.label.path]))
+        n_draft = msgspec.structs.replace(draft, editOf=o_draft, label=Label(
+            ['changed', *draft.label.path]))
+        z_draft = msgspec.structs.replace(draft, editOf=n_draft, label=Label(
+            ['final_z', *draft.label.path]))
 
         do_load_draft(editor, o_draft)
         assert editor.publish_drafts() == 1
-        test.assertCountEqual(
+        case_tester.assertCountEqual(
             [title.label for title in editor.repo.titles.get_titles()],
             [o_draft.label]
         )
 
         do_load_draft(editor, n_draft)
         assert editor.publish_drafts() == 1
-        test.assertCountEqual(
+        case_tester.assertCountEqual(
             [title.label for title in editor.repo.titles.get_titles()],
             [o_draft.label, n_draft.label]
         )
@@ -177,7 +175,7 @@ def test_does_publish_changed_draft_path():
 
         do_load_draft(editor, z_draft)
         assert editor.publish_drafts() == 1
-        test.assertCountEqual(
+        case_tester.assertCountEqual(
             [title.label for title in editor.repo.titles.get_titles()],
             [o_draft.label, n_draft.label, z_draft.label]
         )
@@ -189,7 +187,7 @@ def test_does_publish_changed_draft_path():
 
 
 @given(some_new_drafts(2))
-def test_does_publish_some_new_drafts(some_drafts: Set[Draft]):
+def test_does_publish_some_new_drafts(some_drafts: Set[BaseArticle]):
     with get_file_editor() as editor:
         do_load_drafts(editor, some_drafts)
         assert 0 < editor.publish_drafts() <= 2

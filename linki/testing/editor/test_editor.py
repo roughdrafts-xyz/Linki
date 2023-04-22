@@ -3,8 +3,9 @@ from typing import List, Set
 from unittest import TestCase
 
 from hypothesis import HealthCheck, given, settings
-from linki.article import Article
-from linki.draft import Draft
+import msgspec
+from linki.article import BaseArticle
+from linki.draft import BaseArticle
 
 from linki.editor import Editor
 from linki.id import Label
@@ -24,7 +25,7 @@ class MemoryRepository(Repository):
 
 
 @given(a_new_draft())
-def test_get_updates(draft: Draft):
+def test_get_updates(draft: BaseArticle):
     repo = MemoryRepository()
     editor = Editor(repo)
 
@@ -35,7 +36,7 @@ def test_get_updates(draft: Draft):
 
 
 @given(a_new_draft())
-def test_does_publish_new_draft(draft: Draft):
+def test_does_publish_new_draft(draft: BaseArticle):
     repo = MemoryRepository()
     editor = Editor(repo)
 
@@ -48,7 +49,7 @@ def test_does_publish_new_draft(draft: Draft):
 
 
 @given(a_draft())
-def test_does_publish_draft(draft: Draft):
+def test_does_publish_draft(draft: BaseArticle):
     repo = MemoryRepository()
     editor = Editor(repo)
 
@@ -59,7 +60,7 @@ def test_does_publish_draft(draft: Draft):
 
 
 @given(some_new_drafts(2))
-def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
+def test_does_publish_some_new_drafts(some_drafts: List[BaseArticle]):
     some_drafts = list(some_drafts)
     repo = MemoryRepository()
     editor = Editor(repo)
@@ -76,7 +77,7 @@ def test_does_publish_some_new_drafts(some_drafts: List[Draft]):
 
 @given(some_drafts(2))
 @settings(suppress_health_check=[HealthCheck.filter_too_much])
-def test_does_publish_some_drafts(some_drafts: Set[Draft]):
+def test_does_publish_some_drafts(some_drafts: Set[BaseArticle]):
     repo = MemoryRepository()
     editor = Editor(repo)
 
@@ -90,7 +91,7 @@ def test_does_publish_some_drafts(some_drafts: Set[Draft]):
 
 
 @given(an_article())
-def test_does_copy(update: Article):
+def test_does_copy(update: BaseArticle):
     r_repo = MemoryRepository()
     l_repo = MemoryRepository()
     l_editor = Editor(l_repo)
@@ -108,19 +109,15 @@ def test_does_copy(update: Article):
 
 
 @given(a_new_draft())
-def test_does_publish_changed_draft_path(draft: Draft):
+def test_does_publish_changed_draft_path(draft: BaseArticle):
     repo = MemoryRepository()
     editor = Editor(repo)
-
-    o_draft = Draft.fromArticle(draft)
-    n_draft = Draft.fromArticle(draft)
-    z_draft = Draft.fromArticle(draft)
-
-    o_draft.label = Label(['initial'] + o_draft.label.path)
-    n_draft.label = Label(['changed'] + n_draft.label.path)
-    z_draft.label = Label(['final_z'] + z_draft.label.path)
-    n_draft.editOf = o_draft
-    z_draft.editOf = n_draft
+    o_draft = msgspec.structs.replace(
+        draft, label=Label(['initial', *draft.label.path]))
+    n_draft = msgspec.structs.replace(draft, editOf=o_draft, label=Label(
+        ['changed', *draft.label.path]))
+    z_draft = msgspec.structs.replace(draft, editOf=n_draft, label=Label(
+        ['final_z', *draft.label.path]))
 
     repo.drafts.set_draft(o_draft)
     assert editor.publish_drafts() == 1

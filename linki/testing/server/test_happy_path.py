@@ -1,131 +1,19 @@
 import copy
 from io import BytesIO
-from typing import Dict
+from typing import Dict, TypedDict
 
-from hypothesis import given
+from hypothesis import given, settings
 import msgspec
 import pypandoc
-from linki.article import Article, ArticleCollection
+from linki.article import BaseArticle, ArticleCollection
 from linki.connection import MemoryConnection
 from linki.testing.editor.test_editor import MemoryRepository
-from linki.testing.strategies.article import an_article
-from linki.title import Title, TitleCollection
-from linki.viewer import WebView, WebViewConf
+from linki.testing.strategies.article import an_article, some_articles
+from linki.testing.strategies.draft import some_drafts
+from linki.title import BaseArticle, TitleCollection
+from linki.viewer import RenderedArticle, WebView, WebViewConf
 
 from werkzeug.test import Client
-
-
-@given(an_article())
-def test_does_handle_api(article: Article):
-    viewer = get_memory_server()
-    do_handle_api(viewer, article)
-
-
-@given(an_article())
-def test_does_handle_web(article: Article):
-    viewer = get_memory_server()
-
-    def handleArgs(*args, **kwargs):
-        env = {}
-        for dict_arg in args:
-            env.update(dict_arg)
-        env.update(kwargs)
-        return env
-
-    def retSingle(*args, **kwargs):
-        env = handleArgs(*args, **kwargs)
-        return env.get('item')
-
-    def retMany(*args, **kwargs):
-        env = handleArgs(*args, **kwargs)
-        return env.get('items')
-
-    viewer.one_tmpl.render = retSingle  # type: ignore
-    viewer.many_tmpl.render = retMany  # type: ignore
-
-    do_handle_web(viewer, article)
-
-
-def setup_contribute(article) -> Dict[str, MemoryConnection]:
-    article_conn = MemoryConnection[Article]()
-    title_conn = MemoryConnection[Title]()
-    articles = ArticleCollection(article_conn)
-    titles = TitleCollection(title_conn)
-
-    articles.merge_article(article)
-    titles.set_title(article)
-    return {
-        'titles': title_conn,
-        'articles': article_conn
-    }
-
-
-@given(an_article())
-def test_does_handle_legit_contribute(article: Article):
-    conns = setup_contribute(article)
-    articles = conns['articles']
-    titles = conns['titles']
-
-    pak_contents: Dict[str, BytesIO] = {
-        'articles': articles.toFile(),
-        'titles': titles.toFile(),
-    }
-
-    viewer = get_memory_server()
-    url = 'https://localhost:8080/'
-    viewer.repo.subs.add_url(url)
-
-    client = Client(viewer.app)
-    res = client.post('/contribute', data={
-        'url': url,
-        'titles': (pak_contents['titles'], 'titles'),
-        'articles': (pak_contents['articles'], 'articles')
-    })
-
-    assert res.status_code == 201
-    assert res.text == '/updates'
-
-    assert titles == viewer.repo.get_collection('titles')
-    assert articles == viewer.repo.get_collection('articles')
-
-
-@given(an_article())
-def test_does_handle_not_legit_contribute(article: Article):
-    conns = setup_contribute(article)
-    articles = conns['articles']
-    titles = conns['titles']
-
-    pak_contents: Dict[str, BytesIO] = {
-        'articles': articles.toFile(),
-        'titles': titles.toFile(),
-    }
-
-    viewer = get_memory_server()
-    url = 'https://localhost:8080/'
-    viewer.repo.subs.add_url(url)
-
-    client = Client(viewer.app)
-    res = client.post('/contribute', data={
-        'url': 'https://localhost:8888/',
-        'titles': (pak_contents['titles'], 'titles'),
-        'articles': (pak_contents['articles'], 'articles')
-    })
-
-    assert res.status_code == 403
-    assert res.text == ''
-
-    assert titles != viewer.repo.get_collection('titles')
-    assert articles != viewer.repo.get_collection('articles')
-
-    # TODO - Requires configuration options
-    # handles contributions from illegal users
-    #   expect some kind of failure indicator
-
-
-@given(an_article())
-def test_does_handle_copy(article: Article):
-    viewer = get_memory_server()
-    do_handle_copy(viewer, article)
 
 
 def get_memory_server():
@@ -139,94 +27,261 @@ def get_memory_server():
     return viewer
 
 
-def do_handle_api(viewer: WebView, article: Article):
-    # TODO Make this use the Client
-    output = 'api'
+@given(some_drafts(2))
+def test_does_handle_articles(article_set: set[BaseArticle]):
+    articles = list(article_set)
+    article = articles[0]
+    title = articles[1]
+    viewer = get_memory_server()
     viewer.repo.articles.merge_article(article)
-    viewer.repo.titles.set_title(article)
-    title = Title.fromArticle(article)
+    viewer.repo.articles.merge_article(title)
+    viewer.repo.titles.set_title(title)
+    client = get_client(viewer)
 
-    expected = msgspec.structs.asdict(article)
-    assert viewer.handle(
-        output, 'articles', article.articleId) == expected
-    assert viewer.handle(
-        output, 'articles') == {'articles': [expected]}
+    path = '/'.join(title.label.path)
+    single_calls = (
+        {
+            'style': 'article',
+            'url': f'/api/{title.articleId}'
+        },
+        {
+            'style': 'path',
+            'url': f'/api/{path}'
+        },
+        {
+            'style': 'title',
+            'url': f'/api/{title.label.labelId}'
+        },
+    )
 
-    expected = msgspec.structs.asdict(title)
-    assert viewer.handle(
-        output, 'titles', article.label.labelId) == expected
-    assert viewer.handle(
-        output, 'titles', '/'.join(article.label.path)) == expected
-    assert viewer.handle(
-        output, 'titles') == {'titles': [expected]}
+    expected = title
+    for call in single_calls:
+        res = client.get(call['url'])
+        assert res.status_code == 200
+        assert msgspec.from_builtins(res.json, type=BaseArticle) == expected
+
+    res = client.get('/api/articles/')
+    expected = {
+        'articles': [
+            article,
+            title
+        ]
+    }
+    assert res.status_code == 200
+    assert msgspec.from_builtins(
+        res.json, type=dict[str, list[BaseArticle]]) == expected
+
+    res = client.get('/api/titles/')
+    expected = {
+        'titles': [
+            title
+        ]
+    }
+    assert res.status_code == 200
+    assert msgspec.from_builtins(
+        res.json, type=dict[str, list[BaseArticle]]) == expected
 
 
-def do_handle_web(viewer: WebView, article: Article):
-    # TODO Make this use the Client
-    output = 'w'
+@given(some_drafts(2))
+@settings(deadline=10000)
+def test_does_handle_web(article_set: set[BaseArticle]):
+    articles = list(article_set)
+    article = articles[0]
+    title = articles[1]
+    viewer = get_memory_server()
     viewer.repo.articles.merge_article(article)
-    viewer.repo.titles.set_title(article)
+    viewer.repo.articles.merge_article(title)
+    viewer.repo.titles.set_title(title)
 
-    one_article = copy.copy(article)
-    one_article.content = pypandoc.convert_text(
-        one_article.content, format='markdown', to='html')
-    many_article = copy.copy(article)
+    viewer.one_tmpl.render = msgspec.to_builtins  # type: ignore
+    viewer.many_tmpl.render = msgspec.to_builtins  # type: ignore
+    client = get_client(viewer)
 
-    one_title = Title.fromArticle(one_article)
-    many_title = Title.fromArticle(article)
+    e_article = RenderedArticle.fromArticle(article)
+    e_title = RenderedArticle.fromArticle(title)
 
-    assert viewer.handle(
-        output, 'articles', article.articleId) == one_article
-    assert viewer.handle(
-        output, 'articles') == [many_article]
+    path = '/'.join(title.label.path)
+    single_calls = (
+        {
+            'style': 'article',
+            'url': f'/w/{title.articleId}'
+        },
+        {
+            'style': 'path',
+            'url': f'/w/{path}'
+        },
+        {
+            'style': 'title',
+            'url': f'/w/{title.label.labelId}'
+        },
+    )
 
-    assert viewer.handle(
-        output, 'titles', article.label.labelId) == one_title
-    assert viewer.handle(
-        output, 'titles', '/'.join(article.label.path)) == one_title
-    assert viewer.handle(
-        output, 'titles') == [many_title]
+    expected = {
+        'item': e_title
+    }
+    for call in single_calls:
+        res = client.get(call['url'])
+        assert res.status_code == 200
+        assert msgspec.from_builtins(
+            res.json, type=dict[str, RenderedArticle]) == expected
+
+    class RenderRes(TypedDict):
+        items: list[RenderedArticle]
+        style: str
+        style_root: str
+
+    res = client.get('/w/articles/')
+    expected = {
+        'items': [
+            e_article,
+            e_title
+        ],
+        'style': 'articles'.capitalize(),
+        'style_root': f"/w/articles/"
+    }
+    assert res.status_code == 200
+    assert msgspec.from_builtins(
+        res.json, type=RenderRes) == expected
+
+    res = client.get('/w/titles/')
+    expected = {
+        'items': [
+            e_title
+        ],
+        'style': 'titles'.capitalize(),
+        'style_root': f"/w/titles/"
+    }
+    assert res.status_code == 200
+    assert msgspec.from_builtins(
+        res.json, type=RenderRes) == expected
 
 
-def do_handle_copy(viewer: WebView, article: Article):
-    # TODO Make this use the Client
-    output = 'copy'
-    viewer.repo.articles.merge_article(article)
-    viewer.repo.titles.set_title(article)
-    title = Title.fromArticle(article)
+def setup_contribute(article) -> Dict[str, MemoryConnection]:
+    article_conn = MemoryConnection[BaseArticle]()
+    title_conn = MemoryConnection[BaseArticle]()
+    articles = ArticleCollection(article_conn)
+    titles = TitleCollection(title_conn)
 
-    def one_article():
-        res: bytes = viewer.handle(
-            output, 'articles', article.articleId)  # type: ignore
-        return Article.fromStream(res)
-
-    def many_articles():
-        res: bytes = viewer.handle(output, 'articles')  # type: ignore
-        return ArticleCollection.fromStream(res)
-
-    assert article == one_article()
-
-    articles = ArticleCollection(MemoryConnection[Article]())
     articles.merge_article(article)
-    assert articles == many_articles()
+    titles.set_title(article)
+    return {
+        'titles': title_conn,
+        'articles': article_conn
+    }
 
-    def one_title_id():
-        res: bytes = viewer.handle(
-            output, 'titles', article.label.labelId)  # type: ignore
-        return Title.fromStream(res)
 
-    def one_title_path():
-        res: bytes = viewer.handle(
-            output, 'titles', '/'.join(article.label.path))  # type: ignore
-        return Title.fromStream(res)
+def get_client(viewer: WebView | None = None) -> Client:
+    if (viewer is None):
+        viewer = get_memory_server()
+    return Client(viewer.app)  # type: ignore
 
-    def many_titles():
-        res: bytes = viewer.handle(output, 'titles')  # type: ignore
-        return TitleCollection.fromStream(res)
 
-    titles = TitleCollection(MemoryConnection[Title]())
-    titles.set_title(title)
+@given(an_article())
+def test_does_handle_legit_contribute(article: BaseArticle):
+    conns = setup_contribute(article)
+    articles = conns['articles']
+    titles = conns['titles']
 
-    assert article == one_title_id()
-    assert article == one_title_path()
-    assert titles == many_titles()
+    pak_contents: Dict[str, BytesIO] = {
+        'articles': articles.toFile(),
+        'titles': titles.toFile(),
+    }
+
+    viewer = get_memory_server()
+    url = 'https://localhost:8080/'
+    viewer.repo.subs.add_url(url)
+
+    client = get_client(viewer)
+    res = client.post('/contribute', data={
+        'url': url,
+        'titles': (pak_contents['titles'], 'titles'),
+        'articles': (pak_contents['articles'], 'articles')
+    })
+
+    assert res.status_code == 201
+    assert res.text == '/updates'
+
+    assert list(titles.values()) == viewer.repo.get_collection('titles')
+    assert list(articles.values()) == viewer.repo.get_collection('articles')
+
+
+@given(an_article())
+def test_does_handle_not_legit_contribute(article: BaseArticle):
+    conns = setup_contribute(article)
+    articles = conns['articles']
+    titles = conns['titles']
+
+    pak_contents: Dict[str, BytesIO] = {
+        'articles': articles.toFile(),
+        'titles': titles.toFile(),
+    }
+
+    viewer = get_memory_server()
+    url = 'https://localhost:8080/'
+    viewer.repo.subs.add_url(url)
+
+    client = get_client(viewer)
+    res = client.post('/contribute', data={
+        'url': 'https://localhost:8888/',
+        'titles': (pak_contents['titles'], 'titles'),
+        'articles': (pak_contents['articles'], 'articles')
+    })
+
+    assert res.status_code == 403
+    assert res.text == ''
+
+    assert list(titles.values()) != viewer.repo.get_collection('titles')
+    assert list(articles.values()) != viewer.repo.get_collection('articles')
+
+    # TODO - Requires configuration options
+    # handles contributions from illegal users
+    #   expect some kind of failure indicator
+
+
+@given(some_drafts(2))
+def test_does_handle_copy(article_set: set[BaseArticle]):
+    articles = list(article_set)
+    article = articles[0]
+    title = articles[1]
+    viewer = get_memory_server()
+    viewer.repo.articles.merge_article(article)
+    viewer.repo.articles.merge_article(title)
+    viewer.repo.titles.set_title(title)
+    client = get_client(viewer)
+
+    path = '/'.join(title.label.path)
+    single_calls = (
+        {
+            'style': 'article',
+            'url': f'/copy/{title.articleId}'
+        },
+        {
+            'style': 'path',
+            'url': f'/copy/{path}'
+        },
+        {
+            'style': 'title',
+            'url': f'/copy/{title.label.labelId}'
+        },
+    )
+
+    expected = title
+    for call in single_calls:
+        res = client.get(call['url'])
+        assert res.status_code == 200
+        assert msgspec.msgpack.decode(res.data, type=BaseArticle) == expected
+
+    res = client.get('/copy/articles/')
+    expected = [
+        article,
+        title
+    ]
+    assert res.status_code == 200
+    assert msgspec.msgpack.decode(res.data, type=list[BaseArticle]) == expected
+
+    res = client.get('/copy/titles/')
+    expected = [
+        title
+    ]
+    assert res.status_code == 200
+    assert msgspec.msgpack.decode(res.data, type=list[BaseArticle]) == expected

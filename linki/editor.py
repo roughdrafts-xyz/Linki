@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Iterable
-from linki.article import ArticleCollection
-from linki.draft import Draft
+from linki.article import Article, ArticleCollection
+from linki.draft import BaseArticle, Draft
 from linki.repository import FileRepository, Repository
-from linki.title import Title, TitleCollection
+from linki.title import BaseArticle, Redirect, TitleCollection
 from linki.id import PathLabel
 
 
@@ -12,7 +12,7 @@ class Editor():
     def __init__(self, repo: Repository) -> None:
         self.repo = repo
 
-    def get_updates(self) -> Iterable[Draft]:
+    def get_updates(self) -> Iterable[BaseArticle]:
         for _draft in self.repo.drafts.get_drafts():
             if (_draft.should_update()):
                 yield _draft
@@ -30,7 +30,7 @@ class Editor():
             published.append(draft.label)
             if (article.editOf is not None):
                 if (article.label != article.editOf.label):
-                    redirect = Title.createRedirect(
+                    redirect = Redirect(
                         article.editOf,
                         article.label
                     )

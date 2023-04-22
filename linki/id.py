@@ -45,24 +45,24 @@ class ArticleID(ID):
 
 class LabelID(ID):
     @classmethod
-    def getLabelID(cls, path: List[str]) -> 'LabelID':
+    def getLabelID(cls, path: tuple[str]) -> 'LabelID':
         package = b''.join([str.encode(crumb) for crumb in path])
         return cls(sha224(package).hexdigest())
 
 
 class BaseLabel(msgspec.Struct, kw_only=True, dict=True, frozen=True):
-    path: List[str]
+    path: tuple[str]
 
     @classmethod
     def fromUnsafeString(cls, unsafe_raw_name: str):
-        label_path = [unsafe_raw_name]
+        label_path = tuple([unsafe_raw_name])
         label_path = cls.clean_path(label_path)
         label = cls(path=label_path)
         return label
 
     @classmethod
-    def fromUnsafeList(cls, unsafe_list: List[str]):
-        label_path = unsafe_list
+    def fromUnsafeList(cls, unsafe_list: list[str]):
+        label_path = tuple(unsafe_list)
         label_path = cls.clean_path(label_path)
         label = cls(path=label_path)
         return label
@@ -72,7 +72,7 @@ class BaseLabel(msgspec.Struct, kw_only=True, dict=True, frozen=True):
         if root is not None:
             root = root.resolve()
             path = path.relative_to(root)
-        label_path = list(path.parts)
+        label_path = path.parts
         label_path = cls.clean_path(label_path)
         label = cls(path=label_path)
         return label
@@ -86,12 +86,12 @@ class BaseLabel(msgspec.Struct, kw_only=True, dict=True, frozen=True):
         return self.path[-1]
 
     @property
-    def parents(self) -> List[str]:
+    def parents(self) -> tuple[str]:
         return self.path[:-1]
 
     @classmethod
-    def clean_path(cls, path: List[str]) -> List[str]:
-        path = [cls.as_safe_string(crumb) for crumb in path]
+    def clean_path(cls, path: tuple[str]) -> tuple[str]:
+        path = tuple(cls.as_safe_string(crumb) for crumb in path)
         if not (all(map(cls.is_valid, path))):
             raise AttributeError
         return path

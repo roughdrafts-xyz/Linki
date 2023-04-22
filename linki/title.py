@@ -1,52 +1,48 @@
 import pickle
 from typing import Iterator
-from linki.article import Article
+from linki.article import BaseArticle
 from linki.connection import Connection
 
 from linki.id import BaseLabel
 
 
-class Title(Article):
-    editOf: Article | None
-    redirect: BaseLabel | None = None
+def Title(
+    label: BaseLabel,
+    content: str,
+    editOf: BaseArticle | None
+) -> BaseArticle:
+    return BaseArticle(
+        label=label,
+        content=content,
+        editOf=editOf
+    )
 
-    @classmethod
-    def fromArticle(cls, article: Article) -> 'Title':
-        return cls(
-            article.label,
-            article.content,
-            article.editOf
-        )
 
-    @classmethod
-    def createRedirect(cls, editOf: Article, redirect: BaseLabel) -> 'Title':
-        path_string = ','.join(redirect.path)
-        content = f'[redirect:{path_string}#{redirect.labelId}]'
-        title = cls(
-            label=editOf.label,
-            content=content,
-            editOf=editOf,
-        )
-        title.redirect = redirect
-        return title
+def Redirect(editOf: BaseArticle, redirect: BaseLabel) -> 'BaseArticle':
+    path_string = ','.join(redirect.path)
+    content = f'[redirect:{path_string}#{redirect.labelId}]'
+    return BaseArticle(
+        label=editOf.label,
+        content=content,
+        editOf=editOf,
+        redirect=redirect
+    )
 
 
 class TitleCollection():
-    def __init__(self, connection: Connection[Title]) -> None:
+    def __init__(self, connection: Connection[BaseArticle]) -> None:
         self.titles = connection
 
-    def set_title(self, title: Title | Article) -> Title:
-        if (not isinstance(title, Title)):
-            title = Title.fromArticle(title)
+    def set_title(self, title: BaseArticle | BaseArticle) -> BaseArticle:
         self.titles[title.label.labelId] = title
         return title
 
-    def get_title(self, title: BaseLabel) -> Title | None:
+    def get_title(self, title: BaseLabel) -> BaseArticle | None:
         if (title.labelId not in self.titles):
             return None
         return self.titles[title.labelId]
 
-    def get_titles(self) -> Iterator[Title]:
+    def get_titles(self) -> Iterator[BaseArticle]:
         for item in self.titles.values():
             yield item
 

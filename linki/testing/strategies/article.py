@@ -1,7 +1,7 @@
 from operator import xor
 import string
 from hypothesis import assume, strategies
-from linki.article import Article, Article
+from linki.article import Article, BaseArticle, BaseArticle
 
 from linki.id import SimpleLabel
 
@@ -19,7 +19,7 @@ def some_content(draw: strategies.DrawFn):
 
 
 @strategies.composite
-def an_article(draw: strategies.DrawFn, editOf: Article | None = None) -> Article:
+def an_article(draw: strategies.DrawFn, editOf: BaseArticle | None = None) -> BaseArticle:
     label = draw(a_label())
     data = draw(some_content())
     article = Article(

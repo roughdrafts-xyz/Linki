@@ -4,12 +4,12 @@ import pickle
 import msgspec
 
 import pypandoc
+from linki.article import BaseArticle
 from linki.editor import Copier, Editor
-from linki.id import Label, LabelID
+from linki.id import ID, Label, LabelID
 from linki.repository import Repository, TemporaryRepository
 from dataclasses import dataclass
 import bottle
-
 
 
 @dataclass(kw_only=True)
@@ -22,6 +22,23 @@ class WebViewConf:
     home: str | None = None
 
 
+class RenderedArticle(BaseArticle, frozen=True):
+    raw: str
+
+    @classmethod
+    def fromArticle(cls, article: BaseArticle):
+        raw = pypandoc.convert_text(
+            article.content, format='markdown', to='markdown')
+        content = pypandoc.convert_text(
+            article.content, format='markdown', to='html')
+        return cls(
+            label=article.label,
+            content=content,
+            raw=raw,
+            editOf=article.editOf
+        )
+
+
 class WebView:
     styles = ['titles', 'articles']
 
@@ -31,12 +48,12 @@ class WebView:
         self.conf = conf
         bottle.debug(self.conf.debug)
         self.app.route('/', 'GET', self.handle_home)
-        self.app.route('/<output>/<style>/<label:path>',
-                       'GET', self.handle)
-        self.app.route('/<output>/<style>/',
-                       'GET', self.handle)
-        self.app.route('/<output>/<style>',
-                       'GET', self.handle)
+        self.app.route('/<style>/titles/',
+                       'GET', self.handle_many_titles)
+        self.app.route('/<style>/articles/',
+                       'GET', self.handle_many_articles)
+        self.app.route('/<style>/<label:path>',
+                       'GET', self.handle_single_article)
         if (self.conf.contribute):
             self.app.route('/contribute', 'POST', self.handle_contribution)
         if (self.conf.web):
@@ -53,11 +70,13 @@ class WebView:
             self.many_tmpl.prepare()
 
     def handle_home(self):
-        return self.handle('w', 'titles', self.conf.home)
+        if (self.conf.home is not None):
+            return self.handle_single_article('w', self.conf.home)
+        return self.handle_many_titles('w')
 
-    def handle(self, output: str, style: str, label: str | None = None):
-        unsupported = bottle.HTTPError(400, f'{output} not supported.')
-        match output:
+    def confirm_support(self, style: str):
+        unsupported = bottle.HTTPError(400, f'{style} not supported.')
+        match style:
             case 'count' | 'copy':
                 if (not self.conf.copy):
                     raise unsupported
@@ -70,66 +89,56 @@ class WebView:
             case _:
                 raise unsupported
 
-        if style not in self.styles:
-            raise bottle.HTTPError(404, f'style not found: {style}')
+    def convert_path(self, label: str):
+        return Label(label.split('/')).labelId
 
-        if (label is None):
-            return self.handle_many(output, style)
-        return self.handle_single(output, style, label)
-
-    def convert_path(self, style: str, label: str):
-        item_id = None
-        match style:
-            case 'titles':
-                item_id = Label(label.split('/')).labelId
-            case _:
-                raise bottle.HTTPError(404, f'pathed style not found: {style}')
-        return item_id
-
-    def handle_single(self, output: str, style: str, label: str):
+    def handle_single_article(self, style: str, label: str):
+        self.confirm_support(style)
         if (not LabelID.isValidID(label)):
-            label = self.convert_path(style, label)
+            item_id = self.convert_path(label)
+            error = bottle.HTTPError(404, f'path not found: {label}')
         else:
-            label = LabelID(label)
+            item_id = ID(label)
+            error = bottle.HTTPError(404, f'item not found: {label}')
 
-        item = self.repo.get_item(style, label)
-
+        item = self.repo.titles.titles.get(item_id, None)
         if (item is None):
-            raise bottle.HTTPError(404, f'label not found: {label}')
+            item = self.repo.articles.articles.get(item_id, None)
+        if (item is None):
+            return error
 
-        match output:
+        match style:
             case 'copy':
-                return pickle.dumps(item)
+                return msgspec.msgpack.encode(item)
             case 'api':
-                return msgspec.structs.asdict(item)
+                return msgspec.to_builtins(item)
             case 'w':
-                item.content = pypandoc.convert_text(
-                    item.content, format='markdown', to='html')
-                return self.one_tmpl.render({'item': item})
+                web_item = RenderedArticle.fromArticle(item)
+                return self.one_tmpl.render({'item': web_item})
 
-    def handle_many(self, output: str, style: str):
-        if style not in self.styles:
-            raise bottle.HTTPError(404, f'style not found: {style}')
-        collection = self.repo.get_collection(style)
-        match output:
+    def handle_many_titles(self, style: str):
+        return self.handle_many(style, 'titles')
+
+    def handle_many_articles(self, style: str):
+        return self.handle_many(style, 'articles')
+
+    def handle_many(self, style: str, collection_type: str):
+        self.confirm_support(style)
+        collection = self.repo.get_collection(collection_type)
+        match style:
             case 'copy':
-                return pickle.dumps(collection)
+                return msgspec.msgpack.encode(collection)
             case 'api':
-                return {style: [msgspec.structs.asdict(item) for item in collection.values()]}
+                return {collection_type: [msgspec.to_builtins(item) for item in collection]}
             case 'count':
-                return f"{self.repo.get_count(style)}"
+                return f"{self.repo.get_count(collection_type)}"
             case 'w':
-                items = list(collection.values())
-                for item in items:
-                    if (style == 'titles'):
-                        item.web_id = item.label.labelId
-                    else:
-                        item.web_id = item.articleId
-
+                items = [RenderedArticle.fromArticle(
+                    article) for article in collection]
                 return self.many_tmpl.render({
                     'items': items,
-                    'style': style.capitalize(),
-                    'style_root': f"/w/{style}/"
+                    'style': collection_type.capitalize(),
+                    'style_root': f"/w/{collection_type}/"
                 })
 
     def handle_contribution(self):

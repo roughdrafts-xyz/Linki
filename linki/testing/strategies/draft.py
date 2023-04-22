@@ -1,6 +1,6 @@
 from typing import Set
 from hypothesis import assume, strategies
-from linki.draft import Draft
+from linki.draft import BaseArticle
 from linki.testing.strategies.article import an_article
 
 
@@ -8,13 +8,13 @@ from linki.testing.strategies.article import an_article
 def an_update_draft(draw: strategies.DrawFn):
     base_article = draw(an_article())
     new_article = draw(an_article(base_article))
-    return Draft.fromArticle(new_article)
+    return new_article
 
 
 @strategies.composite
 def a_new_draft(draw: strategies.DrawFn):
     base_article = draw(an_article())
-    return Draft.fromArticle(base_article)
+    return base_article
 
 
 @strategies.composite
@@ -25,7 +25,7 @@ def a_draft(draw: strategies.DrawFn):
 
 @strategies.composite
 def some_drafts(draw: strategies.DrawFn, amount: int):
-    drafts: Set[Draft] = set()
+    drafts: Set[BaseArticle] = set()
     for i in range(amount):
         draft = draw(a_draft())
         for _ in drafts:

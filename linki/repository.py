@@ -3,12 +3,12 @@ from typing import Dict, List
 from urllib.parse import ParseResult
 
 import msgspec
-from linki.article import Article, ArticleCollection
+from linki.article import BaseArticle, ArticleCollection
 from linki.connection import MemoryConnection, ROWebConnection, Connection, PathConnection
 from linki.draft import DraftCollection
 from linki.id import ID
 from linki.url import URL, URLCollection
-from linki.title import Title, TitleCollection
+from linki.title import BaseArticle, TitleCollection
 
 
 class RepositoryConnection:
@@ -57,10 +57,7 @@ class Repository:
 
     def get_collection(self, style: str):
         connection = self.connection.get_style(style)
-        collection = MemoryConnection()
-        for item in connection:
-            collection[item] = connection[item]
-        return collection
+        return list(connection.values())
 
     def get_count(self, style: str):
         connection = self.connection.get_style(style)
@@ -145,9 +142,9 @@ class TemporaryRepository(Repository):
                 continue
             style = None
             if (stream == 'articles'):
-                style = Article
+                style = BaseArticle
             if (stream == 'titles'):
-                style = Title
+                style = BaseArticle
             if (style is None):
                 continue
             items = msgspec.msgpack.decode(streams[stream], type=List[style])
