@@ -8,18 +8,16 @@ from unittest import TestCase
 
 from hypothesis import HealthCheck, assume, given, settings
 import msgspec
-from linki.article import Article, BaseArticle, ArticleCollection
-from linki.connection import MemoryConnection
+from linki.article import Article, BaseArticle
 from linki.draft import BaseArticle
 
 from linki.editor import FileEditor
 from linki.repository import Repository
 from linki.testing.strategies.article import an_article
-from linki.id import BaseLabel, Label, PathLabel, SimpleLabel
+from linki.id import Label, PathLabel, SimpleLabel
 from linki.testing.strategies.draft import a_draft, some_drafts, some_new_drafts
-from linki.title import BaseArticle, TitleCollection
+from linki.title import BaseArticle
 
-from random import randint
 
 case_tester = TestCase()
 
@@ -32,27 +30,25 @@ def do_load_drafts(editor: FileEditor, drafts: Set[BaseArticle]):
             shutil.rmtree(file)
 
     for draft in drafts:
-        p = editor.repo.path.joinpath(*draft.label.parents)
-        p.mkdir(exist_ok=True, parents=True)
-        p.joinpath(draft.label.name).write_text(draft.content)
         if (draft.editOf is not None):
-            artColl = ArticleCollection(MemoryConnection[BaseArticle]())
-            titColl = TitleCollection(MemoryConnection[BaseArticle]())
-
             article = draft.editOf
-            titColl.set_title(article)
-            editor.copy_titles(titColl)
+            p = editor.repo.path.joinpath(*article.label.parents)
+            p.mkdir(exist_ok=True, parents=True)
+            p = p.joinpath(article.label.name)
+            p.write_text(article.content)
 
-            if draft.label != article.label:
-                if randint(0, 1) == 0:
-                    p = editor.repo.path.joinpath(*article.label.parents)
-                    p.mkdir(exist_ok=True, parents=True)
-                    p.joinpath(article.label.name).write_text(article.content)
+            editor.repo.shadows.add_shadow(article, p.resolve())
 
-            while (article is not None):
-                artColl.merge_article(article)
-                article = article.editOf
-            editor.copy_articles(artColl)
+            c = editor.repo.path.joinpath(*draft.label.parents)
+            c.mkdir(exist_ok=True, parents=True)
+            c = c.joinpath(draft.label.name)
+            p = p.replace(c)
+            p.write_text(draft.content)
+
+        else:
+            p = editor.repo.path.joinpath(*draft.label.parents)
+            p.mkdir(exist_ok=True, parents=True)
+            p.joinpath(draft.label.name).write_text(draft.content)
 
     editor.load_drafts()
 
@@ -71,18 +67,15 @@ def get_file_editor():
 
 
 @given(some_drafts(2))
-@settings(suppress_health_check=[HealthCheck.filter_too_much])
+@settings(suppress_health_check=[
+    HealthCheck.filter_too_much, HealthCheck.too_slow
+])
 def test_loads_drafts(drafts: Set[BaseArticle]):
     with get_file_editor() as editor:
         do_load_drafts(editor, drafts)
-        loaded_edits = set(editor.repo.drafts.get_drafts())
-        loaded_drafts = set((draft.label, draft.content)
-                            for draft in loaded_edits)
-        for draft in drafts:
-            if (draft.editOf is not None):
-                assert draft in loaded_edits
-            else:
-                assert (draft.label, draft.content) in loaded_drafts
+        loaded_drafts = set(editor.repo.drafts.get_drafts())
+        assert len(drafts) == len(loaded_drafts)
+        assert drafts == loaded_drafts
 
 
 @given(some_drafts(2))

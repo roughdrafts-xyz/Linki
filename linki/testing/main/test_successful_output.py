@@ -17,22 +17,27 @@ def test_publish_drafts(tmp_path: Path):
     res = runner.invoke(app, ["publish", str(tmp_path)])
     x = 1
     assert res.stdout == f"Published {x} drafts.\n"
+    assert tmp_path.joinpath('hello_world.md').read_text() == 'Hello World'
 
     tmp_path.joinpath('hello_world.md').write_text('Hello World')
     res = runner.invoke(app, ["publish", str(tmp_path)])
     x = 0
     assert res.stdout == f"Published {x} drafts.\n"
+    assert tmp_path.joinpath('hello_world.md').read_text() == 'Hello World'
 
     tmp_path.joinpath('hello_world.md').write_text('Goodnight Moon')
     res = runner.invoke(app, ["publish", str(tmp_path)])
     x = 1
     assert res.stdout == f"Published {x} drafts.\n"
+    assert tmp_path.joinpath('hello_world.md').read_text() == 'Goodnight Moon'
 
     tmp_path.joinpath('good_moon.md').write_text('Goodnight Moon')
     tmp_path.joinpath('hello_world.md').write_text('Hello World')
     res = runner.invoke(app, ["publish", str(tmp_path)])
     x = 2
     assert res.stdout == f"Published {x} drafts.\n"
+    assert tmp_path.joinpath('hello_world.md').read_text() == 'Hello World'
+    assert tmp_path.joinpath('good_moon.md').read_text() == 'Goodnight Moon'
 
 
 def test_create_local_copy(tmp_path: Path):

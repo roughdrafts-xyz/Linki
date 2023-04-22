@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Iterable
-from linki.article import Article, ArticleCollection
+
+from linki.article import ArticleCollection
 from linki.draft import BaseArticle, Draft
 from linki.repository import FileRepository, Repository
 from linki.title import BaseArticle, Redirect, TitleCollection
@@ -80,30 +81,20 @@ class FileEditor(Editor):
     def iterdir(self):
         for path in self.repo.path.rglob('*'):
             if ('.linki' not in path.parts and
-                    path != self.repo.path
-                    ):
+                path != self.repo.path
+                ):
                 yield path
 
     def iterfiles(self):
         glob = self.iterdir()
         return (_glob.resolve() for _glob in glob if _glob.is_file())
 
-    def get_edit_of(self, file: Path):
-        content = file.read_text()
-        path_label = PathLabel(file, self.repo.path)
-        titles = list(self.repo.titles.get_titles())
-        for title in titles:
-            if (path_label == title.label):
-                return title
-        for title in titles:
-            if (content == title.content):
-                return title
-        return None
-
     def load_drafts(self):
-        files = list(self.iterfiles())
         for file in self.iterfiles():
-            editOf = self.get_edit_of(file)
+            shadow = self.repo.shadows.get_shadow(file)
+            editOf = None
+            if (shadow is not None):
+                editOf = shadow.article
             label = PathLabel(file, self.repo.path)
             _draft = Draft(
                 label,
@@ -126,7 +117,9 @@ class FileEditor(Editor):
                 continue
             unload = self.repo.path.joinpath(*title.label.parents)
             unload.mkdir(parents=True, exist_ok=True)
-            unload.joinpath(title.label.name).write_text(title.content)
+            unload = unload.joinpath(title.label.name)
+            unload.write_text(title.content)
+            self.repo.shadows.add_shadow(title, unload.resolve())
 
 
 class Copier:

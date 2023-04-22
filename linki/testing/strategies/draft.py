@@ -28,16 +28,18 @@ def some_drafts(draw: strategies.DrawFn, amount: int):
     drafts: Set[BaseArticle] = set()
     for i in range(amount):
         draft = draw(a_draft())
-        for _ in drafts:
-            assume(draft.label != _.label)
-
-        if (draft.editOf is not None):
-            for _ in drafts:
-                if _.editOf is not None:
-                    assume(draft.editOf.label != _.editOf.label)
-
         drafts.add(draft)
         assume(len(drafts) == i+1)
+
+    for x_draft in drafts:
+        for y_draft in drafts - {x_draft}:
+            assume(x_draft.label != y_draft.label)
+            y_edit = y_draft.editOf
+            while (y_edit is not None):
+                # TODO This seems unrealistic
+                # I don't think its a good assumption
+                assume(x_draft.label != y_edit.label)
+                y_edit = y_edit.editOf
     return drafts
 
 

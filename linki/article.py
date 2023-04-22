@@ -46,23 +46,23 @@ def Article(
 
 class ArticleCollection():
     def __init__(self, connection: Connection[BaseArticle]) -> None:
-        self.articles = connection
+        self.store = connection
 
     def merge_article(self, article: BaseArticle) -> BaseArticle:
-        self.articles[article.articleId] = article
+        self.store[article.articleId] = article
         return article
 
     def get_article(self, articleId: ArticleID) -> BaseArticle | None:
         if (self.has_article(articleId)):
-            return self.articles[articleId]
+            return self.store[articleId]
         return None
 
     def get_articles(self) -> Iterator[ArticleID]:
-        for key in self.articles.keys():
+        for key in self.store.keys():
             yield ArticleID(key)
 
     def has_article(self, articleId: ArticleID | None) -> bool:
-        return articleId in self.articles
+        return articleId in self.store
 
     @classmethod
     def fromStream(cls, stream: bytes):
@@ -70,10 +70,10 @@ class ArticleCollection():
         return ArticleCollection(res)
 
     def __hash__(self) -> int:
-        return hash(self.articles)
+        return hash(self.store)
 
     def __eq__(self, __value: object) -> bool:
         if (not isinstance(__value, ArticleCollection)):
             return False
 
-        return self.articles == __value.articles
+        return self.store == __value.store

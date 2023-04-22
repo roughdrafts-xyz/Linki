@@ -33,6 +33,7 @@ def publish(
     editor = FileEditor.fromPath(location)
     editor.load_drafts()
     x = editor.publish_drafts()
+    editor.unload_titles()
     typer.echo(f"Published {x} drafts.")
 
 

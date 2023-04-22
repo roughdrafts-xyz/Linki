@@ -1,6 +1,5 @@
 from io import BytesIO
 from pathlib import Path
-import pickle
 import msgspec
 
 import pypandoc
@@ -101,9 +100,9 @@ class WebView:
             item_id = ID(label)
             error = bottle.HTTPError(404, f'item not found: {label}')
 
-        item = self.repo.titles.titles.get(item_id, None)
+        item = self.repo.titles.store.get(item_id, None)
         if (item is None):
-            item = self.repo.articles.articles.get(item_id, None)
+            item = self.repo.articles.store.get(item_id, None)
         if (item is None):
             return error
 

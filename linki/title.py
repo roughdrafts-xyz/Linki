@@ -31,24 +31,24 @@ def Redirect(editOf: BaseArticle, redirect: BaseLabel) -> 'BaseArticle':
 
 class TitleCollection():
     def __init__(self, connection: Connection[BaseArticle]) -> None:
-        self.titles = connection
+        self.store = connection
 
     def set_title(self, title: BaseArticle | BaseArticle) -> BaseArticle:
-        self.titles[title.label.labelId] = title
+        self.store[title.label.labelId] = title
         return title
 
     def get_title(self, title: BaseLabel) -> BaseArticle | None:
-        if (title.labelId not in self.titles):
+        if (title.labelId not in self.store):
             return None
-        return self.titles[title.labelId]
+        return self.store[title.labelId]
 
     def get_titles(self) -> Iterator[BaseArticle]:
-        for item in self.titles.values():
+        for item in self.store.values():
             yield item
 
     def clear_title(self, title: BaseLabel) -> None:
-        if (title.labelId in self.titles):
-            del self.titles[title.labelId]
+        if (title.labelId in self.store):
+            del self.store[title.labelId]
 
     @classmethod
     def fromStream(cls, stream: bytes):
@@ -56,10 +56,10 @@ class TitleCollection():
         return TitleCollection(res)
 
     def __hash__(self) -> int:
-        return hash(self.titles)
+        return hash(self.store)
 
     def __eq__(self, __value: object) -> bool:
         if (not isinstance(__value, TitleCollection)):
             return False
 
-        return self.titles == __value.titles
+        return self.store == __value.store

@@ -128,3 +128,8 @@ def SimpleLabel(name: str):
 
 def PathLabel(path: Path, root: Path | None = None):
     return BaseLabel.fromPath(path, root)
+
+
+def InoLabel(path: Path):
+    stat = path.resolve().stat()
+    return SimpleLabel(f"{stat.st_ino}")

@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 from linki.connection import Connection
 
-from linki.id import LabelID
+from linki.id import LabelID, SimpleLabel
 
 
 @dataclass
@@ -25,7 +25,7 @@ class URL():
                 f'Invalid URL. Must be one of these schemes: {valid_schemes}')
 
         self.parsed = urlparse(self.url)
-        self.labelId = LabelID.getLabelID([self.url])
+        self.labelId = SimpleLabel(self.url).labelId
 
     @classmethod
     def is_valid_url(cls, url: str) -> bool:
@@ -39,16 +39,16 @@ class URL():
 
 class URLCollection():
     def __init__(self, connection: Connection[URL]) -> None:
-        self.urls = connection
+        self.store = connection
 
     def add_url(self, url: str):
         new_url = URL(url)
-        self.urls[new_url.labelId] = new_url
+        self.store[new_url.labelId] = new_url
 
     def get_url(self, label: str):
         _id = LabelID(label)
-        return self.urls.get(_id)
+        return self.store.get(_id)
 
     def get_urls(self) -> Iterator[URL]:
-        for url in self.urls.values():
+        for url in self.store.values():
             yield url
