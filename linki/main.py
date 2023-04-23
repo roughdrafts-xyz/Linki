@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Optional
 import pypandoc
 import typer
+from linki.user import UserCollection
 
 from linki.editor import FileCopier, FileEditor
 from linki.inbox import Inbox
@@ -82,10 +83,11 @@ def inbox(
     titles = repo.titles
     inbox = Inbox(subs, titles)
     for update in inbox.get_inbox():
-        typer.echo(''
-                   + f'┌ {update.rowId} {update.url.url}\n'
-                   + f'└ {update.label.name} ({update.size:+n})'
-                   )
+        output = ''
+        output += f'┌ {update.url}\n'
+        for detail in update.updates:
+            output += f'└ {detail.label.name} ({detail.size:+n})'
+        typer.echo(output)
 
 
 @app.command()
@@ -165,7 +167,19 @@ def announce(
     outbox = Outbox(repo)
     update_count = outbox.send_updates()
     typer.echo(
-        f"Announced updates to {update_count} wikis you're contributing to.")
+        f"Sent contributions to {update_count} wikis.")
+
+
+@app.command()
+def authenticate(
+    location: Path = typer.Argument(Path.cwd()),
+    user: str = typer.Option(...),
+    password: str = typer.Option(..., prompt=True,
+                                 hide_input=True, confirmation_prompt=True)
+):
+    repo = FileRepository.fromPath(location)
+    repo.users.add_user(user, password)
+    typer.echo(f"Added {user} to list of authorized users.")
 
 
 def run():

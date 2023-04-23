@@ -1,6 +1,6 @@
 from pathlib import Path
 from typer.testing import CliRunner
-from linki.main import app, inbox
+from linki.main import app
 
 runner = CliRunner()
 
@@ -93,12 +93,11 @@ def test_view_subscription_update(tmp_path: Path):
     update = 'Hello World!'
     update_path.write_text(update)
     runner.invoke(app, ["publish", str(base)])
-    inbox(copy)
     res = runner.invoke(app, ["inbox", str(copy)])
 
     update_path = update_path.relative_to(base)
     assert res.stdout == (''
-                          + f'┌ {0} {base.as_uri()}\n'
+                          + f'┌ {base.as_uri()}\n'
                           + f'└ {update_path} (+{len(update)})\n'
                           )
 
@@ -119,7 +118,7 @@ def test_add_contribution(tmp_path: Path):
     assert res.stdout == f"Contributions by priority (highest to lowest)\n0\tThis Wiki\n1\t{base.resolve().as_uri()}\n"
 
 
-def test_successful_announce(tmp_path: Path):
+def test_successful_contribute(tmp_path: Path):
     # checks Inbox command
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
@@ -136,4 +135,26 @@ def test_successful_announce(tmp_path: Path):
     update_path.write_text(update)
     runner.invoke(app, ["publish", str(base)])
     res = runner.invoke(app, ["announce", str(copy)])
-    assert res.stdout == f"Announced updates to 1 wikis you're contributing to.\n"
+    assert res.stdout == f"Sent contributions to 1 wikis.\n"
+
+
+def test_auth_user_with_flags(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    runner.invoke(app, ["init", str(base)])
+    user = 'username'
+    res = runner.invoke(app, ['authenticate', str(
+        base), '--user', user, '--password', 'pass'])
+    assert res.stdout == f"Added {user} to list of authorized users.\n"
+
+
+def test_auth_user_without_flags(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    runner.invoke(app, ["init", str(base)])
+    user = 'username'
+    password = 'pass'
+    res = runner.invoke(app, ['authenticate', str(
+        base), '--user', user], input=f'{password}\n{password}\n')
+    assert res.stdout == (''
+                          + f"Password: \n"
+                          + f"Repeat for confirmation: \n"
+                          + f"Added {user} to list of authorized users.\n")

@@ -175,55 +175,33 @@ def get_client(viewer: WebView | None = None) -> Client:
 
 
 @given(an_article())
-def test_does_handle_legit_contribute(article: BaseArticle):
+def test_does_handle_contributions(article: BaseArticle):
     conns = setup_contribute(article)
     articles = conns['articles']
     titles = conns['titles']
 
-    pak_contents: Dict[str, BytesIO] = {
-        'articles': articles.toFile(),
-        'titles': titles.toFile(),
-    }
+    def contents() -> Dict[str, BytesIO]:
+        return {
+            'articles': articles.toFile(),
+            'titles': titles.toFile(),
+        }
+
+    username = 'user'
+    password = 'pass'
 
     viewer = get_memory_server()
-    url = 'https://localhost:8080/'
-    viewer.repo.subs.add_url(url)
 
     client = get_client(viewer)
-    res = client.post('/contribute', data={
-        'url': url,
-        'titles': (pak_contents['titles'], 'titles'),
-        'articles': (pak_contents['articles'], 'articles')
-    })
 
-    assert res.status_code == 201
-    assert res.text == '/updates'
+    def contribute():
+        pak_contents = contents()
+        return client.post('/contribute', data={
+            'titles': (pak_contents['titles'], 'titles'),
+            'articles': (pak_contents['articles'], 'articles')
+        }, auth=(username, password))
 
-    assert list(titles.values()) == viewer.repo.get_collection('titles')
-    assert list(articles.values()) == viewer.repo.get_collection('articles')
-
-
-@given(an_article())
-def test_does_handle_not_legit_contribute(article: BaseArticle):
-    conns = setup_contribute(article)
-    articles = conns['articles']
-    titles = conns['titles']
-
-    pak_contents: Dict[str, BytesIO] = {
-        'articles': articles.toFile(),
-        'titles': titles.toFile(),
-    }
-
-    viewer = get_memory_server()
-    url = 'https://localhost:8080/'
-    viewer.repo.subs.add_url(url)
-
-    client = get_client(viewer)
-    res = client.post('/contribute', data={
-        'url': 'https://localhost:8888/',
-        'titles': (pak_contents['titles'], 'titles'),
-        'articles': (pak_contents['articles'], 'articles')
-    })
+    # Invalid User
+    res = contribute()
 
     assert res.status_code == 403
     assert res.text == ''
@@ -231,9 +209,15 @@ def test_does_handle_not_legit_contribute(article: BaseArticle):
     assert list(titles.values()) != viewer.repo.get_collection('titles')
     assert list(articles.values()) != viewer.repo.get_collection('articles')
 
-    # TODO - Requires configuration options
-    # handles contributions from illegal users
-    #   expect some kind of failure indicator
+    # Valid User
+    viewer.repo.users.add_user(username, password)
+    res = contribute()
+    assert res.status_code == 201
+    title_text = ','.join([title.articleId for title in titles.values()])
+    assert res.text == f'/w/titles/{title_text}'
+
+    assert list(titles.values()) == viewer.repo.get_collection('titles')
+    assert list(articles.values()) == viewer.repo.get_collection('articles')
 
 
 @given(some_drafts(2))

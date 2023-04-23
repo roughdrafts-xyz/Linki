@@ -8,11 +8,15 @@ from linki.url import URL, URLCollection
 
 
 @dataclass
-class InboxRow():
-    rowId: int
-    url: URL
-    label: BaseLabel
+class UpdateDetails():
     size: int
+    label: BaseLabel
+
+
+@dataclass
+class InboxRow():
+    url: str
+    updates: list[UpdateDetails]
 
 
 class Inbox():
@@ -22,14 +26,21 @@ class Inbox():
 
     def get_inbox(self):
         # TODO Optimize. No one likes this many loops.
-        count = 0
         for sub in self.subs.get_urls():
             repo = Repository(sub.url)
             remote = repo.titles
             subscription = Subscription(self.titles, remote)
+            row = InboxRow(
+                url=sub.url,
+                updates=[]
+            )
             for update in subscription.get_updates():
                 size = len(update.content)
                 if (update.editOf is not None):
                     size -= len(update.editOf.content)
-                yield InboxRow(count, sub, update.label, size)
-                count += 1
+                details = UpdateDetails(
+                    size=size,
+                    label=update.label
+                )
+                row.updates.append(details)
+            yield row

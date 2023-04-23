@@ -9,6 +9,7 @@ from linki.draft import DraftCollection, ShadowCollection
 from linki.id import ID
 from linki.url import URL, URLCollection
 from linki.title import BaseArticle, TitleCollection
+from linki.user import UserCollection
 
 
 class RepositoryConnection:
@@ -42,7 +43,7 @@ class RepositoryConnection:
 
 
 class Repository:
-    styles = {'titles', 'subs', 'contribs', 'drafts', 'articles'}
+    styles = {'titles', 'subs', 'contribs', 'drafts', 'articles', 'users'}
 
     def __init__(self, url: str) -> None:
         self.connection = RepositoryConnection(url)
@@ -93,6 +94,11 @@ class Repository:
     def articles(self) -> ArticleCollection:
         connection = self.connection.get_style('articles')
         return ArticleCollection(connection)
+
+    @property
+    def users(self) -> UserCollection:
+        connection = self.connection.get_style('users')
+        return UserCollection(connection)
 
     @classmethod
     def create(cls, base: str):

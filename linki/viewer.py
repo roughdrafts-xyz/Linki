@@ -146,10 +146,10 @@ class WebView:
                 })
 
     def handle_contribution(self):
-        req: bottle.FormsDict = bottle.request.params  # type: ignore
         files: bottle.FormsDict = bottle.request.files  # type: ignore
-        url = req.get('url')
-        if (url == 'https://localhost:8080/'):
+        (username, password) = bottle.request.auth or (None, None)
+        is_user = self.repo.users.verify_user(username, password)
+        if (is_user):
             f_titles: bottle.FileUpload | None = files.get('titles')
             f_articles: bottle.FileUpload | None = files.get('articles')
             if (f_articles is None or f_titles is None):
@@ -170,7 +170,9 @@ class WebView:
 
             copier.copy_articles()
             copier.copy_titles()
-            return bottle.HTTPResponse('/updates', 201)
+            title_text = ','.join(
+                [title.articleId for title in source.titles.get_titles()])
+            return bottle.HTTPResponse(f'/w/titles/{title_text}', 201)
         else:
             return bottle.HTTPResponse('', 403)
 
