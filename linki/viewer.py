@@ -26,10 +26,15 @@ class RenderedArticle(BaseArticle, frozen=True):
 
     @classmethod
     def fromArticle(cls, article: BaseArticle):
+        # if(article.redirect is None):
         raw = pypandoc.convert_text(
             article.content, format='markdown', to='markdown')
         content = pypandoc.convert_text(
             article.content, format='markdown', to='html')
+        # TODO Write redirect test for /w/
+        # if (article.redirect is not None):
+        #   redirect = f"0; URL='/w/{article.redirect.labelId}'"
+        #   content = f'<meta http-equiv="refresh" content="{redirect}"/>'
         return cls(
             label=article.label,
             content=content,

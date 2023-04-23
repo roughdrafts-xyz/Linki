@@ -82,8 +82,10 @@ def inbox(
     titles = repo.titles
     inbox = Inbox(subs, titles)
     for update in inbox.get_inbox():
-        typer.echo(
-            f"{update.rowId} {update.url.url}/{update.label.name} ({update.size:+n})")
+        typer.echo(''
+                   + f'┌ {update.rowId} {update.url.url}\n'
+                   + f'└ {update.label.name} ({update.size:+n})'
+                   )
 
 
 @app.command()
@@ -91,11 +93,12 @@ def serve(
     location: Path = typer.Argument(Path.cwd()),
     api: bool = typer.Option(True),
     web: bool = typer.Option(True),
-    subscribe: bool = typer.Option(True),
+    copy: bool = typer.Option(True),
+    contribute: bool = typer.Option(False),
     debug: bool = typer.Option(False, hidden=True),
     host: str = typer.Option('localhost'),
     port: int = typer.Option(8080),
-    home: Optional[Path] = typer.Option(None)
+    home: Optional[Path] = typer.Option(None),
 ):
     try:
         if (web):
@@ -106,8 +109,8 @@ def serve(
             home_str = str(home)
         repo = FileRepository.fromPath(location)
         viewer = WebView(repo, WebViewConf(
-            copy=subscribe,
-            contribute=True,
+            copy=copy,
+            contribute=contribute,
             api=api,
             web=web,
             debug=debug,

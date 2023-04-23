@@ -95,7 +95,12 @@ def test_view_subscription_update(tmp_path: Path):
     runner.invoke(app, ["publish", str(base)])
     inbox(copy)
     res = runner.invoke(app, ["inbox", str(copy)])
-    assert res.stdout == f'{0} {update_path.as_uri()} (+{len(update)})\n'
+
+    update_path = update_path.relative_to(base)
+    assert res.stdout == (''
+                          + f'┌ {0} {base.as_uri()}\n'
+                          + f'└ {update_path} (+{len(update)})\n'
+                          )
 
 
 def test_add_contribution(tmp_path: Path):
