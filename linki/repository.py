@@ -15,7 +15,7 @@ from linki.user import ContributorCollection
 class RepositoryConnection:
     root: ParseResult
     url: ParseResult
-    path: list[str]
+    path: tuple[str]
 
     def __init__(self, url: str) -> None:
         self.url = URL(url).parsed
@@ -27,7 +27,7 @@ class RepositoryConnection:
                 while (path != dot_path):
                     if (path.joinpath('.linki').exists()):
                         self.root = URL(path.as_uri()).parsed
-                        path = Path(self.url.path).relative_to(path).parts
+                        self.path = Path(self.url.path).relative_to(path).parts
                         break
                     path = path.parents[0]
                 if (self.root is None):

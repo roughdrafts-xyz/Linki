@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 import pypandoc
 import typer
 from linki.user import ContributorCollection
@@ -9,6 +9,7 @@ from linki.inbox import Inbox
 from linki.outbox import Outbox
 from linki.repository import FileRepository, Repository
 from linki.viewer import WebView, WebViewConf
+
 
 app = typer.Typer(
     no_args_is_help=True
@@ -183,11 +184,8 @@ def authenticate(
 
 
 def run():
-    try:
-        app()
-    except Exception as e:
-        typer.echo(e)
+    app()
 
 
 if __name__ == "__main__":
-    run()
+    app()

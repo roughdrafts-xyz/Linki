@@ -2,7 +2,7 @@ import copy
 from io import BytesIO
 from pathlib import Path
 import pickle
-from typing import Dict, Iterator, MutableMapping, TypeVar
+from typing import Callable, Dict, Iterator, MutableMapping, TypeVar
 from urllib.error import HTTPError
 from urllib.parse import ParseResult
 from urllib.request import urlopen
@@ -16,7 +16,20 @@ VT = TypeVar('VT')
 
 
 class Connection(MutableMapping[ID, VT]):
-    pass
+    def __setitem__(self, __key: ID, __value: VT) -> None:  # type: ignore
+        pass
+
+    def __delitem__(self, __key: ID) -> None:  # type: ignore
+        pass
+
+    def __getitem__(self, __key: ID) -> VT:  # type: ignore
+        pass
+
+    def __iter__(self) -> Iterator[ID]:  # type: ignore
+        pass
+
+    def __len__(self) -> int:  # type: ignore
+        pass
 
 
 class MemoryConnection(Connection[VT]):
@@ -127,9 +140,6 @@ class ROWebConnection(Connection[VT]):
         self.count_url = f'{url.geturl()}count/{style}/'
         self.style = style
 
-    def __setitem__(self, __key: ID, __value: VT) -> None:
-        pass
-
     def __getitem__(self, __key: ID) -> 'Title | Article':  # type: ignore
         try:
             url = f"{self.url}{__key}"
@@ -137,9 +147,6 @@ class ROWebConnection(Connection[VT]):
             return pickle.loads(res)
         except HTTPError:
             raise KeyError
-
-    def __delitem__(self, __key: ID) -> None:
-        pass
 
     def __iter__(self) -> Iterator[ID]:
         res = urlopen(self.url).read()
@@ -154,3 +161,22 @@ class ROWebConnection(Connection[VT]):
     def __len__(self) -> int:
         res = urlopen(self.count_url).read()
         return res
+
+
+class SparseConnection(Connection[VT]):
+    def __init__(self, store: Connection[VT], identifier: Callable[[VT], bool]) -> None:
+        super().__init__()
+        self.store = store
+        self.identifies = identifier
+
+    def __getitem__(self, __key: ID) -> VT:
+        return self.store[__key]
+
+    def __iter__(self) -> Iterator[ID]:
+        for (key, item) in self.store.items():
+            if (self.identifies(item)):
+                yield key
+
+    def __len__(self) -> int:
+        return self.store.__len__()
+    pass

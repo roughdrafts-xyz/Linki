@@ -1,6 +1,6 @@
 from pathlib import Path
 from typer.testing import CliRunner
-from linki.main import app
+from linki.main import app, run
 
 runner = CliRunner()
 
@@ -66,14 +66,14 @@ def test_create_local_group_copy(tmp_path: Path):
     base.joinpath('folder').mkdir()
 
     res = runner.invoke(app, ["init", str(base)])
-    article = base.joinpath('folder')
-    article.joinpath('hello_world.md').write_text('Hello World')
-    article.joinpath('moon_night.md').write_text('Hello Moon')
+    group = base.joinpath('folder')
+    group.joinpath('hello_world.md').write_text('Hello World')
+    group.joinpath('moon_night.md').write_text('Hello Moon')
     res = runner.invoke(app, ["publish", str(base)])
 
-    res = runner.invoke(app, ["copy", str(article), str(copy)])
-    x = 1
-    y = 1
+    res = runner.invoke(app, ["copy", str(group), str(copy)])
+    x = 2
+    y = 2
     assert res.stdout == f"Copied {x} titles and {y} articles.\n"
 
     content = copy.joinpath('folder', 'hello_world.md').read_text()
@@ -98,7 +98,7 @@ def test_create_local_article_copy(tmp_path: Path):
     y = 1
     assert res.stdout == f"Copied {x} titles and {y} articles.\n"
 
-    content = copy.joinpath('folder', 'hello_world.md').read_text()
+    content = copy.joinpath('folder', 'hello_moon.md').read_text()
     assert content == "Hello World"
 
 

@@ -1,7 +1,9 @@
+from itertools import zip_longest
 from pathlib import Path
 from typing import Iterable
 
 from linki.article import ArticleCollection
+from linki.connection import Connection, SparseConnection
 from linki.draft import BaseArticle, Draft
 from linki.repository import FileRepository, Repository
 from linki.title import BaseArticle, Redirect, TitleCollection
@@ -46,10 +48,7 @@ class Editor():
 
     def copy_articles(self, articles: ArticleCollection):
         count = 0
-        for article_id in articles.get_articles():
-            if (self.repo.articles.has_article(article_id)):
-                continue
-            article = articles.get_article(article_id)
+        for article in articles.get_articles():
             if (article is None):
                 continue
             self.repo.articles.merge_article(article)
@@ -81,7 +80,7 @@ class FileEditor(Editor):
     def iterdir(self):
         for path in self.repo.path.rglob('*'):
             if ('.linki' not in path.parts and
-                    path != self.repo.path
+                        path != self.repo.path
                     ):
                 yield path
 
@@ -129,12 +128,29 @@ class Copier:
     def __init__(self, source: Repository, destination: Editor) -> None:
         self.source = source
         self.destination = destination
+        self.articles = self.source.articles
+        self.titles = self.source.titles
+        if (self.source.connection.url != self.source.connection.root):
+            self.articles = ArticleCollection(SparseConnection(
+                self.source.articles.store, self.should_copy))
+            self.titles = TitleCollection(SparseConnection(
+                self.source.titles.store, self.should_copy))
+
+    def should_copy(self, article: BaseArticle) -> bool:
+        a = article.label.path
+        b = self.source.connection.path
+        for (x, y) in zip_longest(a, b):
+            if (y is None):
+                return True
+            if (x != y):
+                return False
+        return True
 
     def copy_articles(self):
-        return self.destination.copy_articles(self.source.articles)
+        return self.destination.copy_articles(self.articles)
 
     def copy_titles(self):
-        return self.destination.copy_titles(self.source.titles)
+        return self.destination.copy_titles(self.titles)
 
 
 class FileCopier(Copier):
@@ -143,6 +159,7 @@ class FileCopier(Copier):
     def __init__(self, source: Repository, destination: str | Path) -> None:
         self.source = source
         self.destination = FileEditor.fromPath(destination)
+        super().__init__(self.source, self.destination)
 
     def unload_titles(self):
         self.destination.unload_titles()

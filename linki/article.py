@@ -53,16 +53,11 @@ class ArticleCollection():
         return article
 
     def get_article(self, articleId: ArticleID) -> BaseArticle | None:
-        if (self.has_article(articleId)):
-            return self.store[articleId]
-        return None
+        return self.store.get(articleId)
 
-    def get_articles(self) -> Iterator[ArticleID]:
-        for key in self.store.keys():
-            yield ArticleID(key)
-
-    def has_article(self, articleId: ArticleID | None) -> bool:
-        return articleId in self.store
+    def get_articles(self) -> Iterator[BaseArticle]:
+        for article in self.store.values():
+            yield article
 
     @classmethod
     def fromStream(cls, stream: bytes):
