@@ -68,6 +68,7 @@ def test_create_local_group_copy(tmp_path: Path):
     res = runner.invoke(app, ["init", str(base)])
     article = base.joinpath('folder')
     article.joinpath('hello_world.md').write_text('Hello World')
+    article.joinpath('moon_night.md').write_text('Hello Moon')
     res = runner.invoke(app, ["publish", str(base)])
 
     res = runner.invoke(app, ["copy", str(article), str(copy)])
@@ -86,7 +87,9 @@ def test_create_local_article_copy(tmp_path: Path):
     base.joinpath('folder').mkdir()
 
     res = runner.invoke(app, ["init", str(base)])
-    article = base.joinpath('folder', 'hello_world.md')
+    article = base.joinpath('folder')
+    article.joinpath('moon_night.md').write_text('Hello Moon')
+    article = article.joinpath('hello_moon.md')
     article.write_text('Hello World')
     res = runner.invoke(app, ["publish", str(base)])
 

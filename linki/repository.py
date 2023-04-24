@@ -13,27 +13,49 @@ from linki.user import ContributorCollection
 
 
 class RepositoryConnection:
+    root: ParseResult
     url: ParseResult
+    path: list[str]
 
     def __init__(self, url: str) -> None:
         self.url = URL(url).parsed
-
-    def get_style(self, style: str) -> Connection:
         match self.url.scheme:
             case 'file':
-                path = PathConnection.get_path(self.url.path, style)
+                # look upward until we find the root
+                path = Path(self.url.path)
+                dot_path = Path('.')
+                while (path != dot_path):
+                    if (path.joinpath('.linki').exists()):
+                        self.root = URL(path.as_uri()).parsed
+                        path = Path(self.url.path).relative_to(path).parts
+                        break
+                    path = path.parents[0]
+                if (self.root is None):
+                    raise FileNotFoundError(
+                        '.linki folder not found. Maybe you need to initialize it?')
+            case 'https':
+                # TODO Assumes installed to root path
+                root = URL(url)
+                root.parsed = root.parsed._replace(path='')
+                root = root.parsed.geturl()
+                self.root = URL(root).parsed
+
+    def get_style(self, style: str) -> Connection:
+        match self.root.scheme:
+            case 'file':
+                path = PathConnection.get_path(self.root.path, style)
                 return PathConnection(path)
             case 'ssh':
                 raise NotImplementedError
             case 'https':
-                return ROWebConnection(self.url, style)
+                return ROWebConnection(self.root, style)
             case _:
                 raise NotImplementedError
 
     def create_style(self, style: str):
-        match self.url.scheme:
+        match self.root.scheme:
             case 'file':
-                PathConnection.create_path(self.url.path, style)
+                PathConnection.create_path(self.root.path, style)
             case 'ssh':
                 raise NotImplementedError
             case 'https':
@@ -111,12 +133,12 @@ class FileRepository(Repository, styles={'shadows'}):
 
     def __init__(self, url: str) -> None:
         super().__init__(url)
-        if (self.connection.url.scheme != 'file'):
+        if (self.connection.root.scheme != 'file'):
             raise ValueError
 
     @property
     def path(self) -> Path:
-        return Path(self.connection.url.path).resolve()
+        return Path(self.connection.root.path).resolve()
 
     @classmethod
     def fromPath(cls, path: str | Path):
@@ -125,6 +147,7 @@ class FileRepository(Repository, styles={'shadows'}):
 
     @classmethod
     def createPath(cls, path: str | Path):
+        Path(path).joinpath('.linki').mkdir(exist_ok=True)
         path = Path(path).resolve().as_uri()
         cls.create(path)
 

@@ -94,7 +94,7 @@ class PathConnection(Connection[VT]):
 
         root = base.joinpath('.linki')
         if (not root.exists()):
-            root.mkdir()
+            raise FileNotFoundError
 
         connection = root.joinpath(style)
         connection.mkdir()
