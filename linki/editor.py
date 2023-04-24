@@ -81,8 +81,8 @@ class FileEditor(Editor):
     def iterdir(self):
         for path in self.repo.path.rglob('*'):
             if ('.linki' not in path.parts and
-                path != self.repo.path
-                ):
+                    path != self.repo.path
+                    ):
                 yield path
 
     def iterfiles(self):

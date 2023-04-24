@@ -9,7 +9,7 @@ from linki.draft import DraftCollection, ShadowCollection
 from linki.id import ID
 from linki.url import URL, URLCollection
 from linki.title import BaseArticle, TitleCollection
-from linki.user import UserCollection
+from linki.user import ContributorCollection
 
 
 class RepositoryConnection:
@@ -25,7 +25,7 @@ class RepositoryConnection:
                 return PathConnection(path)
             case 'ssh':
                 raise NotImplementedError
-            case 'http' | 'https':
+            case 'https':
                 return ROWebConnection(self.url, style)
             case _:
                 raise NotImplementedError
@@ -36,7 +36,7 @@ class RepositoryConnection:
                 PathConnection.create_path(self.url.path, style)
             case 'ssh':
                 raise NotImplementedError
-            case 'http' | 'https':
+            case 'https':
                 raise NotImplementedError
             case _:
                 raise NotImplementedError
@@ -96,9 +96,9 @@ class Repository:
         return ArticleCollection(connection)
 
     @property
-    def users(self) -> UserCollection:
+    def users(self) -> ContributorCollection:
         connection = self.connection.get_style('users')
-        return UserCollection(connection)
+        return ContributorCollection(connection)
 
     @classmethod
     def create(cls, base: str):

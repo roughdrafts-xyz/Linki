@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional
 import pypandoc
 import typer
-from linki.user import UserCollection
+from linki.user import ContributorCollection
 
 from linki.editor import FileCopier, FileEditor
 from linki.inbox import Inbox
@@ -84,13 +84,13 @@ def inbox(
     inbox = Inbox(subs, titles)
     for update in inbox.get_inbox():
         output = ''
-        output += f'┌ {update.url}\n'
+        output += f'{update.url}\n'
         for detail in update.updates:
-            output += f'└ {detail.label.name} ({detail.size:+n})'
+            output += f'└┤{detail.inbox_id}├ {detail.label.name} ({detail.size:+n})'
         typer.echo(output)
 
 
-@app.command()
+@ app.command()
 def serve(
     location: Path = typer.Argument(Path.cwd()),
     api: bool = typer.Option(True),
@@ -126,7 +126,7 @@ def serve(
         typer.Exit()
 
 
-@app.command(hidden=True)
+@ app.command(hidden=True)
 def install_pandoc():
     try:
         pandoc = pypandoc.get_pandoc_path()
@@ -137,7 +137,7 @@ def install_pandoc():
         typer.echo("Pandoc installed successfully.")
 
 
-@app.command()
+@ app.command()
 def contribute(url: str,  location: Path = typer.Argument(Path.cwd())):
     repo = FileRepository.fromPath(location)
     contribs = repo.contribs
@@ -145,7 +145,7 @@ def contribute(url: str,  location: Path = typer.Argument(Path.cwd())):
     typer.echo(f"Contributing to {url}.")
 
 
-@app.command()
+@ app.command()
 def contributions(
     location: Path = typer.Argument(Path.cwd()),
 ):
@@ -159,7 +159,7 @@ def contributions(
         typer.echo(f"{priority}\t{contrib.url}")
 
 
-@app.command()
+@ app.command()
 def announce(
     location: Path = typer.Argument(Path.cwd()),
 ):
@@ -170,7 +170,7 @@ def announce(
         f"Sent contributions to {update_count} wikis.")
 
 
-@app.command()
+@ app.command()
 def authenticate(
     location: Path = typer.Argument(Path.cwd()),
     user: str = typer.Option(...),

@@ -40,19 +40,57 @@ def test_publish_drafts(tmp_path: Path):
     assert tmp_path.joinpath('good_moon.md').read_text() == 'Goodnight Moon'
 
 
-def test_create_local_copy(tmp_path: Path):
+def test_create_local_linki_copy(tmp_path: Path):
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
     base.mkdir()
     base.joinpath('folder').mkdir()
 
     res = runner.invoke(app, ["init", str(base)])
-    assert res.stdout == f"Initialized wiki in {str(base)}.\n"
     base.joinpath('folder', 'hello_world.md').write_text('Hello World')
     res = runner.invoke(app, ["publish", str(base)])
-    assert res.stdout == f"Published 1 drafts.\n"
 
     res = runner.invoke(app, ["copy", str(base), str(copy)])
+    x = 1
+    y = 1
+    assert res.stdout == f"Copied {x} titles and {y} articles.\n"
+
+    content = copy.joinpath('folder', 'hello_world.md').read_text()
+    assert content == "Hello World"
+
+
+def test_create_local_group_copy(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    base.joinpath('folder').mkdir()
+
+    res = runner.invoke(app, ["init", str(base)])
+    article = base.joinpath('folder')
+    article.joinpath('hello_world.md').write_text('Hello World')
+    res = runner.invoke(app, ["publish", str(base)])
+
+    res = runner.invoke(app, ["copy", str(article), str(copy)])
+    x = 1
+    y = 1
+    assert res.stdout == f"Copied {x} titles and {y} articles.\n"
+
+    content = copy.joinpath('folder', 'hello_world.md').read_text()
+    assert content == "Hello World"
+
+
+def test_create_local_article_copy(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    base.joinpath('folder').mkdir()
+
+    res = runner.invoke(app, ["init", str(base)])
+    article = base.joinpath('folder', 'hello_world.md')
+    article.write_text('Hello World')
+    res = runner.invoke(app, ["publish", str(base)])
+
+    res = runner.invoke(app, ["copy", str(article), str(copy)])
     x = 1
     y = 1
     assert res.stdout == f"Copied {x} titles and {y} articles.\n"
@@ -77,7 +115,7 @@ def test_add_subscription(tmp_path: Path):
     assert res.stdout == f"Subscriptions by priority (highest to lowest)\n0\tThis Wiki\n1\t{base.resolve().as_uri()}\n"
 
 
-def test_view_subscription_update(tmp_path: Path):
+def test_view_inbox_updates(tmp_path: Path):
     # checks Inbox command
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
@@ -95,10 +133,12 @@ def test_view_subscription_update(tmp_path: Path):
     runner.invoke(app, ["publish", str(base)])
     res = runner.invoke(app, ["inbox", str(copy)])
 
+    # inbox_id = InboxID(update_path.as_uri())
+    inbox_id = 0
     update_path = update_path.relative_to(base)
     assert res.stdout == (''
-                          + f'┌ {base.as_uri()}\n'
-                          + f'└ {update_path} (+{len(update)})\n'
+                          + f'{base.as_uri()}\n'
+                          + f'└┤{inbox_id}├ {update_path} (+{len(update)})\n'
                           )
 
 

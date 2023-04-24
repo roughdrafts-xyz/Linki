@@ -11,6 +11,7 @@ from linki.url import URL, URLCollection
 class UpdateDetails():
     size: int
     label: BaseLabel
+    inbox_id: int
 
 
 @dataclass
@@ -40,7 +41,8 @@ class Inbox():
                     size -= len(update.editOf.content)
                 details = UpdateDetails(
                     size=size,
-                    label=update.label
+                    label=update.label,
+                    inbox_id=0
                 )
                 row.updates.append(details)
             yield row

@@ -1,24 +1,31 @@
 
 from linki.connection import Connection
-from linki.id import BaseLabel
+from linki.id import Label
 
 
-def Password(password):
-    return BaseLabel.fromUnsafeString(password).labelId
+def UserID(username, password):
+    return Label([username, password]).labelId
 
 
-class User():
+class Contributor():
     pass
 
 
-class UserCollection():
-    def __init__(self, connection: Connection[User]) -> None:
+class ContributorExistsError(Exception):
+    pass
+
+
+class ContributorCollection():
+    def __init__(self, connection: Connection[Contributor]) -> None:
         self.store = connection
 
     def verify_user(self, username, password):
-        user = self.store.get(Password(password))
+        user = self.store.get(UserID(username, password))
         return user is not None
 
     def add_user(self, username, password):
-        password = Password(password)
-        self.store[password] = username
+        user_id = UserID(username, password)
+        # TODO Write test first
+        # if (self.verify_user(username, password)):
+        #   raise UserExistsError
+        self.store[user_id] = username

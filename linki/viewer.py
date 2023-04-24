@@ -23,9 +23,10 @@ class WebViewConf:
 
 class RenderedArticle(BaseArticle, frozen=True):
     raw: str
+    web_id: str
 
     @classmethod
-    def fromArticle(cls, article: BaseArticle):
+    def fromArticle(cls, article: BaseArticle, use_path: bool = False):
         # if(article.redirect is None):
         raw = pypandoc.convert_text(
             article.content, format='markdown', to='markdown')
@@ -35,11 +36,15 @@ class RenderedArticle(BaseArticle, frozen=True):
         # if (article.redirect is not None):
         #   redirect = f"0; URL='/w/{article.redirect.labelId}'"
         #   content = f'<meta http-equiv="refresh" content="{redirect}"/>'
+        web_id = article.articleId
+        if (use_path):
+            web_id = '/'.join(article.label.path)
         return cls(
             label=article.label,
             content=content,
             raw=raw,
-            editOf=article.editOf
+            editOf=article.editOf,
+            web_id=web_id
         )
 
 
@@ -138,11 +143,11 @@ class WebView:
                 return f"{self.repo.get_count(collection_type)}"
             case 'w':
                 items = [RenderedArticle.fromArticle(
-                    article) for article in collection]
+                    article, collection_type == 'titles') for article in collection]
                 return self.many_tmpl.render({
                     'items': items,
                     'style': collection_type.capitalize(),
-                    'style_root': f"/w/{collection_type}/"
+                    'style_root': f"/w/"
                 })
 
     def handle_contribution(self):

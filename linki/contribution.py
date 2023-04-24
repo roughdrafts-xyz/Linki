@@ -20,7 +20,7 @@ class Contribution():
                 copier.copy_titles()
                 copier.unload_titles()
                 return True
-            case 'http' | 'https':
+            case 'https':
                 data = urlencode({'url': self.destination.url})
                 request = Request(self.destination.url, str.encode(data))
                 res = urlopen(request).read()

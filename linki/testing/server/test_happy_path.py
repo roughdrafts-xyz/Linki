@@ -154,6 +154,45 @@ def test_does_handle_web(article_set: set[BaseArticle]):
         res.json, type=RenderRes) == expected
 
 
+@given(some_drafts(2))
+@settings(deadline=10000)
+def test_does_render_web(article_set: set[BaseArticle]):
+    articles = list(article_set)
+    article = articles[0]
+    title = articles[1]
+    viewer = get_memory_server()
+    viewer.repo.articles.merge_article(article)
+    viewer.repo.articles.merge_article(title)
+    viewer.repo.titles.set_title(title)
+
+    client = get_client(viewer)
+
+    path = '/'.join(title.label.path)
+    single_calls = (
+        {
+            'style': 'article',
+            'url': f'/w/{title.articleId}'
+        },
+        {
+            'style': 'path',
+            'url': f'/w/{path}'
+        },
+        {
+            'style': 'title',
+            'url': f'/w/{title.label.labelId}'
+        },
+    )
+    for call in single_calls:
+        res = client.get(call['url'])
+        assert res.status_code == 200
+
+    res = client.get('/w/articles/')
+    assert res.status_code == 200
+
+    res = client.get('/w/titles/')
+    assert res.status_code == 200
+
+
 def setup_contribute(article) -> Dict[str, MemoryConnection]:
     article_conn = MemoryConnection[BaseArticle]()
     title_conn = MemoryConnection[BaseArticle]()
