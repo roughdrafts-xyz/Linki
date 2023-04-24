@@ -179,4 +179,3 @@ class SparseConnection(Connection[VT]):
 
     def __len__(self) -> int:
         return self.store.__len__()
-    pass

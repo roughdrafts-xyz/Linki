@@ -95,63 +95,70 @@ def test_does_handle_web(article_set: set[BaseArticle]):
     viewer.many_tmpl.render = msgspec.to_builtins  # type: ignore
     client = get_client(viewer)
 
-    e_article = RenderedArticle.fromArticle(article)
-    e_title = RenderedArticle.fromArticle(title)
+    e_article = RenderedArticle.fromArticle(article, str(article.articleId))
+    e_title_by_a_id = RenderedArticle.fromArticle(title, str(title.articleId))
+    e_title_by_l_id = RenderedArticle.fromArticle(title, title.label.labelId)
+    e_title_by_path = RenderedArticle.fromArticle(
+        title, '/'.join(title.label.path))
 
     path = '/'.join(title.label.path)
     single_calls = (
         {
             'style': 'article',
+            'expect': e_title_by_a_id,
             'url': f'/w/{title.articleId}'
         },
         {
             'style': 'path',
+            'expect': e_title_by_path,
             'url': f'/w/{path}'
         },
         {
             'style': 'title',
+            'expect': e_title_by_l_id,
             'url': f'/w/{title.label.labelId}'
         },
     )
-
-    expected = {
-        'item': e_title
-    }
     for call in single_calls:
         res = client.get(call['url'])
+        expected = {'item': call['expect']}
         assert res.status_code == 200
         assert msgspec.from_builtins(
             res.json, type=dict[str, RenderedArticle]) == expected
 
     class RenderRes(TypedDict):
-        items: list[RenderedArticle]
+        items: set[RenderedArticle]
         style: str
         style_root: str
 
     res = client.get('/w/articles/')
     expected = {
-        'items': [
+        'items': {
             e_article,
-            e_title
-        ],
+            e_title_by_a_id
+        },
         'style': 'articles'.capitalize(),
-        'style_root': f"/w/articles/"
+        'style_root': f"/w/"
     }
     assert res.status_code == 200
-    assert msgspec.from_builtins(
-        res.json, type=RenderRes) == expected
+    actual = msgspec.from_builtins(res.json, type=RenderRes)
+    assert actual['style'] == expected['style']
+    assert actual['style_root'] == expected['style_root']
+    assert actual['items'] == expected['items']
 
     res = client.get('/w/titles/')
     expected = {
-        'items': [
-            e_title
-        ],
+        'items': {
+            e_title_by_path
+        },
         'style': 'titles'.capitalize(),
-        'style_root': f"/w/titles/"
+        'style_root': f"/w/"
     }
     assert res.status_code == 200
-    assert msgspec.from_builtins(
-        res.json, type=RenderRes) == expected
+    actual = msgspec.from_builtins(res.json, type=RenderRes)
+    assert actual['style'] == expected['style']
+    assert actual['style_root'] == expected['style_root']
+    assert actual['items'] == expected['items']
 
 
 @given(some_drafts(2))

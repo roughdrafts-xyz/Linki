@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Iterable
 
 from linki.article import ArticleCollection
-from linki.connection import Connection, SparseConnection
+from linki.connection import SparseConnection
 from linki.draft import BaseArticle, Draft
 from linki.repository import FileRepository, Repository
 from linki.title import BaseArticle, Redirect, TitleCollection

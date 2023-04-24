@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 import pypandoc
 import typer
-from linki.user import ContributorCollection
 
 from linki.editor import FileCopier, FileEditor
 from linki.inbox import Inbox

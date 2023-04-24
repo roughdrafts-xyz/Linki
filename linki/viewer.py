@@ -22,30 +22,44 @@ class WebViewConf:
 
 
 class RenderedArticle(BaseArticle, frozen=True):
-    raw: str
+    web_content: str
     web_id: str
 
     @classmethod
-    def fromArticle(cls, article: BaseArticle, use_path: bool = False):
+    def fromArticle(cls, article: BaseArticle, label: str):
         # if(article.redirect is None):
-        raw = pypandoc.convert_text(
-            article.content, format='markdown', to='markdown')
-        content = pypandoc.convert_text(
+        raw = article.content
+        # raw = pypandoc.convert_text(
+        # article.content, format='markdown', to='markdown')
+        web_content = pypandoc.convert_text(
             article.content, format='markdown', to='html')
         # TODO Write redirect test for /w/
         # if (article.redirect is not None):
         #   redirect = f"0; URL='/w/{article.redirect.labelId}'"
         #   content = f'<meta http-equiv="refresh" content="{redirect}"/>'
-        web_id = article.articleId
-        if (use_path):
-            web_id = '/'.join(article.label.path)
+
         return cls(
             label=article.label,
-            content=content,
-            raw=raw,
+            web_content=web_content,
+            content=raw,
             editOf=article.editOf,
-            web_id=web_id
+            web_id=label
         )
+
+    @classmethod
+    def render(cls, collection: list[BaseArticle], collection_type: str):
+        match collection_type:
+            case 'articles':
+                return {
+                    cls.fromArticle(article, str(article.articleId))
+                    for article in collection
+                }
+            case 'titles':
+                return {
+                    cls.fromArticle(
+                        article, '/'.join(article.label.path))
+                    for article in collection
+                }
 
 
 class WebView:
@@ -122,7 +136,7 @@ class WebView:
             case 'api':
                 return msgspec.to_builtins(item)
             case 'w':
-                web_item = RenderedArticle.fromArticle(item)
+                web_item = RenderedArticle.fromArticle(item, label)
                 return self.one_tmpl.render({'item': web_item})
 
     def handle_many_titles(self, style: str):
@@ -142,8 +156,7 @@ class WebView:
             case 'count':
                 return f"{self.repo.get_count(collection_type)}"
             case 'w':
-                items = [RenderedArticle.fromArticle(
-                    article, collection_type == 'titles') for article in collection]
+                items = RenderedArticle.render(collection, collection_type)
                 return self.many_tmpl.render({
                     'items': items,
                     'style': collection_type.capitalize(),

@@ -23,16 +23,19 @@ class RepositoryConnection:
             case 'file':
                 # look upward until we find the root
                 path = Path(self.url.path)
+                root = None
                 dot_path = Path('.')
-                while (path != dot_path):
+                slash_path = Path('/')
+                while (path != dot_path and path != slash_path):
                     if (path.joinpath('.linki').exists()):
-                        self.root = URL(path.as_uri()).parsed
+                        root = URL(path.as_uri()).parsed
                         self.path = Path(self.url.path).relative_to(path).parts
                         break
                     path = path.parents[0]
-                if (self.root is None):
+                if (root is None):
                     raise FileNotFoundError(
                         '.linki folder not found. Maybe you need to initialize it?')
+                self.root = root
             case 'https':
                 # TODO Assumes installed to root path
                 root = URL(url)
@@ -160,6 +163,9 @@ class FileRepository(Repository, styles={'shadows'}):
 class MemoryRepoConnection(RepositoryConnection):
     def __init__(self) -> None:
         self.connections: Dict[str, MemoryConnection] = dict()
+        self.root = URL('').parsed
+        self.url = URL('').parsed
+        self.path = ('',)
 
     def get_style(self, style: str) -> Connection:
         conn = self.connections.get(style)

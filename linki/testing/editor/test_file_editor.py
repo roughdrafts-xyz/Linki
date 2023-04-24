@@ -12,7 +12,7 @@ from linki.article import Article, BaseArticle
 from linki.draft import BaseArticle
 
 from linki.editor import FileEditor
-from linki.repository import Repository
+from linki.repository import FileRepository
 from linki.testing.strategies.article import an_article
 from linki.id import Label, PathLabel, SimpleLabel
 from linki.testing.strategies.draft import a_draft, some_drafts, some_new_drafts
@@ -61,8 +61,8 @@ def do_load_draft(editor: FileEditor, draft: BaseArticle):
 @contextmanager
 def get_file_editor():
     with TemporaryDirectory() as _dir:
-        path = Path(_dir).resolve().as_uri()
-        Repository.create(path)
+        path = Path(_dir).resolve()
+        FileRepository.createPath(path)
         yield FileEditor.fromPath(_dir)
 
 

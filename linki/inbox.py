@@ -4,7 +4,7 @@ from linki.subscription import Subscription
 
 from linki.title import TitleCollection
 from linki.id import BaseLabel
-from linki.url import URL, URLCollection
+from linki.url import URLCollection
 
 
 @dataclass
