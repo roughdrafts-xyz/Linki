@@ -33,9 +33,8 @@ class Inbox():
                     size -= len(update.editOf.content)
                 change = Change(
                     size=size,
-                    label=update.label,
-                    change_label=ChangeLabel(
-                        sub.url, '/'.join(update.label.path))
+                    article=update,
+                    url=sub
                 )
                 self.repo.changes.add_change(change)
 

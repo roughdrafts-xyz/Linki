@@ -1,28 +1,34 @@
 
 from dataclasses import dataclass
+from linki.article import BaseArticle
 from linki.connection import Connection
 
-from linki.id import BaseLabel, Label
+from linki.id import BaseLabel, Label, SimpleLabel
 from linki.url import URL
 
 
 @dataclass
 class Change():
     size: int
-    label: BaseLabel
-    change_label: BaseLabel
+    article: BaseArticle
+    url: URL
+
+    @property
+    def label(self):
+        return ChangeLabel(self.url, self.article)
 
     @property
     def change_id(self) -> str:
-        return self.change_label.labelId[0:7]
+        return self.label.labelId[0:7]
 
     @property
     def path(self) -> str:
-        return '/'.join(self.label.path)
+        return '/'.join(self.article.label.path)
 
 
-def ChangeLabel(base: str, path: str):
-    return Label([base, path])
+def ChangeLabel(base: URL, article: BaseArticle):
+    path = '/'.join(article.label.path)
+    return SimpleLabel(f'{base.url}{path}')
 
 
 class ChangeCollection():
@@ -30,7 +36,7 @@ class ChangeCollection():
         self.store = connection
 
     def add_change(self, change: Change):
-        self.store[change.change_label.labelId] = change
+        self.store[change.label.labelId] = change
 
     def get_changes(self, url: URL | None = None):
         for change_id in self.store:
@@ -39,6 +45,6 @@ class ChangeCollection():
                 yield change
                 continue
 
-            inbox_label = ChangeLabel(url.url, '/'.join(change.label.path))
-            if (inbox_label == change.change_label):
+            inbox_label = ChangeLabel(url, change.article)
+            if (inbox_label == change.label):
                 yield change
