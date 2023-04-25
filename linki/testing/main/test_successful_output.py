@@ -1,5 +1,6 @@
 from pathlib import Path
 from typer.testing import CliRunner
+from linki.inbox import ChangeLabel
 from linki.main import app
 
 runner = CliRunner()
@@ -136,9 +137,8 @@ def test_view_inbox_updates(tmp_path: Path):
     runner.invoke(app, ["publish", str(base)])
     res = runner.invoke(app, ["inbox", str(copy)])
 
-    # inbox_id = InboxID(update_path.as_uri())
-    inbox_id = 0
     update_path = update_path.relative_to(base)
+    inbox_id = ChangeLabel(base.as_uri(), str(update_path)).labelId[0:7]
     assert res.stdout == (''
                           + f'{base.as_uri()}\n'
                           + f'└┤{inbox_id}├ {update_path} (+{len(update)})\n'

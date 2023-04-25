@@ -79,14 +79,22 @@ def inbox(
     location: Path = typer.Argument(Path.cwd())
 ):
     repo = FileRepository.fromPath(location)
-    subs = repo.subs
-    titles = repo.titles
-    inbox = Inbox(subs, titles)
-    for update in inbox.get_inbox():
+    inbox = Inbox(repo)
+    inbox.load_inbox()
+    for folder in inbox.read_inbox():
         output = ''
-        output += f'{update.url}\n'
-        for detail in update.updates:
-            output += f'└┤{detail.inbox_id}├ {detail.label.name} ({detail.size:+n})'
+        output += f'{folder.url}\n'
+        updates = iter(folder.updates)
+        detail = next(updates, None)
+        while detail is not None:
+            next_detail = next(updates, None)
+            entry = f'┤{detail.change_id}├ {detail.path} ({detail.size:+n})'
+            if (next_detail) is not None:
+                output += f'├{entry}\n'
+            else:
+                output += f'└{entry}'
+            detail = next_detail
+
         typer.echo(output)
 
 

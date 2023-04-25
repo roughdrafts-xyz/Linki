@@ -1,48 +1,47 @@
 from dataclasses import dataclass
+from typing import Iterator
+from linki.change import Change, ChangeLabel
 from linki.repository import Repository
 from linki.subscription import Subscription
 
-from linki.title import TitleCollection
-from linki.id import BaseLabel
-from linki.url import URLCollection
 
+# start a counter
+# for every id[0:counter], see if any match across ids
+# if yes, increase counter and try again until there are no matches.
 
-@dataclass
-class UpdateDetails():
-    size: int
-    label: BaseLabel
-    inbox_id: int
+# store inbox IDs somewhere so that we can reverse them into url&path on Copy
 
 
 @dataclass
 class InboxRow():
     url: str
-    updates: list[UpdateDetails]
+    updates: Iterator[Change]
 
 
 class Inbox():
-    def __init__(self, subs: URLCollection,  titles: TitleCollection) -> None:
-        self.subs = subs
-        self.titles = titles
+    def __init__(self, repo: Repository) -> None:
+        self.repo = repo
 
-    def get_inbox(self):
-        # TODO Optimize. No one likes this many loops.
-        for sub in self.subs.get_urls():
+    def load_inbox(self):
+        for sub in self.repo.subs.get_urls():
             repo = Repository(sub.url)
             remote = repo.titles
-            subscription = Subscription(self.titles, remote)
-            row = InboxRow(
-                url=sub.url,
-                updates=[]
-            )
+            subscription = Subscription(self.repo.titles, remote)
             for update in subscription.get_updates():
                 size = len(update.content)
                 if (update.editOf is not None):
                     size -= len(update.editOf.content)
-                details = UpdateDetails(
+                change = Change(
                     size=size,
                     label=update.label,
-                    inbox_id=0
+                    change_label=ChangeLabel(
+                        sub.url, '/'.join(update.label.path))
                 )
-                row.updates.append(details)
-            yield row
+                self.repo.changes.add_change(change)
+
+    def read_inbox(self):
+        for sub in self.repo.subs.get_urls():
+            yield InboxRow(
+                url=sub.url,
+                updates=self.repo.changes.get_changes(sub)
+            )
