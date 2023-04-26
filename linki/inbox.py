@@ -86,18 +86,15 @@ class Inbox():
         line_bottom = f'├{line_left}─{line_right}\n'
         removes = ''
         if (copy.changes is not None):
-            removes = copy.changes.content.splitlines(keepends=True)
+            removes = copy.changes.content.splitlines()
 
-        adds = copy.article.content.splitlines(keepends=True)
+        adds = copy.article.content.splitlines()
         diff = unified_diff(removes, adds, fromfile='Removes', tofile='Adds')
         styled_diff = ''
-        line = next(diff, None)
-        while line is not None:
-            next_line = next(diff, None)
+        for line in [next(diff) for _ in range(3)]:
             styled_diff += f'╎{line}'
-            if (next_line is None):
-                styled_diff += '\n'
-            line = next_line
+        for line in diff:
+            styled_diff += f'╎{line}\n'
         output = (''
                   + header
                   + line_top
