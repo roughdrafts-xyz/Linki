@@ -76,7 +76,7 @@ def subscriptions(
 
 @app.command()
 def inbox(
-    location: Path = typer.Argument(Path.cwd()),
+    location: Path = typer.Option(Path.cwd()),
     copy_id: Optional[str] = typer.Argument(None)
 ):
     repo = FileRepository.fromPath(location)
