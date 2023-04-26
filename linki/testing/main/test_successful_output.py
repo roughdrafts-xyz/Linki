@@ -1,7 +1,6 @@
 from pathlib import Path
 from typer.testing import CliRunner
 from linki.id import SimpleLabel
-from linki.inbox import ChangeLabel
 from linki.main import app
 
 runner = CliRunner()
@@ -144,6 +143,60 @@ def test_view_inbox_updates(tmp_path: Path):
                           + f'{base.as_uri()}\n'
                           + f'└┤{inbox_id}├ {update_path} (+{len(update)})\n'
                           )
+
+
+def test_view_inbox_update_details(tmp_path: Path):
+    # checks Inbox command
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    copy.mkdir()
+
+    update_path = base.joinpath('hello.md').resolve()
+
+    runner.invoke(app, ["init", str(base)])
+    runner.invoke(app, ["init", str(copy)])
+    runner.invoke(app, ["subscribe", str(base), str(copy)])
+
+    update = 'Hello World!'
+    update_path.write_text(update)
+    runner.invoke(app, ["publish", str(base)])
+
+    inbox_id = SimpleLabel(update_path.as_uri()).labelId[0:7]
+    update_path = update_path.relative_to(base)
+    res = runner.invoke(app, ["inbox", str(copy)])
+# ```
+# │d507cef│ hello.md (+12)
+# ├───────┴───────────────
+# ╎--- Removes
+# ╎+++ Adds
+# ╎@@ -1,3 +1,3 @@
+# ╎Great Story
+# ╎-Hello Moon
+# ╎+Hello World
+# ╎Finale
+# ├────────────────────────
+# └file:///tmp/pytest-of-zone/pytest-168/test_view_inbox_update_details0/base
+# ```
+    header_left = f'│{inbox_id}│'
+    header_right = f'{update_path} (+{len(update)})'
+    header = f'{header_left} {header_right}\n'
+
+    line_left = '─' * (len(header_left)-2)
+    line_right = '─' * len(header_right)
+    line_top = f'├{line_left}┴{line_right}\n'
+    line_bottom = f'├{line_left}─{line_right}\n'
+    output = (''
+              + header
+              + line_top
+              + '╎--- Removes\n'
+              + '╎+++ Adds\n'
+              + '╎@@ -0,0 +1 @@\n'
+              + '╎+Hello World!\n'
+              + line_bottom
+              + f'└{base.as_uri()}\n'
+              )
+    assert res.stdout == output
 
 
 def test_add_contribution(tmp_path: Path):

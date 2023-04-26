@@ -179,3 +179,9 @@ class SparseConnection(Connection[VT]):
 
     def __len__(self) -> int:
         return self.store.__len__()
+
+
+class CountError(Exception):
+    def __init__(self, options: list[ID], message: str | None = None) -> None:
+        self.options = options
+        super().__init__(message)

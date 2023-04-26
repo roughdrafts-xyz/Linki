@@ -3,15 +3,15 @@ from dataclasses import dataclass
 from linki.article import BaseArticle
 from linki.connection import Connection
 
-from linki.id import BaseLabel, Label, SimpleLabel
+from linki.id import LabelID, SimpleLabel
 from linki.url import URL
 
 
 @dataclass
 class Change():
-    size: int
     article: BaseArticle
     url: URL
+    changes: BaseArticle | None = None
 
     @property
     def label(self):
@@ -25,6 +25,13 @@ class Change():
     def path(self) -> str:
         return '/'.join(self.article.label.path)
 
+    @property
+    def size(self) -> int:
+        size = len(self.article.content)
+        if (self.changes is not None):
+            size -= len(self.changes.content)
+        return size
+
 
 def ChangeLabel(base: URL, article: BaseArticle):
     path = '/'.join(article.label.path)
@@ -37,6 +44,15 @@ class ChangeCollection():
 
     def add_change(self, change: Change):
         self.store[change.label.labelId] = change
+
+    def find_change_id(self, key: str):
+        return [
+            change_id for change_id in self.store
+            if change_id.startswith(key)
+        ]
+
+    def get_change(self, change_id: str):
+        return self.store.get(LabelID(change_id))
 
     def get_changes(self, url: URL | None = None):
         for change_id in self.store:
