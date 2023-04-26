@@ -164,7 +164,7 @@ def test_view_inbox_update_details(tmp_path: Path):
 
     inbox_id = SimpleLabel(update_path.as_uri()).labelId[0:7]
     update_path = update_path.relative_to(base)
-    res = runner.invoke(app, ["inbox", str(copy)])
+    res = runner.invoke(app, ["inbox", str(copy), inbox_id])
 # ```
 # │d507cef│ hello.md (+12)
 # ├───────┴───────────────

@@ -76,26 +76,17 @@ def subscriptions(
 
 @app.command()
 def inbox(
-    location: Path = typer.Argument(Path.cwd())
+    location: Path = typer.Argument(Path.cwd()),
+    copy_id: Optional[str] = typer.Argument(None)
 ):
     repo = FileRepository.fromPath(location)
     inbox = Inbox(repo)
     inbox.load_inbox()
-    for folder in inbox.read_inbox():
-        output = ''
-        output += f'{folder.url}\n'
-        updates = iter(folder.updates)
-        detail = next(updates, None)
-        while detail is not None:
-            next_detail = next(updates, None)
-            entry = f'┤{detail.change_id}├ {detail.path} ({detail.size:+n})'
-            if (next_detail) is not None:
-                output += f'├{entry}\n'
-            else:
-                output += f'└{entry}'
-            detail = next_detail
-
-        typer.echo(output)
+    if (copy_id is None):
+        output = ''.join(inbox.render_inbox())
+    else:
+        output = ''.join(inbox.render_copy(copy_id))
+    typer.echo(output)
 
 
 @ app.command()
