@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from difflib import unified_diff
 from typing import Iterator
 from linki.change import Change
 from linki.connection import CountError
@@ -83,13 +84,24 @@ class Inbox():
         line_right = '─' * len(header_right)
         line_top = f'├{line_left}┴{line_right}\n'
         line_bottom = f'├{line_left}─{line_right}\n'
+        removes = ''
+        if (copy.changes is not None):
+            removes = copy.changes.content.splitlines(keepends=True)
+
+        adds = copy.article.content.splitlines(keepends=True)
+        diff = unified_diff(removes, adds, fromfile='Removes', tofile='Adds')
+        styled_diff = ''
+        line = next(diff, None)
+        while line is not None:
+            next_line = next(diff, None)
+            styled_diff += f'╎{line}'
+            if (next_line is None):
+                styled_diff += '\n'
+            line = next_line
         output = (''
                   + header
                   + line_top
-                  + '╎--- Removes\n'
-                  + '╎+++ Adds\n'
-                  + '╎@@ -0,0 +1 @@\n'
-                  + '╎+Hello World!\n'
+                  + styled_diff
                   + line_bottom
                   + f'└{copy.url.url}'
                   )
