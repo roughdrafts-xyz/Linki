@@ -103,6 +103,28 @@ def test_create_local_article_copy(tmp_path: Path):
     assert content == "Hello World"
 
 
+def test_refuse_contribution(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    copy.mkdir()
+
+    update_path = base.joinpath('hello.md').resolve()
+
+    runner.invoke(app, ["init", str(base)])
+    runner.invoke(app, ["init", str(copy)])
+    runner.invoke(app, ["subscribe", str(base), str(copy)])
+
+    update = 'Hello World!'
+    update_path.write_text(update)
+    runner.invoke(app, ["publish", str(base)])
+    inbox_id = SimpleLabel(update_path.as_uri()).labelId
+    res = runner.invoke(app, ["refuse", "--location", str(copy), inbox_id])
+    assert res.stdout == f"Refusing contribution {inbox_id}\n"
+    res = runner.invoke(app, ["refuse", "--location", str(copy), "--list"])
+    assert inbox_id in res.output
+
+
 def test_add_subscription(tmp_path: Path):
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
@@ -135,7 +157,7 @@ def test_view_inbox_updates(tmp_path: Path):
     update = 'Hello World!'
     update_path.write_text(update)
     runner.invoke(app, ["publish", str(base)])
-    res = runner.invoke(app, ["inbox", str(copy)])
+    res = runner.invoke(app, ["inbox", "--location", str(copy)])
 
     inbox_id = SimpleLabel(update_path.as_uri()).labelId[0:7]
     update_path = update_path.relative_to(base)
@@ -164,7 +186,7 @@ def test_view_inbox_update_details(tmp_path: Path):
 
     inbox_id = SimpleLabel(update_path.as_uri()).labelId[0:7]
     update_path = update_path.relative_to(base)
-    res = runner.invoke(app, ["inbox", str(copy), inbox_id])
+    res = runner.invoke(app, ["inbox", "--location", str(copy), inbox_id])
 # ```
 # │d507cef│ hello.md (+12)
 # ├───────┴───────────────

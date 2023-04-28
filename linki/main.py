@@ -89,6 +89,20 @@ def inbox(
     typer.echo(output)
 
 
+@app.command()
+def refuse(
+    location: Path = typer.Option(Path.cwd()),
+    copy_id: str = typer.Argument(None),
+    list: bool = typer.Option(False)
+):
+    repo = FileRepository.fromPath(location)
+    if (list):
+        typer.echo(repo.config.render_refusals())
+    else:
+        repo.config.add_refusal(copy_id)
+        typer.echo(f"Refusing contribution {copy_id}")
+
+
 @ app.command()
 def serve(
     location: Path = typer.Argument(Path.cwd()),

@@ -4,6 +4,7 @@ from urllib.parse import ParseResult
 
 import msgspec
 from linki.article import BaseArticle, ArticleCollection
+from linki.config import ConfigCollection
 from linki.connection import MemoryConnection, ROWebConnection, Connection, PathConnection
 from linki.draft import DraftCollection, ShadowCollection
 from linki.id import ID
@@ -70,7 +71,7 @@ class RepositoryConnection:
 
 class Repository:
     styles = {'titles', 'subs', 'contribs',
-              'drafts', 'articles', 'users', 'changes'}
+              'drafts', 'articles', 'users', 'changes', 'config'}
 
     def __init__(self, url: str) -> None:
         self.connection = RepositoryConnection(url)
@@ -131,6 +132,11 @@ class Repository:
     def changes(self) -> ChangeCollection:
         connection = self.connection.get_style('changes')
         return ChangeCollection(connection)
+
+    @property
+    def config(self) -> ConfigCollection:
+        connection = self.connection.get_style('config')
+        return ConfigCollection(connection)
 
     @classmethod
     def create(cls, base: str):
