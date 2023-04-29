@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from urllib.parse import urlencode
 import msgspec
 import requests
+from linki.change import Change
 from linki.editor import FileCopier
+from linki.inbox import Inbox
 from linki.repository import Repository
 from linki.url import URL
 
@@ -15,11 +17,13 @@ class Contribution():
     def announce_updates(self) -> bool:
         match self.destination.parsed.scheme:
             case 'file':
-                destination = self.destination.parsed.path
-                copier = FileCopier(self.source, destination)
-                copier.copy_articles()
-                copier.copy_titles()
-                copier.unload_titles()
+                repo = Repository(self.destination.url)
+                url = URL(self.source.connection.url.geturl())
+                for title in self.source.titles.get_titles():
+                    repo.changes.add_change(Change(
+                        article=title,
+                        url=url
+                    ))
                 return True
             case 'https':
                 url = self.destination.url + 'api/contribute'

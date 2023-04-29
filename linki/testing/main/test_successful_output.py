@@ -241,7 +241,7 @@ def test_successful_contribute(tmp_path: Path):
     base.mkdir()
     copy.mkdir()
 
-    update_path = base.joinpath('hello.md').resolve()
+    update_path = copy.joinpath('hello.md').resolve()
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
@@ -252,6 +252,9 @@ def test_successful_contribute(tmp_path: Path):
 
     res = runner.invoke(app, ["publish", str(copy), "--contribute"])
     assert f"Sent contributions to 1 wikis.\n" in res.stdout
+
+    res = runner.invoke(app, ["inbox", "--location", str(base)])
+    assert 'hello.md' in res.stdout
 
 
 def test_auth_user_with_flags(tmp_path: Path):

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from difflib import unified_diff
+from itertools import groupby
 from typing import Iterator
 from linki.change import Change
 from linki.connection import CountError
@@ -30,20 +31,16 @@ class Inbox():
                 self.repo.changes.add_change(change)
 
     def read_inbox(self):
-        for sub in self.repo.subs.get_urls():
-            # Optimize IDs here
-            # start a counter
-            # for every id[0:counter], see if any match across ids
-            # if yes, increase counter and try again until there are no matches.
-
-            # store inbox IDs somewhere so that we can reverse them into url&path on Copy
-            changes = list(self.repo.changes.get_changes(sub))
-            for change in changes:
-                change.changes = self.repo.titles.get_title(change.label)
-
+        def sort_by_key(x): return x.url.url
+        changes = sorted(self.repo.changes.get_changes(), key=sort_by_key)
+        changes = groupby(changes, sort_by_key)
+        for url, updates in changes:
+            updates = list(updates)
+            for update in updates:
+                update.changes = self.repo.titles.get_title(update.label)
             yield InboxRow(
-                url=sub.url,
-                updates=iter(changes)
+                url=url,
+                updates=iter(updates)
             )
 
     def render_inbox(self):
