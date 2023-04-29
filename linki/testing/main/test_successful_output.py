@@ -142,7 +142,6 @@ def test_add_subscription(tmp_path: Path):
 
 
 def test_view_inbox_updates(tmp_path: Path):
-    # checks Inbox command
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
     base.mkdir()
@@ -168,7 +167,6 @@ def test_view_inbox_updates(tmp_path: Path):
 
 
 def test_view_inbox_update_details(tmp_path: Path):
-    # checks Inbox command
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
     base.mkdir()
@@ -238,7 +236,6 @@ def test_add_contribution(tmp_path: Path):
 
 
 def test_successful_contribute(tmp_path: Path):
-    # checks Inbox command
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')
     base.mkdir()
@@ -252,9 +249,9 @@ def test_successful_contribute(tmp_path: Path):
 
     update = 'Hello World!'
     update_path.write_text(update)
-    runner.invoke(app, ["publish", str(base)])
-    res = runner.invoke(app, ["announce", str(copy)])
-    assert res.stdout == f"Sent contributions to 1 wikis.\n"
+
+    res = runner.invoke(app, ["publish", str(copy), "--contribute"])
+    assert f"Sent contributions to 1 wikis.\n" in res.stdout
 
 
 def test_auth_user_with_flags(tmp_path: Path):

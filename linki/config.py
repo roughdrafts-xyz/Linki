@@ -4,6 +4,7 @@ from linki.id import SimpleLabel
 
 Config: TypeAlias = object
 Refusals: TypeAlias = list[str]
+# TODO This is ugly, find a more elegant solution
 
 
 class ConfigCollection():

@@ -29,13 +29,19 @@ def init(
 
 @app.command()
 def publish(
-    location: Path = typer.Argument(Path.cwd())
+    location: Path = typer.Argument(Path.cwd()),
+    contribute: bool = typer.Option(False)
 ):
     editor = FileEditor.fromPath(location)
     editor.load_drafts()
     x = editor.publish_drafts()
     editor.unload_titles()
     typer.echo(f"Published {x} drafts.")
+    if (contribute):
+        outbox = Outbox(editor.repo)
+        update_count = outbox.send_updates()
+        typer.echo(
+            f"Sent contributions to {update_count} wikis.")
 
 
 @app.command()
@@ -170,17 +176,6 @@ def contributions(
     for contrib in contribs.get_urls():
         priority += 1
         typer.echo(f"{priority}\t{contrib.url}")
-
-
-@ app.command()
-def announce(
-    location: Path = typer.Argument(Path.cwd()),
-):
-    repo = FileRepository.fromPath(location)
-    outbox = Outbox(repo)
-    update_count = outbox.send_updates()
-    typer.echo(
-        f"Sent contributions to {update_count} wikis.")
 
 
 @ app.command()
