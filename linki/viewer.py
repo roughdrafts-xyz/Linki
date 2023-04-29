@@ -70,6 +70,9 @@ class WebView:
         self.repo = repo
         self.conf = conf
         bottle.debug(self.conf.debug)
+        if (self.conf.contribute):
+            self.app.route('/api/me', 'GET', self.handle_get_me)
+            self.app.route('/api/contribute', 'POST', self.handle_contribution)
         self.app.route('/', 'GET', self.handle_home)
         self.app.route('/<style>/titles/',
                        'GET', self.handle_many_titles)
@@ -77,8 +80,6 @@ class WebView:
                        'GET', self.handle_many_articles)
         self.app.route('/<style>/<label:path>',
                        'GET', self.handle_single_article)
-        if (self.conf.contribute):
-            self.app.route('/contribute', 'POST', self.handle_contribution)
         if (self.conf.web):
             self.single_templates = dict()
             self.iter_templates = dict()
@@ -193,6 +194,15 @@ class WebView:
             return bottle.HTTPResponse(f'/w/titles/{title_text}', 201)
         else:
             return bottle.HTTPResponse('', 403)
+
+    def handle_get_me(self):
+        (username, password) = bottle.request.auth or (None, None)
+        is_user = self.repo.users.verify_user(username, password)
+        if (not is_user):
+            return bottle.HTTPResponse('', 403)
+        return {
+            'username': username
+        }
 
     def run(self, host: str, port: int):
         self.app.run(host=host, port=port, reloader=self.conf.debug)

@@ -10,7 +10,7 @@ from linki.id import LabelID, SimpleLabel
 
 @dataclass
 class URL():
-    valid_schemes = ['file', 'http', 'https']
+    valid_schemes = ['file', 'https']
 
     def __init__(self, url: str) -> None:
         self.url = url
@@ -44,6 +44,7 @@ class URLCollection():
     def add_url(self, url: str):
         new_url = URL(url)
         self.store[new_url.labelId] = new_url
+        return new_url
 
     def get_url(self, label: str):
         _id = LabelID(label)

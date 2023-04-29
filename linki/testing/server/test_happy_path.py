@@ -241,7 +241,7 @@ def test_does_handle_contributions(article: BaseArticle):
 
     def contribute():
         pak_contents = contents()
-        return client.post('/contribute', data={
+        return client.post('/api/contribute', data={
             'titles': (pak_contents['titles'], 'titles'),
             'articles': (pak_contents['articles'], 'articles')
         }, auth=(username, password))

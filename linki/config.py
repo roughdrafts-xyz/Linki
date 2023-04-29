@@ -1,10 +1,19 @@
 from typing import Any, TypeAlias
+
+import msgspec
 from linki.connection import Connection
 from linki.id import SimpleLabel
+from linki.url import URL
 
 Config: TypeAlias = object
 Refusals: TypeAlias = list[str]
 # TODO This is ugly, find a more elegant solution
+
+
+class AuthDetails(msgspec.Struct, frozen=True):
+    url: str
+    username: str
+    password: str
 
 
 class ConfigCollection():
@@ -24,3 +33,17 @@ class ConfigCollection():
             return "No refusals."
 
         return ', '.join(refusals)
+
+    def add_auth(self, url: URL, username: str, password: str):
+        auth = AuthDetails(
+            url.url,
+            username,
+            password
+        )
+        self.store[url.labelId] = auth
+
+    def get_auth(self, url: URL) -> AuthDetails | None:
+        auth = self.store.get(url.labelId)
+        if (isinstance(auth, AuthDetails)):
+            return auth
+        return None

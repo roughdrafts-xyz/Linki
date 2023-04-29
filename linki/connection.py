@@ -31,6 +31,16 @@ class Connection(MutableMapping[ID, VT]):
     def __len__(self) -> int:  # type: ignore
         pass
 
+    def toStream(self) -> bytes:
+        items = [self[label] for label in self]
+        if (any([not isinstance(item, msgspec.Struct) for item in items])):
+            raise AttributeError
+        encode = msgspec.msgpack.encode(items)
+        return encode
+
+    def toFile(self) -> BytesIO:
+        return BytesIO(self.toStream())
+
 
 class MemoryConnection(Connection[VT]):
     def __init__(self) -> None:
@@ -50,16 +60,6 @@ class MemoryConnection(Connection[VT]):
 
     def __len__(self) -> int:
         return self.store.__len__()
-
-    def toStream(self) -> bytes:
-        items = [self.store[label] for label in self.store]
-        if (any([not isinstance(item, msgspec.Struct) for item in items])):
-            raise AttributeError
-        encode = msgspec.msgpack.encode(items)
-        return encode
-
-    def toFile(self) -> BytesIO:
-        return BytesIO(self.toStream())
 
 
 class PathConnection(Connection[VT]):

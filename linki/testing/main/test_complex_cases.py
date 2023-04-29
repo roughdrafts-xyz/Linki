@@ -1,8 +1,12 @@
 from pathlib import Path
 from unittest import TestCase
 
+import requests
+
 from linki.main import app
 from typer.testing import CliRunner
+
+from linki.testing.server.test_happy_path import get_client, get_memory_server
 
 runner = CliRunner()
 
@@ -55,3 +59,73 @@ def test_copy_changed_paths(tmp_path: Path):
     c_files = [f.relative_to(copy)
                for f in copy.iterdir()]
     test.assertCountEqual(s_files, c_files)
+
+
+def test_add_http_contribution_with_flags(tmp_path: Path, monkeypatch):
+    server = get_memory_server()
+    server_url = "https://localhost/"
+    client = get_client(server)
+    monkeypatch.setattr(requests, "get", client.get)
+    username = 'user'
+    password = 'pass'
+    server.repo.users.add_user(username, password)
+
+    linki = tmp_path.joinpath('client')
+    linki.mkdir()
+    runner.invoke(app, ["init", str(linki)])
+    res = runner.invoke(app, ["contribute", server_url, str(
+        linki), "--username", username, "--password", password])
+
+    assert res.stdout == f"Contributing to {server_url}.\n"
+
+    res = runner.invoke(app, ["contributions", str(linki)])
+    assert res.stdout == f"Contributions by priority (highest to lowest)\n0\tThis Wiki\n1\t{server_url}\n"
+
+
+def test_add_http_contribution_without_flags(tmp_path: Path, monkeypatch):
+    server = get_memory_server()
+    server_url = "https://localhost/"
+    client = get_client(server)
+    monkeypatch.setattr(requests, "get", client.get)
+    username = 'user'
+    password = 'pass'
+    server.repo.users.add_user(username, password)
+
+    linki = tmp_path.joinpath('client')
+    linki.mkdir()
+    runner.invoke(app, ["init", str(linki)])
+    res = runner.invoke(app, ["contribute", server_url, str(
+        linki)], input="user\npass")
+
+    assert res.stdout == ('' +
+                          f"Please authenticate\n" +
+                          f"Username: user\n" +
+                          f"Password: \n"
+                          f"Contributing to {server_url}.\n")
+
+    res = runner.invoke(app, ["contributions", str(linki)])
+    assert res.stdout == f"Contributions by priority (highest to lowest)\n0\tThis Wiki\n1\t{server_url}\n"
+
+
+def test_successful_http_contribute(tmp_path: Path, monkeypatch):
+    server = get_memory_server()
+    server_url = "https://localhost/"
+    client = get_client(server)
+    monkeypatch.setattr(requests, "get", client.get)
+    monkeypatch.setattr(requests, "post", client.post)
+    username = 'user'
+    password = 'pass'
+    server.repo.users.add_user(username, password)
+
+    linki = tmp_path.joinpath('client')
+    linki.mkdir()
+    runner.invoke(app, ["init", str(linki)])
+    res = runner.invoke(app, ["contribute", server_url, str(
+        linki), "--username", "user", "--password", "pass"])
+    update_path = linki.joinpath('hello.md').resolve()
+
+    update = 'Hello World!'
+    update_path.write_text(update)
+
+    res = runner.invoke(app, ["publish", str(linki), "--contribute"])
+    assert f"Sent contributions to 1 wikis.\n" in res.stdout

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+import msgspec
+import requests
 from linki.editor import FileCopier
 from linki.repository import Repository
 from linki.url import URL
@@ -21,9 +22,29 @@ class Contribution():
                 copier.unload_titles()
                 return True
             case 'https':
-                data = urlencode({'url': self.destination.url})
-                request = Request(self.destination.url, str.encode(data))
-                res = urlopen(request).read()
-                if (res == "0"):
-                    return True
+                url = self.destination.url + 'api/contribute'
+                titles = self.source.titles.store.toFile()
+                articles = self.source.articles.store.toFile()
+                auth = self.source.config.get_auth(URL(self.destination.url))
+                if (auth is None):
+                    raise AttributeError(
+                        "You need to authenticate this URL. Add it again using contribute.")
+                res = requests.post(
+                    url,
+                    data={'titles': (titles, 'titles'),
+                          'articles': (articles, 'articles')},
+                    auth=(auth.username, auth.password)
+                )
+                return res.status_code == 201
+        return False
+
+    def authenticate(self, url: str, username: str, password: str):
+        if not self.destination.parsed.scheme == 'https':
+            raise NotImplementedError('authentication works with: https')
+
+        url = self.destination.url + 'api/me'
+        res = requests.get(url, auth=(username, password))
+        if (res.status_code == 200):
+            user = res.json.get('username')
+            return user == username
         return False

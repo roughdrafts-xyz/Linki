@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Optional
 import pypandoc
 import typer
+from linki.contribution import Contribution
 
 from linki.editor import FileCopier, FileEditor
 from linki.inbox import Inbox
@@ -157,10 +158,26 @@ def install_pandoc():
 
 
 @ app.command()
-def contribute(url: str,  location: Path = typer.Argument(Path.cwd())):
+def contribute(
+    url: str,
+    location: Path = typer.Argument(Path.cwd()),
+    username: Optional[str] = typer.Option(None),
+    password: Optional[str] = typer.Option(None)
+):
     repo = FileRepository.fromPath(location)
-    contribs = repo.contribs
-    contribs.add_url(url)
+    new_url = repo.contribs.add_url(url)
+    if (new_url.parsed.scheme == 'https'):
+        contrib = Contribution(repo, new_url)
+        if (not username or not password):
+            typer.echo("Please authenticate")
+        while (not username):
+            username = typer.prompt('Username')
+        while (not password):
+            password = typer.prompt('Password', hide_input=True)
+
+        if (not contrib.authenticate(url, username, password)):
+            return typer.echo("Username or Password was incorrect")
+        repo.config.add_auth(new_url, username, password)
     typer.echo(f"Contributing to {url}.")
 
 
