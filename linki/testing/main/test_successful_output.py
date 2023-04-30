@@ -125,6 +125,28 @@ def test_refuse_contribution(tmp_path: Path):
     assert inbox_id in res.output
 
 
+def test_approve_contribution(tmp_path: Path):
+    base = tmp_path.joinpath('base')
+    copy = tmp_path.joinpath('copy')
+    base.mkdir()
+    copy.mkdir()
+
+    update_path = base.joinpath('hello.md').resolve()
+
+    runner.invoke(app, ["init", str(base)])
+    runner.invoke(app, ["init", str(copy)])
+    runner.invoke(app, ["subscribe", str(base), str(copy)])
+
+    update = 'Hello World!'
+    update_path.write_text(update)
+    runner.invoke(app, ["publish", str(base)])
+    inbox_id = SimpleLabel(update_path.as_uri()).labelId
+    res = runner.invoke(app, ["approve", "--location", str(copy), inbox_id])
+    assert res.stdout == f"Approving contribution {inbox_id}\n"
+    res = runner.invoke(app, ["approve", "--location", str(copy), "--list"])
+    assert inbox_id in res.output
+
+
 def test_add_subscription(tmp_path: Path):
     base = tmp_path.joinpath('base')
     copy = tmp_path.joinpath('copy')

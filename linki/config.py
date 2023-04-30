@@ -34,6 +34,20 @@ class ConfigCollection():
 
         return ', '.join(refusals)
 
+    def add_approval(self, copy_id: str):
+        approval_label = SimpleLabel('approvals').labelId
+        approvals: set = self.store.get(approval_label, set())
+        approvals.add(copy_id)
+        self.store[approval_label] = approvals
+
+    def render_approvals(self):
+        approval_label = SimpleLabel('approvals').labelId
+        approvals: set | None = self.store.get(approval_label, None)
+        if (approvals is None):
+            return "No approvals."
+
+        return ', '.join(approvals)
+
     def add_auth(self, url: URL, username: str, password: str):
         auth = AuthDetails(
             url.url,

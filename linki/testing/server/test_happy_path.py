@@ -243,6 +243,8 @@ def test_does_handle_contributions(article: BaseArticle):
     change_text = ','.join([change.articleId for change in titles.values()])
     assert res.text == f'/w/contributions/{change_text}'
 
+    # TODO Test for 201 (can_edit=True)
+
 
 @given(some_drafts(2))
 def test_does_handle_copy(article_set: set[BaseArticle]):
