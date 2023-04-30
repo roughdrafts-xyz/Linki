@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest import TestCase
 
 import requests
+from linki.inbox import Inbox
 
 from linki.main import app
 from typer.testing import CliRunner
@@ -129,3 +130,6 @@ def test_successful_http_contribute(tmp_path: Path, monkeypatch):
 
     res = runner.invoke(app, ["publish", str(linki), "--contribute"])
     assert f"Sent contributions to 1 wikis.\n" in res.stdout
+
+    inbox = Inbox(server.repo)
+    assert 'hello.md' in ''.join(inbox.render_inbox())

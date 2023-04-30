@@ -21,25 +21,23 @@ class Contribution():
                 url = URL(self.source.connection.url.geturl())
                 for title in self.source.titles.get_titles():
                     repo.changes.add_change(Change(
-                        article=title,
-                        url=url
+                        source=url.url,
+                        article=title
                     ))
                 return True
             case 'https':
                 url = self.destination.url + 'api/contribute'
-                titles = self.source.titles.store.toFile()
-                articles = self.source.articles.store.toFile()
+                changes = self.source.titles.store.toFile()
                 auth = self.source.config.get_auth(URL(self.destination.url))
                 if (auth is None):
                     raise AttributeError(
                         "You need to authenticate this URL. Add it again using contribute.")
                 res = requests.post(
                     url,
-                    data={'titles': (titles, 'titles'),
-                          'articles': (articles, 'articles')},
+                    data={'changes': (changes, 'changes')},
                     auth=(auth.username, auth.password)
                 )
-                return res.status_code == 201
+                return (res.status_code == 201 or res.status_code == 202)
         return False
 
     def authenticate(self, url: str, username: str, password: str):

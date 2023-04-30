@@ -19,7 +19,7 @@ class ContributorCollection():
     def __init__(self, connection: Connection[Contributor]) -> None:
         self.store = connection
 
-    def verify_user(self, username, password):
+    def verify_user(self, username: str | None, password: str | None):
         user = self.store.get(UserID(username, password))
         return user is not None
 

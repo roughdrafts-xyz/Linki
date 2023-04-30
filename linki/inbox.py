@@ -26,12 +26,12 @@ class Inbox():
             for update in subscription.get_updates():
                 change = Change(
                     article=update,
-                    url=sub
+                    source=sub.url
                 )
                 self.repo.changes.add_change(change)
 
     def read_inbox(self):
-        def sort_by_key(x): return x.url.url
+        def sort_by_key(x): return x.source
         changes = sorted(self.repo.changes.get_changes(), key=sort_by_key)
         changes = groupby(changes, sort_by_key)
         for url, updates in changes:
@@ -97,6 +97,6 @@ class Inbox():
                   + line_top
                   + styled_diff
                   + line_bottom
-                  + f'└{copy.url.url}'
+                  + f'└{copy.source}'
                   )
         return output

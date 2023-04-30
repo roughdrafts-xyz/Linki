@@ -3,19 +3,19 @@ from dataclasses import dataclass
 from linki.article import BaseArticle
 from linki.connection import Connection
 
-from linki.id import LabelID, SimpleLabel
+from linki.id import Label, LabelID
 from linki.url import URL
 
 
 @dataclass
 class Change():
     article: BaseArticle
-    url: URL
+    source: str
     changes: BaseArticle | None = None
 
     @property
     def label(self):
-        return ChangeLabel(self.url, self.article)
+        return ChangeLabel(self.source, self.article)
 
     @property
     def change_id(self) -> str:
@@ -33,9 +33,9 @@ class Change():
         return size
 
 
-def ChangeLabel(base: URL, article: BaseArticle):
-    path = '/'.join(article.label.path)
-    return SimpleLabel(f'{base.url}{path}')
+def ChangeLabel(source: str, article: BaseArticle):
+    path = [source, *article.label.path]
+    return Label(path)
 
 
 class ChangeCollection():
@@ -61,6 +61,6 @@ class ChangeCollection():
                 yield change
                 continue
 
-            inbox_label = ChangeLabel(url, change.article)
+            inbox_label = ChangeLabel(url.url, change.article)
             if (inbox_label == change.label):
                 yield change

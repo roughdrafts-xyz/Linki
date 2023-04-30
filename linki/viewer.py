@@ -4,11 +4,14 @@ import msgspec
 
 import pypandoc
 from linki.article import BaseArticle
+from linki.change import Change
 from linki.editor import Copier, Editor
 from linki.id import ID, Label, LabelID
 from linki.repository import Repository, TemporaryRepository
 from dataclasses import dataclass
 import bottle
+
+from linki.url import URL
 
 
 @dataclass(kw_only=True)
@@ -165,35 +168,43 @@ class WebView:
                 })
 
     def handle_contribution(self):
-        files: bottle.FormsDict = bottle.request.files  # type: ignore
         (username, password) = bottle.request.auth or (None, None)
-        is_user = self.repo.users.verify_user(username, password)
-        if (is_user):
-            f_titles: bottle.FileUpload | None = files.get('titles')
-            f_articles: bottle.FileUpload | None = files.get('articles')
-            if (f_articles is None or f_titles is None):
-                return bottle.HTTPError(500)
-
-            c_titles: bottle.FileUpload = f_titles
-            c_articles: bottle.FileUpload = f_articles
-
-            b_titles: BytesIO = c_titles.file
-            b_articles: BytesIO = c_articles.file
-            source = TemporaryRepository.fromStreams(
-                titles=b_titles.read(),
-                articles=b_articles.read()
-            )
-
-            destination = Editor(self.repo)
-            copier = Copier(source, destination)
-
-            copier.copy_articles()
-            copier.copy_titles()
-            title_text = ','.join(
-                [title.articleId for title in source.titles.get_titles()])
-            return bottle.HTTPResponse(f'/w/titles/{title_text}', 201)
-        else:
+        if (
+            (username is None) or (password is None) or
+            (not isinstance(username, str)) or
+            (not isinstance(password, str)) or
+            (not self.repo.users.verify_user(username, password))
+        ):
             return bottle.HTTPResponse('', 403)
+        files: bottle.FormsDict = bottle.request.files  # type: ignore
+        f_changes: bottle.FileUpload | None = files.get('changes')
+        if (f_changes is None):
+            return bottle.HTTPError(500)
+
+        c_changes: bottle.FileUpload = f_changes
+
+        b_changes: BytesIO = c_changes.file
+
+        r_changes = msgspec.msgpack.decode(
+            b_changes.read(), type=list[BaseArticle])
+        can_edit = False
+        for change in r_changes:
+            new_change = Change(
+                source=username,
+                article=change
+            )
+            if (can_edit):
+                # merge directly
+                self.repo.titles.set_title(change)
+                # TODO Also add the articles to the article db
+                # TODO self.repo.changes.accept_change(new_change)
+                pass
+            else:
+                self.repo.changes.add_change(new_change)
+        title_text = ','.join([title.articleId for title in r_changes])
+        if (can_edit):
+            return bottle.HTTPResponse(f'/w/titles/{title_text}', 201)
+        return bottle.HTTPResponse(f'/w/contributions/{title_text}', 202)
 
     def handle_get_me(self):
         (username, password) = bottle.request.auth or (None, None)
