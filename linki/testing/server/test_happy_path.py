@@ -200,20 +200,6 @@ def test_does_render_web(article_set: set[BaseArticle]):
     assert res.status_code == 200
 
 
-def setup_contribute(article) -> Dict[str, MemoryConnection]:
-    article_conn = MemoryConnection[BaseArticle]()
-    title_conn = MemoryConnection[BaseArticle]()
-    articles = ArticleCollection(article_conn)
-    titles = TitleCollection(title_conn)
-
-    articles.merge_article(article)
-    titles.set_title(article)
-    return {
-        'titles': title_conn,
-        'articles': article_conn
-    }
-
-
 def get_client(viewer: WebView | None = None) -> Client:
     if (viewer is None):
         viewer = get_memory_server()
@@ -222,14 +208,13 @@ def get_client(viewer: WebView | None = None) -> Client:
 
 @given(an_article())
 def test_does_handle_contributions(article: BaseArticle):
-    conns = setup_contribute(article)
-    articles = conns['articles']
-    titles = conns['titles']
+    titles = MemoryConnection[BaseArticle]()
+    title_collection = TitleCollection(titles)
+    title_collection.set_title(article)
 
     def contents() -> Dict[str, BytesIO]:
         return {
-            'articles': articles.toFile(),
-            'titles': titles.toFile(),
+            'changes': titles.toFile(),
         }
 
     username = 'user'
@@ -242,8 +227,7 @@ def test_does_handle_contributions(article: BaseArticle):
     def contribute():
         pak_contents = contents()
         return client.post('/api/contribute', data={
-            'titles': (pak_contents['titles'], 'titles'),
-            'articles': (pak_contents['articles'], 'articles')
+            'changes': (pak_contents['changes'], 'changes')
         }, auth=(username, password))
 
     # Invalid User
@@ -252,18 +236,12 @@ def test_does_handle_contributions(article: BaseArticle):
     assert res.status_code == 403
     assert res.text == ''
 
-    assert list(titles.values()) != viewer.repo.get_collection('titles')
-    assert list(articles.values()) != viewer.repo.get_collection('articles')
-
     # Valid User
     viewer.repo.users.add_user(username, password)
     res = contribute()
-    assert res.status_code == 201
-    title_text = ','.join([title.articleId for title in titles.values()])
-    assert res.text == f'/w/titles/{title_text}'
-
-    assert list(titles.values()) == viewer.repo.get_collection('titles')
-    assert list(articles.values()) == viewer.repo.get_collection('articles')
+    assert res.status_code == 202
+    change_text = ','.join([change.articleId for change in titles.values()])
+    assert res.text == f'/w/contributions/{change_text}'
 
 
 @given(some_drafts(2))
