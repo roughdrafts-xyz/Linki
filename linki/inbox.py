@@ -19,6 +19,7 @@ class Inbox():
         self.repo = repo
 
     def load_inbox(self):
+        refusals = self.repo.config.get_refusals()
         for sub in self.repo.subs.get_urls():
             repo = Repository(sub.url)
             remote = repo.titles
@@ -28,6 +29,8 @@ class Inbox():
                     article=update,
                     source=sub.url
                 )
+                if (change.change_id in refusals):
+                    continue
                 self.repo.changes.add_change(change)
 
     def read_inbox(self):
@@ -100,3 +103,18 @@ class Inbox():
                   + f'└{copy.source}'
                   )
         return output
+
+    def approve(self, copy_id):
+        change = self.read_copy(copy_id)
+        if (change is None):
+            return False
+        self.repo.titles.set_title(change.article)
+        self.repo.config.add_approval(change.change_id)
+        self.repo.changes.remove_change(change)
+
+    def refuse(self, copy_id):
+        change = self.read_copy(copy_id)
+        if (change is None):
+            return False
+        self.repo.config.add_refusal(change.change_id)
+        self.repo.changes.remove_change(change)

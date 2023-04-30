@@ -106,6 +106,8 @@ def refuse(
     if (list):
         typer.echo(repo.config.render_refusals())
     else:
+        inbox = Inbox(repo)
+        inbox.refuse(copy_id)
         repo.config.add_refusal(copy_id)
         typer.echo(f"Refusing contribution {copy_id}")
 
@@ -116,11 +118,13 @@ def approve(
     copy_id: str = typer.Argument(None),
     list: bool = typer.Option(False)
 ):
-    repo = FileRepository.fromPath(location)
+    editor = FileEditor.fromPath(location)
     if (list):
-        typer.echo(repo.config.render_approvals())
+        typer.echo(editor.repo.config.render_approvals())
     else:
-        repo.config.add_approval(copy_id)
+        inbox = Inbox(editor.repo)
+        inbox.approve(copy_id)
+        editor.unload_titles()
         typer.echo(f"Approving contribution {copy_id}")
 
 

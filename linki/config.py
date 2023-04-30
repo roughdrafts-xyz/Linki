@@ -26,6 +26,10 @@ class ConfigCollection():
         refusals.add(copy_id)
         self.store[refusal_label] = refusals
 
+    def get_refusals(self):
+        refusal_label = SimpleLabel('refusals').labelId
+        return self.store.get(refusal_label, [])
+
     def render_refusals(self):
         refusal_label = SimpleLabel('refusals').labelId
         refusals: set | None = self.store.get(refusal_label, None)

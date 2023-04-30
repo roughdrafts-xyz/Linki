@@ -64,3 +64,6 @@ class ChangeCollection():
             inbox_label = ChangeLabel(url.url, change.article)
             if (inbox_label == change.label):
                 yield change
+
+    def remove_change(self, change: Change):
+        del self.store[change.label.labelId]
