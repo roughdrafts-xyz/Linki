@@ -1,6 +1,7 @@
 from pathlib import Path
 from typer.testing import CliRunner
-from linki.id import SimpleLabel
+from linki.change import ChangeLabel
+from linki.id import Label, SimpleLabel
 from linki.main import app
 
 runner = CliRunner()
@@ -118,7 +119,8 @@ def test_refuse_contribution(tmp_path: Path):
     update = 'Hello World!'
     update_path.write_text(update)
     runner.invoke(app, ["publish", str(base)])
-    inbox_id = SimpleLabel(update_path.as_uri()).labelId
+    inbox_id = Label([base.as_uri(), 'hello.md']).labelId[0:7]
+    runner.invoke(app, ["inbox", "--location", str(copy)])
     res = runner.invoke(app, ["refuse", "--location", str(copy), inbox_id])
     assert res.stdout == f"Refusing contribution {inbox_id}\n"
     res = runner.invoke(app, ["refuse", "--location", str(copy), "--list"])
@@ -140,7 +142,8 @@ def test_approve_contribution(tmp_path: Path):
     update = 'Hello World!'
     update_path.write_text(update)
     runner.invoke(app, ["publish", str(base)])
-    inbox_id = SimpleLabel(update_path.as_uri()).labelId
+    inbox_id = Label([base.as_uri(), 'hello.md']).labelId[0:7]
+    runner.invoke(app, ["inbox", "--location", str(copy)])
     res = runner.invoke(app, ["approve", "--location", str(copy), inbox_id])
     assert res.stdout == f"Approving contribution {inbox_id}\n"
     res = runner.invoke(app, ["approve", "--location", str(copy), "--list"])
