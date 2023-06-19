@@ -24,14 +24,13 @@ Let's say you're interested in bird watching, and you find a great bird wiki usi
 
 # Installation
 
-We're on PyPI! You can just run `pip install linki` and continue.  
-Alternatively, download a release from [the releases](#installation).
+We're on PyPI! You can just run `pip install linki` and continue.
 
 # Getting Started
 
-You can get started by running `linki init` to start your own wiki. The initialization procedure should have created a folder that we'll be calling this folder the `working directory`. This is where your wiki will live.
+You can get started by running `linki init` to start your wiki. The initialization procedure should have created a folder that we'll be calling this folder the `working directory`. This is where your wiki will live.
 
-The working directory should have a hidden folder in it called `.linki`. Don't touch this. Its for linki to handle, and its a sensitive folder.
+The working directory should have a hidden folder in it called `.linki`. Don't touch this. It's for linki to handle, and it's a sensitive folder.
 
 ## Terminology
 
@@ -41,7 +40,7 @@ linki puts documents known as "Titles" on display. Named after the fact that the
 
 ### Articles
 
-Articles are an archive of all changes to a Title whether or not that Title is on display. When you do commands to a title, you're actually doing a command to an Article. Anything that works on an Article should work on a Title. This may not always be the case the other way around.
+Articles are an archive of all changes to a Title whether or not that Title is on display. When you do commands to a title, you're doing a command to an Article. Anything that works on an Article should work on a Title. This may not always be the case the other way around.
 
 ### Drafts
 
@@ -51,7 +50,7 @@ Drafts are your works in progress. They aren't titles and they aren't articles. 
 
 Writing Drafts is pretty easy - just use markdown in any text editor you prefer. As long as it can save to markdown directly, you're golden. (Future versions will support anything [Pandoc](https://pandoc.org/) can!)
 
-If a Draft is inside of a folder, it'll remember that - When you get to publishing it'll save the folder structure as part of the Title.You can edit your drafts like you would normal files. Move folders around. Rename things. linki will know what you changed when you ask it to publish your drafts.
+If a Draft is inside of a folder, it'll remember that - When you get to publishing it'll save the folder structure as part of the Title. You can edit your drafts like you would normal files. Move folders around. Rename things. linki will know what you changed when you ask it to publish your drafts.
 
 # Publishing Drafts
 
@@ -59,7 +58,7 @@ When you're ready to turn your Drafts into Titles and archive them as Articles, 
 
 # Copying Articles from Other Wikis
 
-See something you like on another wiki? Maybe a version of an article you wrote that you like better? Or an article you think would be important on your wiki that you don't have? You can copy it! You can copy it _and_ its history! When this thing has comments, it'll copy the comments too! Just run `linki copy <url of article>` and it'll copy all of that over to your wiki, ready to go. You can treat it like one of your own articles - edit its draft, change its groups, whatever. It's yours to change now.
+See something you like on another wiki? Maybe a version of an article you wrote that you like better? Or an article you think would be important on your wiki that you don't have? You can copy it! You can copy it _and_ its history! When this thing has comments, it'll copy the comments too! Just run `linki copy <url of article>` and it'll copy all of that over to your wiki, ready to go. You can treat it like one of your articles - edit its draft, change its groups, whatever. It's yours to change now.
 
 Your wiki will only update Drafts you haven't changed. This will let you copy an article and change the title without changing the draft. You might need to do a bit of effort to add your draft's changes to the article, but this avoids what is known as an "[edit conflict](https://en.wikipedia.org/wiki/Edit_conflict)".
 
@@ -73,31 +72,27 @@ Instead of running `linki init` you can use `linki copy`. This will automaticall
 
 # Subscribing to Wikis
 
-There are likely wikis that you'd like to copy from consistently. This might be a copy of your wiki deployed to a server, or a wiki that covers a topic very related to your own. You can use `linki subscribe <url>` to do this.
-
-If you subscribe to the same url multiple times, it'll unsubscribe from the wiki and then subscribe again. This is a good way to change settings on a subscription.
+,
+There are likely wikis that you'd like to copy from consistently. This might be a copy of your wiki deployed to a server or a wiki that covers a topic very related to your own. You can use `linki subscribe <url>` to do this.
+If you subscribe to the same URL multiple times, you'll unsubscribe from the wiki and then subscribe again. This is a good way to change settings on a subscription.
 
 ## Reading your Subscriptions
 
-When you subscribe to a wiki, linki will show you to updates to wikis with `linki inbox`. If the same title has changed multiple times, it'll batch these changes together so that you only see the latest one. You can pick and choose which ones you'd like to copy over using the `linki copy` command.
-
-Just like `linki copy` you can subscribe to a whole wiki, a group in that wiki, or just an individual page. It'll subscribe accordingly. You can subscribe to the same wiki multiple times, using different urls. This is useful if you want different subscriptions to the same wiki to have different settings.
+When you subscribe to a wiki, linki will show you updates to wikis with `linki inbox`.
 
 ## Subscribing to Multiple Wikis
 
 You can subscribe to multiple wikis. You do this by using `linki subscribe` any number of times. If you aren't subscribed to the wiki already, it'll add it to your list of subscriptions.
 
-# Making your wiki public
+# Making your Wiki public
 
 `linki serve` will provide you with a ready-to-go web server that can display all your titles and articles. Your drafts will stay private, they're called drafts for a reason. It'll run up a web server with a basic wiki interface that displays your titles. You can use `linki serve --home=<title>` to set a title as a home page. If you do not, it will display a list of your ungrouped groups and titles.
 
-This also makes your wiki public for other linki installations to subscribe to! It'll also create an API to access your titles and articles. You can read more about the API options in the [API Documentation](#).
+This also makes your wiki public for other linki installations to subscribe to! It'll also create an API to access your titles and articles. You can read more about the API options in the [API Documentation](API.md).
 
 ## I don't want to have some of these features
 
-Use `linki serve --no-web` to only serve your API and Subscription access. You can also do `linki serve --no-api` to turn off the API. Similarly you can do `linki serve --no-subscribe`. You can do any mix of these, but if you do all three it might just be better not to serve in the first place.
-
-The linki Server comes with a basic search function, html displays of your articles, a history view of your titles, title lists, an API, and an endpoint for subscribers to update from.
+Use `linki serve --no-web` to only serve your API and Subscription access. You can also do `linki serve --no-api` to turn off the API. Similarly, you can do `linki serve --no-subscribe`. You can do any mix of these, but if you do all three it might just be better not to serve in the first place.
 
 ## I don't want to host this on my personal computer
 
@@ -105,11 +100,11 @@ Smart! You can run `linki serve` on a server, and this is the recommended option
 
 ## I don't want to maintain a server
 
-Find a public linki host that will serve your wiki for you. They'll likely have advanced tools to help you, such as user groups or multi-author wiki tools. They'll likely also offer you search and discovery tools too.
+Look for public linki hosts soon. [Rough Drafts](https://roughdrafts.xyz/) is aiming to change into one pretty soon. Linki hosts will likely have advanced tools to help you, such as user groups or multi-author wiki tools. They'll likely also offer you search and discovery tools too.
 
 # Contributing to other wikis
 
-You can contribute to other wikis, and they might like to know when you're making a contribution to them. You can do this with the `linki announce` function. The `linki announce` function tells wikis that you've made some updates they should copy over. You can track which wikis receive announcements using the `linki contribute` command. It operates similarly to the `linki subscribe` command. Similarly, you can see who you're contributing to with the `linki contributions` command.
+You can contribute to other wikis with `linki contribute <url>` similarly to subscribing, but in reverse. The wiki you're contributing to will need to use `linki authenticate` to let you send them contributions. After that, it's as simple as using `linki publish --contribute` when you're ready to send out changes to wikis that you contribute to. They'll receive your contributions in their inbox, similar to a subscription, and can accept or refuse them just like a subscription.
 
 # Questions
 
@@ -119,19 +114,13 @@ These are questions I either asked myself or that someone asked me while discuss
 
 Git isn't very oriented toward non-developers, and its purpose is different. Existing wiki solutions built on top of git are great, but they are not purpose-built.
 
-For example, a linki hosting service (like [roughdrafts.xyz](#)) could provide permissions on who can read what articles by article, group, or wiki. It could also introduce something like pull requests for articles. (By the way, [roughdrafts.xyz](#)) does this today. Check it out!)
+For example, a linki hosting service could provide permissions on who can read what articles by article, group, or wiki. It could also introduce something like pull requests for articles.
 
 ## How do I prevent plagiarism?
 
 If you use a linki hosting service it might be able to act as a Timestamp Authority. If this is the case, anyone who trusts that host can use it to verify who published something first and you can use it to store copies of the verification.
 
-You could also use this [pre-publish hook](#) to digitally timestamp your articles using the [FreeTSA Timestamp Authority service](https://www.freetsa.org/index_en.php) and [Sigstore TSA](https://www.sigstore.dev/).
-
-Outside of using a Timestamp authority the best you can do is digitally sign something to say that it was written by you. This does not prevent someone from copying the text and signing it themselves. You can encrypt your articles and develop a web of trust, sharing your public keys with those you want to read your articles.
-
-If you want to do that you can use this [pre-publish hook](#) to automatically digitally sign everything you publish. If you're subscribed to a signed wiki you can run a [post-copy hook](#) that verifies the entries automatically. If you'd like to encrypt and decrypt as well you can use [this set of hooks](#) to do that.
-
-In addition to all of this, Articles identify themselves based on the articles they have been edited from. If you can find a public record of an article's history you can verify the authenticity of its identifier by comparing it against that.
+Also, Articles identify themselves based on the articles they have been edited from. If you can find a public record of an article's history you can verify the authenticity of its identifier by comparing it against that.
 
 ## How do I delete something?
 
@@ -143,4 +132,4 @@ If being able to delete your articles is a concern, develop a personal [web of t
 
 # Thanks
 
-Thank You, Ward Cunningham, for sharing the [concept of a Federated Wiki](https://www.youtube.com/watch?v=BdwLczSgvcc) at TEDx and laying the ground work necessary to build off of.
+Thank You, Ward Cunningham, for sharing the [concept of a Federated Wiki](https://www.youtube.com/watch?v=BdwLczSgvcc) at TEDx and laying the groundwork necessary to build off of.
