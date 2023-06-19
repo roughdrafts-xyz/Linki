@@ -53,3 +53,11 @@ class URLCollection():
     def get_urls(self) -> Iterator[URL]:
         for url in self.store.values():
             yield url
+
+    def render_urls(self) -> str:
+        priority = 0
+        output = f'{priority}\tThis Wiki'
+        for url in self.get_urls():
+            priority += 1
+            output += f"\n{priority}\t{url.url}"
+        return output

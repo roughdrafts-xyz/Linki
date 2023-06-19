@@ -114,7 +114,7 @@ def test_refuse_contribution(tmp_path: Path):
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
-    runner.invoke(app, ["subscribe", str(base), str(copy)])
+    runner.invoke(app, ["subscribe", "--location", str(copy), str(base)])
 
     update = 'Hello World!'
     update_path.write_text(update)
@@ -137,7 +137,7 @@ def test_approve_contribution(tmp_path: Path):
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
-    runner.invoke(app, ["subscribe", str(base), str(copy)])
+    runner.invoke(app, ["subscribe", "--location", str(copy), str(base)])
 
     update = 'Hello World!'
     update_path.write_text(update)
@@ -158,11 +158,11 @@ def test_add_subscription(tmp_path: Path):
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
-    res = runner.invoke(app, ["subscribe", str(base), str(copy)])
+    res = runner.invoke(app, ["subscribe", "--location", str(copy), str(base)])
 
     assert res.stdout == f"Subscribed to {str(base)}.\n"
 
-    res = runner.invoke(app, ["subscriptions", str(copy)])
+    res = runner.invoke(app, ["subscribe", "--location", str(copy), "--list"])
     assert res.stdout == f"Subscriptions by priority (highest to lowest)\n0\tThis Wiki\n1\t{base.resolve().as_uri()}\n"
 
 
@@ -176,7 +176,7 @@ def test_view_inbox_updates(tmp_path: Path):
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
-    runner.invoke(app, ["subscribe", str(base), str(copy)])
+    runner.invoke(app, ["subscribe", "--location", str(copy), str(base)])
 
     update = 'Hello World!'
     update_path.write_text(update)
@@ -201,7 +201,7 @@ def test_view_inbox_update_details(tmp_path: Path):
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
-    runner.invoke(app, ["subscribe", str(base), str(copy)])
+    runner.invoke(app, ["subscribe", "--location", str(copy), str(base)])
 
     update = 'Hello World!'
     update_path.write_text(update)
@@ -252,11 +252,12 @@ def test_add_contribution(tmp_path: Path):
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
-    res = runner.invoke(app, ["contribute", str(base), str(copy)])
+    res = runner.invoke(
+        app, ["contribute", "--location", str(copy), str(base)])
 
     assert res.stdout == f"Contributing to {str(base)}.\n"
 
-    res = runner.invoke(app, ["contributions", str(copy)])
+    res = runner.invoke(app, ["contribute", "--location", str(copy), "--list"])
     assert res.stdout == f"Contributions by priority (highest to lowest)\n0\tThis Wiki\n1\t{base.resolve().as_uri()}\n"
 
 
@@ -270,7 +271,7 @@ def test_successful_contribute(tmp_path: Path):
 
     runner.invoke(app, ["init", str(base)])
     runner.invoke(app, ["init", str(copy)])
-    runner.invoke(app, ["contribute", str(base), str(copy)])
+    runner.invoke(app, ["contribute", "--location", str(copy), str(base)])
 
     update = 'Hello World!'
     update_path.write_text(update)

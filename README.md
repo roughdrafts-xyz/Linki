@@ -1,6 +1,6 @@
 # Linki
 
-The Command Line Client for the linki project - A tool to create distributed wikis. You can use this to publish a new wiki or copy an existing one. You can also use it to manage your wiki.
+A tool to create distributed wikis, and link them together through subscriptions and contributions.
 
 # What's a Distributed Wiki?
 
@@ -67,10 +67,6 @@ Your wiki will only update Drafts you haven't changed. This will let you copy an
 
 If you want to, you can even copy a whole wiki. Just do `linki copy <url to wiki>` and it'll work the same - think of it as running copy on every article in the wiki.
 
-### Filtering
-
-When you copy an entire wiki you can use the `--filter` flag to filter titles using regex. This will let you only download specific file types, or only Titles that share parts of their label.
-
 ## Starting with a copy of a Wiki
 
 Instead of running `linki init` you can use `linki copy`. This will automatically initialize the folder, and then run the copy command like normal for you. It's a great way to get up and running with a pre-made set of articles you want to build on top of.
@@ -87,25 +83,9 @@ When you subscribe to a wiki, linki will show you to updates to wikis with `link
 
 Just like `linki copy` you can subscribe to a whole wiki, a group in that wiki, or just an individual page. It'll subscribe accordingly. You can subscribe to the same wiki multiple times, using different urls. This is useful if you want different subscriptions to the same wiki to have different settings.
 
-## Automatic Subscriptions
-
-You can set a subscription to be automatic with the `--automatic` flag. If a subscription is set to automatic, it will copy every update it sees after informing you of the changes. This is useful for making a replication of a wiki you work on.
-
-You can stop a subscription from being automatic by subscribing again with the `--not-automatic` flag.
-
 ## Subscribing to Multiple Wikis
 
 You can subscribe to multiple wikis. You do this by using `linki subscribe` any number of times. If you aren't subscribed to the wiki already, it'll add it to your list of subscriptions.
-
-### Subscription priority
-
-It's likely some of the wikis you subscribe to will have similar articles with the same title. Because of this, linki subscriptions have priority.
-
-Automatic subscriptions will copy updates from all automatic subscriptions. Priority determines which article becomes the title article.
-
-You can view your existing subscriptions and their priorities with `linki subscriptions` with no parameters. This will show you both your automatic and non-automatic subscriptions. It will also show you your wiki, labeled as `This Wiki`. Your Wiki defaults to having the highest priority.
-
-A new subscription has the lowest priority until you change it. You can also set the priority when you run `linki subscribe` with `linki subscribe <url> [priority]`. You can also use this format to change the priority of an existing subscription. Your Wiki's url is `this`.
 
 # Making your wiki public
 

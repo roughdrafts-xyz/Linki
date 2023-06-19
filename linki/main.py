@@ -83,35 +83,24 @@ def copy(source: str, destination: Path = typer.Argument(Path.cwd(), file_okay=F
 
 
 @app.command()
-def subscribe(url: str, location: Path = typer.Argument(Path.cwd())):
+def subscribe(
+    location: Path = typer.Option(Path.cwd()),
+    url: str = typer.Argument(None),
+    list: bool = typer.Option(False),
+):
     """
     Follow a wiki for updates
 
     When you run linki inbox, it will check what you're subscribed to and if that linki has any updates. If it does have any updates, it'll download them to your inbox
     """
-    repo = FileRepository.fromPath(location)
-    subs = repo.subs
-    subs.add_url(url)
-    typer.echo(f"Subscribed to {url}.")
-
-
-@app.command()
-def subscriptions(
-    location: Path = typer.Argument(Path.cwd())
-):
-    """
-    DEPRECATED
-
-    Needs to become subscribe --list
-    """
-    repo = FileRepository.fromPath(location)
-    subs = repo.subs
-    typer.echo(f"Subscriptions by priority (highest to lowest)")
-    priority = 0
-    typer.echo(f'{priority}\tThis Wiki')
-    for subscription in subs.get_urls():
-        priority += 1
-        typer.echo(f"{priority}\t{subscription.url}")
+    editor = FileEditor.fromPath(location)
+    if (list):
+        typer.echo(f"Subscriptions by priority (highest to lowest)")
+        typer.echo(editor.repo.subs.render_urls())
+    else:
+        subs = editor.repo.subs
+        subs.add_url(url)
+        typer.echo(f"Subscribed to {url}.")
 
 
 @app.command()
@@ -239,10 +228,11 @@ def install_pandoc():
 
 @ app.command()
 def contribute(
-    url: str,
-    location: Path = typer.Argument(Path.cwd()),
+    url: str = typer.Argument(None),
+    location: Path = typer.Option(Path.cwd()),
     username: Optional[str] = typer.Option(None),
-    password: Optional[str] = typer.Option(None)
+    password: Optional[str] = typer.Option(None),
+    list: bool = typer.Option(False)
 ):
     """
     Contribute to a linki!
@@ -250,39 +240,25 @@ def contribute(
     When you contribute to a linki you can use `linki publish --contribute` to send your changes to linkis that you contribute to. Just add the urls for those linkis to your contributors list by using this command and point it at the root of the linki you're contributing to.
     """
     repo = FileRepository.fromPath(location)
-    new_url = repo.contribs.add_url(url)
-    if (new_url.parsed.scheme == 'https'):
-        contrib = Contribution(repo, new_url)
-        if (not username or not password):
-            typer.echo("Please authenticate")
-        while (not username):
-            username = typer.prompt('Username')
-        while (not password):
-            password = typer.prompt('Password', hide_input=True)
+    if (list):
+        typer.echo(f"Contributions by priority (highest to lowest)")
+        typer.echo(repo.contribs.render_urls())
+        pass
+    else:
+        new_url = repo.contribs.add_url(url)
+        if (new_url.parsed.scheme == 'https'):
+            contrib = Contribution(repo, new_url)
+            if (not username or not password):
+                typer.echo("Please authenticate")
+            while (not username):
+                username = typer.prompt('Username')
+            while (not password):
+                password = typer.prompt('Password', hide_input=True)
 
-        if (not contrib.authenticate(url, username, password)):
-            return typer.echo("Username or Password was incorrect")
-        repo.config.add_auth(new_url, username, password)
-    typer.echo(f"Contributing to {url}.")
-
-
-@ app.command()
-def contributions(
-    location: Path = typer.Argument(Path.cwd()),
-):
-    """
-    DEPRECATED
-
-    This needs to become `linki contribute --list`
-    """
-    repo = FileRepository.fromPath(location)
-    contribs = repo.contribs
-    typer.echo(f"Contributions by priority (highest to lowest)")
-    priority = 0
-    typer.echo(f'{priority}\tThis Wiki')
-    for contrib in contribs.get_urls():
-        priority += 1
-        typer.echo(f"{priority}\t{contrib.url}")
+            if (not contrib.authenticate(url, username, password)):
+                return typer.echo("Username or Password was incorrect")
+            repo.config.add_auth(new_url, username, password)
+        typer.echo(f"Contributing to {url}.")
 
 
 @ app.command()
