@@ -74,12 +74,13 @@ def test_add_http_contribution_with_flags(tmp_path: Path, monkeypatch):
     linki = tmp_path.joinpath('client')
     linki.mkdir()
     runner.invoke(app, ["init", str(linki)])
-    res = runner.invoke(app, ["contribute", server_url, str(
+    res = runner.invoke(app, ["contribute", server_url, "--location", str(
         linki), "--username", username, "--password", password])
 
     assert res.stdout == f"Contributing to {server_url}.\n"
 
-    res = runner.invoke(app, ["contributions", str(linki)])
+    res = runner.invoke(
+        app, ["contribute", "--location", str(linki), "--list"])
     assert res.stdout == f"Contributions by priority (highest to lowest)\n0\tThis Wiki\n1\t{server_url}\n"
 
 
@@ -95,7 +96,7 @@ def test_add_http_contribution_without_flags(tmp_path: Path, monkeypatch):
     linki = tmp_path.joinpath('client')
     linki.mkdir()
     runner.invoke(app, ["init", str(linki)])
-    res = runner.invoke(app, ["contribute", server_url, str(
+    res = runner.invoke(app, ["contribute", server_url, "--location", str(
         linki)], input="user\npass")
 
     assert res.stdout == ('' +
@@ -104,7 +105,8 @@ def test_add_http_contribution_without_flags(tmp_path: Path, monkeypatch):
                           f"Password: \n"
                           f"Contributing to {server_url}.\n")
 
-    res = runner.invoke(app, ["contributions", str(linki)])
+    res = runner.invoke(
+        app, ["contribute", "--location", str(linki), "--list"])
     assert res.stdout == f"Contributions by priority (highest to lowest)\n0\tThis Wiki\n1\t{server_url}\n"
 
 
@@ -121,7 +123,7 @@ def test_successful_http_contribute(tmp_path: Path, monkeypatch):
     linki = tmp_path.joinpath('client')
     linki.mkdir()
     runner.invoke(app, ["init", str(linki)])
-    res = runner.invoke(app, ["contribute", server_url, str(
+    res = runner.invoke(app, ["contribute", server_url, "--location", str(
         linki), "--username", "user", "--password", "pass"])
     update_path = linki.joinpath('hello.md').resolve()
 

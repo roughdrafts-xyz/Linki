@@ -56,7 +56,7 @@ def test_does_handle_articles(article_set: set[BaseArticle]):
     for call in single_calls:
         res = client.get(call['url'])
         assert res.status_code == 200
-        assert msgspec.from_builtins(res.json, type=BaseArticle) == expected
+        assert msgspec.convert(res.json, type=BaseArticle) == expected
 
     res = client.get('/api/articles/')
     expected = {
@@ -66,7 +66,7 @@ def test_does_handle_articles(article_set: set[BaseArticle]):
         ]
     }
     assert res.status_code == 200
-    assert msgspec.from_builtins(
+    assert msgspec.convert(
         res.json, type=dict[str, list[BaseArticle]]) == expected
 
     res = client.get('/api/titles/')
@@ -76,7 +76,7 @@ def test_does_handle_articles(article_set: set[BaseArticle]):
         ]
     }
     assert res.status_code == 200
-    assert msgspec.from_builtins(
+    assert msgspec.convert(
         res.json, type=dict[str, list[BaseArticle]]) == expected
 
 
@@ -123,7 +123,7 @@ def test_does_handle_web(article_set: set[BaseArticle]):
         res = client.get(call['url'])
         expected = {'item': call['expect']}
         assert res.status_code == 200
-        assert msgspec.from_builtins(
+        assert msgspec.convert(
             res.json, type=dict[str, RenderedArticle]) == expected
 
     class RenderRes(TypedDict):
@@ -141,7 +141,7 @@ def test_does_handle_web(article_set: set[BaseArticle]):
         'style_root': f"/w/"
     }
     assert res.status_code == 200
-    actual = msgspec.from_builtins(res.json, type=RenderRes)
+    actual = msgspec.convert(res.json, type=RenderRes)
     assert actual['style'] == expected['style']
     assert actual['style_root'] == expected['style_root']
     assert actual['items'] == expected['items']
@@ -155,7 +155,7 @@ def test_does_handle_web(article_set: set[BaseArticle]):
         'style_root': f"/w/"
     }
     assert res.status_code == 200
-    actual = msgspec.from_builtins(res.json, type=RenderRes)
+    actual = msgspec.convert(res.json, type=RenderRes)
     assert actual['style'] == expected['style']
     assert actual['style_root'] == expected['style_root']
     assert actual['items'] == expected['items']
