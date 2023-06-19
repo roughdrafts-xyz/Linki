@@ -14,5 +14,8 @@ dependencies = [
     "requests==2.31.0"
 ]
 
+[project.optional-dependencies]
+dev = ["pytest==7.3.2", "hypothesis==6.78.3"]
+
 [project.scripts]
 linki = "linki:main.run"
