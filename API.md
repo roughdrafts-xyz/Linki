@@ -22,14 +22,14 @@ If you have the label of an article (name of it or id of it), then you can acces
 
 Anything listed here is for internal use by linki, and might change in any version. Use with caution.
 
-## /api/me/
+### /api/me/
 
 If you're authenticated, this returns your profile on the server.
 
-## /api/contribute/
+### /api/contribute/
 
 If you're authenticated, this lets you send a contribution in the form of a MessagePack.
 
-## /copy/<titles|articles|:label>
+### /copy/<titles|articles|:label>
 
 As `/api/` but it returns a MessagePack instead of a json object.
