@@ -1,21 +1,31 @@
 [project]
 name = "linki"
-version = '0.0.3'
+version = '0.0.9'
 description = 'Distributed wiki tools'
-authors = [{ name = 'Antonio M', email = 'antoniomenteguiaga@gmail.com' }]
 readme = "README.md"
+requires-python = ">=3.7"
 dependencies = [
-    "typer==0.7.0",
-    "typing_extensions==4.5.0",
-    "bottle==0.12.25",
-    "msgspec==0.16.0",
-    "Werkzeug==2.3.6",
-    "pypandoc==1.11",
-    "requests==2.31.0"
+    "typer~=0.9.0",
+    "typing_extensions~=4.5.0",
+    "bottle~=0.12.25",
+    "msgspec~=0.16.0",
+    "Werkzeug~=2.3.6",
+    "pypandoc~=1.11",
+    "requests~=2.31.0"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent"
 ]
 
 [project.optional-dependencies]
-dev = ["pytest==7.3.2", "hypothesis==6.78.3"]
+dev = ["pytest~=7.3.2", "hypothesis~=6.78.3"]
 
 [project.scripts]
 linki = "linki:main.run"
+
+[project.urls]
+"Homepage" = "https://github.com/roughdrafts-xyz/Linki"
+"Bug Tracker" = "https://github.com/roughdrafts-xyz/Linki/issues"

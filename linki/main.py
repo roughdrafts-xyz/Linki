@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Optional
+from typing_extensions import Annotated
 import pypandoc
 import typer
 from linki.contribution import Contribution
@@ -175,7 +176,7 @@ def serve(
     debug: bool = typer.Option(False, hidden=True),
     host: str = typer.Option('localhost'),
     port: int = typer.Option(80),
-    home: Optional[Path] = typer.Option(None),
+    home: Annotated[Optional[Path], typer.Option()] = None,
 ):
     """
     Run a web server!
@@ -188,28 +189,28 @@ def serve(
 
     To accept contributions, you must add contributing users with `linki authenticate` and run this command with the --contribute flag.
     """
-    try:
-        if (web):
+    if (web):
+        try:
             pypandoc.get_pandoc_path()
-        home_str = None
-        if (home):
-            home = home.resolve().relative_to(Path.cwd().resolve())
-            home_str = str(home)
-        repo = FileRepository.fromPath(location)
-        viewer = WebView(repo, WebViewConf(
-            copy=copy,
-            contribute=contribute,
-            api=api,
-            web=web,
-            debug=debug,
-            home=home_str
-        ))
+        except OSError:
+            typer.echo(
+                "Pandoc not found. Run using linki serve --no-web or install pandoc with linki install-pandoc.")
+            typer.Exit()
+    home_str = None
+    if (home is not None):
+        home = home.resolve().relative_to(Path.cwd().resolve())
+        home_str = str(home)
+    repo = FileRepository.fromPath(location)
+    viewer = WebView(repo, WebViewConf(
+        copy=copy,
+        contribute=contribute,
+        api=api,
+        web=web,
+        debug=debug,
+        home=home_str
+    ))
 
-        viewer.run(host, port)
-    except OSError:
-        typer.echo(
-            "Pandoc not found. Run using linki serve --no-web or install pandoc with linki install-pandoc.")
-        typer.Exit()
+    viewer.run(host, port)
 
 
 @ app.command(hidden=True)
