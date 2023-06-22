@@ -163,7 +163,7 @@ class FileRepository(Repository, styles={'shadows'}):
 
     @classmethod
     def createPath(cls, path: str | Path):
-        Path(path).joinpath('.linki').mkdir(exist_ok=True)
+        Path(path).joinpath('.linki').mkdir()
         path = Path(path).resolve().as_uri()
         cls.create(path)
 

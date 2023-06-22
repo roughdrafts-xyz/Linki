@@ -32,9 +32,15 @@ def init(
     """
     if (not destination.exists()):
         destination.mkdir()
-    FileRepository.createPath(destination)
-    if (not silent):
-        typer.echo(f"Initialized wiki in {destination}.")
+    try:
+        FileRepository.createPath(destination)
+        if (not silent):
+            typer.echo(f"Initialized wiki in {destination}.")
+    except FileExistsError:
+        if (not silent):
+            typer.echo(
+                f"{destination} already initialized. No action was taken.")
+        typer.Abort()
 
 
 @app.command()
@@ -198,7 +204,7 @@ def serve(
         except OSError:
             typer.echo(
                 "Pandoc not found. Run using linki serve --no-web or install pandoc with linki install-pandoc.")
-            typer.Exit()
+            typer.Abort()
     home_str = None
     if (home is not None):
         home = home.resolve().relative_to(Path.cwd().resolve())
