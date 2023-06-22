@@ -148,10 +148,14 @@ def refuse(
     if (list):
         typer.echo(repo.config.render_refusals())
     else:
-        inbox = Inbox(repo)
-        inbox.refuse(copy_id)
-        repo.config.add_refusal(copy_id)
-        typer.echo(f"Refusing contribution {copy_id}")
+        try:
+            inbox = Inbox(repo)
+            inbox.refuse(copy_id)
+            repo.config.add_refusal(copy_id)
+            typer.echo(f"Refusing contribution {copy_id}")
+        except IndexError:
+            typer.echo("Change ID not found.")
+            typer.Abort()
 
 
 @app.command()
@@ -169,10 +173,14 @@ def approve(
     if (list):
         typer.echo(editor.repo.config.render_approvals())
     else:
-        inbox = Inbox(editor.repo)
-        inbox.approve(copy_id)
-        editor.unload_titles()
-        typer.echo(f"Approving contribution {copy_id}")
+        try:
+            inbox = Inbox(editor.repo)
+            inbox.approve(copy_id)
+            editor.unload_titles()
+            typer.echo(f"Approving contribution {copy_id}")
+        except IndexError:
+            typer.echo("Change ID not found.")
+            typer.Abort()
 
 
 @ app.command()
