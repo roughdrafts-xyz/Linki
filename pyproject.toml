@@ -1,9 +1,9 @@
 [project]
 name = "linki"
-version = '0.0.9'
+dynamic = ["version"]
 description = 'Distributed wiki tools'
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
     "typer~=0.9.0",
     "typing_extensions~=4.5.0",
@@ -20,11 +20,14 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 
+[tool.setuptools.dynamic]
+version = { attr = "linki.__version__" }
+
 [project.optional-dependencies]
 dev = ["pytest~=7.3.2", "hypothesis~=6.78.3"]
 
 [project.scripts]
-linki = "linki:main.run"
+linki = "linki:main.app"
 
 [project.urls]
 "Homepage" = "https://github.com/roughdrafts-xyz/Linki"

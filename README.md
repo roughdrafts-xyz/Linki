@@ -6,6 +6,8 @@ A tool to create distributed wikis, and link them together through subscriptions
 
 A distributed wiki means that it is easy to make a copy of it in another location that is yours to edit. It also means it is easy to share parts of it with others - they can copy individual edits and articles to their wiki (or wikis.) This lets people work on edits to the wiki in a way similar to the "production" version of the wiki, without needing to edit it directly.
 
+[![asciicast](https://asciinema.org/a/wpsp4yPeQbiRGTxMleRuDXa5J.svg)](https://asciinema.org/a/wpsp4yPeQbiRGTxMleRuDXa5J)
+
 ## Why would I want to use this?
 
 There are a lot more reasons why you'd want to use a distributed wiki than just preventing hasty, embarrassing edits.

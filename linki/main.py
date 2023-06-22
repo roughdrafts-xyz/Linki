@@ -10,10 +10,13 @@ from linki.inbox import Inbox
 from linki.outbox import Outbox
 from linki.repository import FileRepository, Repository
 from linki.viewer import WebView, WebViewConf
+from linki import __version__
 
 app = typer.Typer(
     no_args_is_help=True,
-    help="A tool to create distributed wikis, and link them together through subscriptions and contributions."
+    add_help_option=False,
+    add_completion=False,
+    help="A tool to create distributed wikis, and link them together through subscriptions and contributions.",
 )
 
 
@@ -279,9 +282,6 @@ def authenticate(
     typer.echo(f"Added {user} to list of authorized users.")
 
 
-def run():
-    app()
-
-
-if __name__ == "__main__":
-    app()
+@app.command(hidden=True)
+def version():
+    typer.echo(f"linki v{__version__}")
